@@ -1,0 +1,17 @@
+# Local/CI default is DuckDB: a single file, no service to run, and the whole
+# warehouse rebuilds from the raw layer in seconds.
+#
+# Swapping to Postgres (Neon, RDS, anything) is this file only — the models are
+# plain SQL and do not use DuckDB-specific syntax outside of stg_*, where
+# read_json_auto reads the landing zone.
+stock_warehouse:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: '../warehouse/warehouse.duckdb'
+      threads: 4
+    ci:
+      type: duckdb
+      path: '../warehouse/warehouse.duckdb'
+      threads: 4

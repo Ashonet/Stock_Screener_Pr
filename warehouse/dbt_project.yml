@@ -1,0 +1,22 @@
+name: stock_warehouse
+version: '1.0.0'
+config-version: 2
+profile: stock_warehouse
+
+model-paths: ['models']
+macro-paths: ['macros']
+test-paths: ['tests']
+target-path: 'target'
+clean-targets: ['target', 'dbt_packages']
+
+vars:
+  # Where the immutable raw layer lives, relative to the dbt project root.
+  raw_dir: '../warehouse/raw'
+
+models:
+  stock_warehouse:
+    staging:
+      +materialized: view
+      +schema: staging
+    marts:
+      +materialized: table

@@ -1,0 +1,24 @@
+{
+  "name": "stock-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A Qualtrim-style stock research dashboard. Zero dependencies.",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "extract": "node pipeline/extract.js",
+    "extract:full": "node pipeline/extract.js --full",
+    "warehouse": "cd warehouse && dbt build --profiles-dir .",
+    "warehouse:refresh": "cd warehouse && dbt build --profiles-dir . --full-refresh",
+    "pipeline": "npm run extract && npm run warehouse",
+    "docs": "cd warehouse && dbt docs generate --profiles-dir ."
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "duckdb": "^1.4.4"
+  }
+}

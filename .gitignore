@@ -1,0 +1,9 @@
+node_modules/
+.venv/
+
+# Derived, not source: rebuilt from warehouse/raw by `npm run warehouse`.
+warehouse/warehouse.duckdb
+warehouse/target/
+warehouse/logs/
+warehouse/dbt_packages/
+**/.user.yml

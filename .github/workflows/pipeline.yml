@@ -1,0 +1,78 @@
+name: pipeline
+
+# Nightly after the US close, plus a manual trigger.
+#
+# The whole point of running this on a schedule is that the app no longer calls
+# Yahoo at request time. Serving reads the warehouse, so the dashboard is not
+# exposed to upstream rate limits or outages — only this job is, and it retries.
+on:
+  schedule:
+    - cron: '30 22 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      full_refresh:
+        description: 'Ignore watermarks and re-download all history'
+        type: boolean
+        default: false
+
+concurrency:
+  # Never let two runs write the raw layer at once.
+  group: pipeline
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install dbt
+        run: pip install -r pipeline/requirements.txt
+
+      - name: Extract
+        run: |
+          if [ "${{ inputs.full_refresh }}" = "true" ]; then
+            node pipeline/extract.js --full
+          else
+            node pipeline/extract.js
+          fi
+
+      - name: Build and test the warehouse
+        working-directory: warehouse
+        run: dbt build --profiles-dir .
+
+      # Uploaded whether or not the build passed, so a failed run is debuggable
+      # from the artifact rather than only from the log.
+      - name: Upload dbt artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dbt-target
+          path: warehouse/target/
+          retention-days: 14
+
+      - name: Commit the new raw slice
+        run: |
+          git config user.name  'pipeline'
+          git config user.email 'pipeline@users.noreply.github.com'
+          git add warehouse/raw pipeline/state.json
+          if git diff --staged --quiet; then
+            echo 'Nothing new to commit.'
+          else
+            git commit -m "data: extract $(date -u +%Y-%m-%d)"
+            git push
+          fi

@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Stock Dashboard</title>
+    <meta name="description" content="A stock research dashboard: prices, fundamentals, dividends and analyst targets." />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232a78d6'/%3E%3Cpath d='M6 22l6-7 5 4 9-11' fill='none' stroke='white' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="/styles.css" />
+    <script>
+      // Applied before first paint so a stored theme never flashes the other one.
+      // ?theme=light|dark overrides the stored choice, for shareable links.
+      try {
+        var forced = new URLSearchParams(location.search).get('theme');
+        var saved = forced || localStorage.getItem('sd:theme');
+        if (saved === 'light' || saved === 'dark') document.documentElement.dataset.theme = saved;
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#detail">Skip to dashboard</a>
+
+    <header class="topbar">
+      <div class="brand">
+        <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+          <rect width="32" height="32" rx="7" fill="var(--series-1)" />
+          <path d="M6 22l6-7 5 4 9-11" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <span class="brand-name">Stock Dashboard</span>
+      </div>
+
+      <div class="search" role="search">
+        <label class="visually-hidden" for="search-input">Search for a company or ticker</label>
+        <svg class="search-icon" viewBox="0 0 20 20" aria-hidden="true">
+          <circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="2" />
+          <path d="M13.5 13.5L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
+        <input
+          id="search-input"
+          type="text"
+          placeholder="Search ticker or company…"
+          autocomplete="off"
+          spellcheck="false"
+          role="combobox"
+          aria-expanded="false"
+          aria-controls="search-results"
+          aria-autocomplete="list"
+        />
+        <ul id="search-results" class="search-results" role="listbox" aria-label="Search results" hidden></ul>
+      </div>
+
+      <div class="topbar-actions">
+        <span id="refresh-status" class="refresh-status" aria-live="polite"></span>
+        <button id="theme-toggle" class="icon-button" type="button" aria-label="Switch to light theme">
+          <svg class="icon-moon" viewBox="0 0 20 20" aria-hidden="true">
+            <path d="M16 12.3A7 7 0 0 1 7.7 4a7 7 0 1 0 8.3 8.3z" fill="currentColor" />
+          </svg>
+          <svg class="icon-sun" viewBox="0 0 20 20" aria-hidden="true">
+            <circle cx="10" cy="10" r="3.6" fill="currentColor" />
+            <g stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+              <path d="M10 1.6v2.2M10 16.2v2.2M18.4 10h-2.2M3.8 10H1.6M15.9 4.1l-1.6 1.6M5.7 14.3l-1.6 1.6M15.9 15.9l-1.6-1.6M5.7 5.7L4.1 4.1" />
+            </g>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <section class="market-strip" aria-label="Market overview">
+      <ul id="market-strip" class="market-list"></ul>
+    </section>
+
+    <main class="layout">
+      <aside class="sidebar">
+        <section class="panel">
+          <button id="nav-screener" class="nav-item" type="button">
+            <span>Screener</span>
+            <span id="screener-count" class="pill"></span>
+          </button>
+        </section>
+
+        <section class="panel" aria-labelledby="watchlist-heading">
+          <div class="panel-head">
+            <h2 id="watchlist-heading" class="visually-hidden">Watchlists</h2>
+            <label class="visually-hidden" for="list-picker">Choose a watchlist</label>
+            <select id="list-picker" class="picker"></select>
+            <span id="watchlist-count" class="pill"></span>
+            <button id="list-new" class="icon-button small" type="button" aria-label="New watchlist" title="New watchlist">+</button>
+            <button id="list-edit" class="icon-button small" type="button" aria-label="Rename or delete this watchlist" title="Rename or delete">⋯</button>
+          </div>
+          <div id="list-form" class="inline-form" hidden></div>
+          <ul id="watchlist" class="watchlist-list"></ul>
+          <p class="watchlist-hint">Search above to add a ticker.</p>
+        </section>
+
+        <section class="panel" aria-labelledby="wallets-heading">
+          <div class="panel-head">
+            <h2 id="wallets-heading" class="panel-title">Wallets</h2>
+            <button id="wallet-new" class="icon-button small" type="button" aria-label="New wallet" title="New wallet">+</button>
+          </div>
+          <div id="wallet-form" class="inline-form" hidden></div>
+          <ul id="wallet-list" class="wallet-list"></ul>
+        </section>
+      </aside>
+
+      <section id="detail" class="detail" aria-live="polite">
+        <div class="detail-top">
+          <div class="chart-column">
+            <div id="price-card" class="card card-chart"></div>
+
+            <!-- One filter row, directly under the chart, scoping everything below. -->
+            <div class="filter-row" id="filter-row">
+              <div class="filter-group" role="group" aria-label="Price chart range">
+                <span class="filter-label">Range</span>
+                <div class="segmented" id="range-picker"></div>
+              </div>
+              <div class="filter-group" role="group" aria-label="Financial reporting period">
+                <span class="filter-label">Financials</span>
+                <div class="segmented" id="period-picker"></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="hero" class="hero-card"></div>
+        </div>
+
+        <div class="tabs" role="tablist" aria-label="Company sections">
+          <button id="tab-stats" class="tab" type="button" role="tab" aria-controls="panel-stats" aria-selected="true">
+            Key stats
+          </button>
+          <button id="tab-financials" class="tab" type="button" role="tab" aria-controls="panel-financials" aria-selected="false" tabindex="-1">
+            Financials
+          </button>
+          <button id="tab-score" class="tab" type="button" role="tab" aria-controls="panel-score" aria-selected="false" tabindex="-1">
+            Quality score
+          </button>
+        </div>
+
+        <div id="panel-stats" class="tab-panel" role="tabpanel" aria-labelledby="tab-stats">
+          <div id="stats"></div>
+          <div class="grid-2">
+            <div id="target-card" class="card"></div>
+            <div id="about-card" class="card"></div>
+          </div>
+        </div>
+
+        <div id="panel-financials" class="tab-panel" role="tabpanel" aria-labelledby="tab-financials" hidden>
+          <div class="grid-2">
+            <div id="financials-card" class="card card-chart"></div>
+            <div id="dividend-card" class="card card-chart"></div>
+          </div>
+          <div id="income-statement" class="card"></div>
+        </div>
+
+        <div id="panel-score" class="tab-panel" role="tabpanel" aria-labelledby="tab-score" hidden>
+          <div id="score-card" class="card"></div>
+        </div>
+      </section>
+
+      <section id="wallet-view" class="detail" aria-live="polite" hidden>
+        <div id="wallet-hero" class="hero-card wallet-hero"></div>
+
+        <div class="filter-row">
+          <div class="filter-group" role="group" aria-label="Wallet history range">
+            <span class="filter-label">Range</span>
+            <div class="segmented" id="wallet-range-picker"></div>
+          </div>
+        </div>
+
+        <div id="wallet-chart-card" class="card card-chart"></div>
+        <div id="wallet-holdings" class="card"></div>
+      </section>
+
+      <section id="screener-view" class="detail" aria-live="polite" hidden>
+        <div id="screener-card" class="card"></div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>
+        Data from Yahoo Finance public endpoints, cached server-side. Quotes may be delayed.
+        For research and education — not investment advice.
+      </p>
+    </footer>
+
+    <div id="tooltip" class="chart-tooltip" role="status" hidden></div>
+
+    <script type="module" src="/js/app.js"></script>
+  </body>
+</html>

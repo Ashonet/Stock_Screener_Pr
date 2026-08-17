@@ -1,0 +1,16 @@
+{
+  "description": "Tickers the warehouse tracks. Deliberately mixed: REITs exercise the FFO branch of the scoring model, non-payers exercise the null-dividend paths, and the megacaps give the marts some recognisable names.",
+  "symbols": [
+    "AAPL", "MSFT", "NVDA", "GOOGL", "AMZN", "META", "AVGO", "TSLA",
+    "JPM", "V", "MA", "BAC", "WFC", "GS", "AXP",
+    "JNJ", "ABBV", "LLY", "MRK", "PFE", "UNH", "ABT", "AMGN",
+    "KO", "PEP", "PG", "COST", "WMT", "MCD", "PM", "MDLZ", "CL",
+    "XOM", "CVX", "COP", "SLB",
+    "UNP", "CAT", "DE", "HON", "GE", "LMT", "RTX", "UPS", "BA",
+    "O", "PLD", "AMT", "SPG", "VICI", "WELL", "DLR", "EQIX", "PSA", "AVB", "MAA", "STAG", "ADC",
+    "NEE", "DUK", "SO", "D",
+    "T", "VZ", "TMUS",
+    "ORCL", "CRM", "ADBE", "CSCO", "TXN", "QCOM", "AMD", "INTC", "IBM", "ACN",
+    "MMM", "IBM", "CVS", "TGT", "LOW", "HD", "SBUX", "NKE"
+  ]
+}

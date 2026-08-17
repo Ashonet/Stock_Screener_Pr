@@ -1,0 +1,1633 @@
+/* ============================================================================
+   Stock Dashboard — design tokens & layout
+
+   Colors come from a validated palette: the categorical slots clear the
+   lightness band, chroma floor, CVD separation and normal-vision floors in
+   BOTH modes. Dark is a selected set of steps for the dark surface, not an
+   inverted copy of light. Delta colors are status tokens (direction means
+   good/bad) and always ship beside an arrow glyph and a signed number, so
+   direction is never carried by color alone.
+   ========================================================================= */
+
+:root {
+  color-scheme: light;
+
+  /* Surfaces & ink */
+  --surface-1: #fcfcfb;
+  --surface-2: #f4f4f1;
+  --page: #f9f9f7;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #898781;
+  --gridline: #e1e0d9;
+  --axis: #c3c2b7;
+  --border: rgba(11, 11, 11, 0.1);
+  --border-strong: rgba(11, 11, 11, 0.18);
+  --wash: rgba(11, 11, 11, 0.04);
+
+  /* Categorical slots (identity) */
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+
+  /* Status (state) */
+  --up: #0ca30c;
+  --down: #d03b3b;
+  --up-text: #006300;
+  --down-text: #d03b3b;
+  --warning: #fab219;
+
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 1px 2px rgba(11, 11, 11, 0.05), 0 8px 24px -16px rgba(11, 11, 11, 0.25);
+  --font: system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme='light'])) {
+    color-scheme: dark;
+    --surface-1: #1a1a19;
+    --surface-2: #232322;
+    --page: #0d0d0d;
+    --text-primary: #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted: #898781;
+    --gridline: #2c2c2a;
+    --axis: #383835;
+    --border: rgba(255, 255, 255, 0.1);
+    --border-strong: rgba(255, 255, 255, 0.18);
+    --wash: rgba(255, 255, 255, 0.06);
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --series-3: #199e70;
+    --up: #0ca30c;
+    --down: #e66767;
+    --up-text: #0ca30c;
+    --down-text: #e66767;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -16px rgba(0, 0, 0, 0.8);
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --surface-1: #1a1a19;
+  --surface-2: #232322;
+  --page: #0d0d0d;
+  --text-primary: #ffffff;
+  --text-secondary: #c3c2b7;
+  --text-muted: #898781;
+  --gridline: #2c2c2a;
+  --axis: #383835;
+  --border: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 255, 255, 0.18);
+  --wash: rgba(255, 255, 255, 0.06);
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  --up: #0ca30c;
+  --down: #e66767;
+  --up-text: #0ca30c;
+  --down-text: #e66767;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -16px rgba(0, 0, 0, 0.8);
+}
+
+/* --------------------------------------------------------------- base ---- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Author `display` rules outrank the UA stylesheet's [hidden] rule, so a
+   `display: flex` container stays visible when hidden. Restate it here. */
+[hidden] {
+  display: none !important;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--page);
+  color: var(--text-primary);
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+ul,
+figure {
+  margin: 0;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+:where(a, button, input, [tabindex]):focus-visible {
+  outline: 2px solid var(--series-1);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  padding: 10px 16px;
+  background: var(--surface-1);
+  color: var(--text-primary);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+}
+.skip-link:focus {
+  left: 12px;
+  top: 12px;
+}
+
+/* ------------------------------------------------------------- topbar ---- */
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 12px 24px;
+  background: color-mix(in srgb, var(--page) 88%, transparent);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.brand-mark {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+}
+.brand-name {
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.search {
+  position: relative;
+  flex: 1;
+  max-width: 460px;
+}
+.search-icon {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+.search input {
+  width: 100%;
+  padding: 9px 12px 9px 34px;
+  font: inherit;
+  color: var(--text-primary);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+.search input::placeholder {
+  color: var(--text-muted);
+}
+.search input:focus {
+  outline: none;
+  border-color: var(--series-1);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--series-1) 22%, transparent);
+}
+
+.search-results {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  max-height: 340px;
+  overflow-y: auto;
+  background: var(--surface-1);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  z-index: 50;
+}
+.search-results li {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 9px 14px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+}
+.search-results li:last-child {
+  border-bottom: 0;
+}
+.search-results li[aria-selected='true'],
+.search-results li:hover {
+  background: var(--wash);
+}
+.result-symbol {
+  font-weight: 650;
+  min-width: 62px;
+}
+.result-name {
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+.result-meta {
+  color: var(--text-muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.search-empty {
+  padding: 14px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+.refresh-status {
+  color: var(--text-muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.icon-button {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-secondary);
+}
+.icon-button:hover {
+  background: var(--wash);
+  color: var(--text-primary);
+}
+.icon-button svg {
+  width: 17px;
+  height: 17px;
+}
+.icon-sun {
+  display: none;
+}
+:root[data-theme='dark'] .icon-sun {
+  display: block;
+}
+:root[data-theme='dark'] .icon-moon {
+  display: none;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme='light'])) .icon-sun {
+    display: block;
+  }
+  :root:where(:not([data-theme='light'])) .icon-moon {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------- market strip ---- */
+
+.market-strip {
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-1);
+  overflow-x: auto;
+}
+.market-list {
+  display: flex;
+  gap: 0;
+  min-width: max-content;
+  padding: 0 12px;
+}
+.market-item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 10px 16px;
+  border-right: 1px solid var(--border);
+  white-space: nowrap;
+}
+.market-item:last-child {
+  border-right: 0;
+}
+.market-label {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+.market-value {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------- layout ---- */
+
+.layout {
+  display: grid;
+  grid-template-columns: 288px minmax(0, 1fr);
+  gap: 20px;
+  max-width: 1520px;
+  margin: 0 auto;
+  padding: 20px 24px 48px;
+}
+
+@media (max-width: 1040px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 16px;
+  }
+  .sidebar {
+    position: static;
+    max-height: none;
+    overflow: visible;
+  }
+}
+
+/* ------------------------------------------------------------- wallet view ---- */
+
+/* The wallet summary is a full-width card, so it reads across rather than stacking. */
+.wallet-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 20px 32px;
+  align-items: start;
+}
+.wallet-hero .hero-side {
+  min-width: 240px;
+}
+@media (max-width: 720px) {
+  .wallet-hero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.wallet-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+.wallet-table {
+  margin-top: 12px;
+  max-height: none;
+}
+.wallet-table table.data th,
+.wallet-table table.data td {
+  padding: 8px 10px;
+}
+.symbol-link {
+  padding: 0;
+  font-weight: 650;
+  color: var(--series-1);
+  background: none;
+  border: 0;
+}
+.symbol-link:hover {
+  text-decoration: underline;
+}
+.row-actions {
+  display: flex;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+/* Allocation: one series, one color — length carries the value. */
+.weight-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.weight-track {
+  width: 54px;
+  height: 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--series-1) 18%, transparent);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.weight-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--series-1);
+}
+
+.holding-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.holding-form .field {
+  flex: 0 1 130px;
+}
+.add-holding {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.is-loading .card-chart,
+.is-loading .hero-card {
+  opacity: 0.45;
+  transition: opacity 120ms ease;
+}
+
+/* ---------------------------------------------------------- watchlist ---- */
+
+.sidebar {
+  position: sticky;
+  top: 74px;
+  align-self: start;
+  max-height: calc(100vh - 96px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+.panel {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.panel-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 10px 9px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.panel-title {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+}
+
+/* Watchlist selector */
+.picker {
+  flex: 1;
+  min-width: 0;
+  padding: 5px 8px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--text-primary);
+  background: var(--surface-1);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+}
+.picker:hover {
+  border-color: var(--border);
+  background: var(--wash);
+}
+.icon-button.small {
+  width: 26px;
+  height: 26px;
+  font-size: 14px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* Inline create/rename form */
+.inline-form {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--wash);
+}
+.inline-form form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.field {
+  min-width: 0;
+  flex: 1;
+  padding: 6px 9px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--text-primary);
+  background: var(--surface-1);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+}
+.field:focus {
+  outline: none;
+  border-color: var(--series-1);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--series-1) 20%, transparent);
+}
+.field[readonly] {
+  color: var(--text-secondary);
+  background: var(--wash);
+}
+.primary-button {
+  padding: 6px 13px;
+  font-size: 12.5px;
+  font-weight: 650;
+  color: #fff;
+  background: var(--series-1);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+.primary-button:hover {
+  filter: brightness(1.08);
+}
+.link-button.danger {
+  color: var(--down-text);
+  border-color: color-mix(in srgb, var(--down-text) 40%, transparent);
+}
+.form-error {
+  flex-basis: 100%;
+  font-size: 12px;
+  color: var(--down-text);
+}
+
+/* Wallet rows */
+.wallet-list .wl-row,
+.wallet-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+.pill {
+  padding: 1px 8px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+  background: var(--wash);
+  border-radius: 999px;
+}
+.watchlist-list {
+  overflow-y: auto;
+  flex: 1;
+}
+.watchlist-hint {
+  padding: 10px 16px;
+  font-size: 12px;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+}
+
+.wl-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 64px auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+.wl-row:hover {
+  background: var(--wash);
+}
+.wl-row[aria-current='true'] {
+  background: color-mix(in srgb, var(--series-1) 12%, transparent);
+  box-shadow: inset 3px 0 0 var(--series-1);
+}
+.wl-symbol {
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+.wl-name {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.wl-spark {
+  width: 64px;
+  height: 26px;
+}
+.wl-figures {
+  text-align: right;
+}
+.wl-price {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+.wl-change {
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+}
+.wl-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 22px;
+  height: 22px;
+  display: none;
+  place-items: center;
+  background: var(--surface-1);
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1;
+}
+.wl-row:hover .wl-remove,
+.wl-remove:focus-visible {
+  display: grid;
+}
+.wl-remove:hover {
+  color: var(--down-text);
+  border-color: var(--down-text);
+}
+
+/* --------------------------------------------------------------- cards ---- */
+
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.card {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px 20px;
+}
+
+.card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+.card-title {
+  font-size: 14px;
+  font-weight: 650;
+  letter-spacing: -0.005em;
+}
+.card-sub {
+  margin-bottom: 14px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 16px;
+}
+
+/* ---------------------------------------------------------------- hero ---- */
+
+/* The chart leads; the quote summary sits in a rail beside it. */
+.detail-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 16px;
+  align-items: start;
+}
+.chart-column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.hero-card {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px 22px 22px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+/* Too narrow for a rail: the summary goes back on top, full width. */
+@media (max-width: 1240px) {
+  .detail-top {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .hero-card {
+    order: -1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 20px 32px;
+    align-items: start;
+    padding: 20px 24px 22px;
+  }
+}
+@media (max-width: 720px) {
+  .hero-card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.hero-id {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.hero-symbol {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.hero-name {
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tag {
+  padding: 2px 8px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  background: var(--wash);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+/* Hero figure: >=48px, same sans as everything, proportional figures. */
+.hero-price {
+  margin-top: 6px;
+  /* Sized to still clear 48px in the narrow rail, where a five-figure
+     crypto price is the widest thing it has to hold. */
+  font-size: clamp(48px, 4.6vw, 56px);
+  font-weight: 680;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+.hero-delta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 15px;
+  font-weight: 600;
+}
+.hero-meta {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.delta-up {
+  color: var(--up-text);
+}
+.delta-down {
+  color: var(--down-text);
+}
+.delta-flat {
+  color: var(--text-secondary);
+}
+.delta-arrow {
+  font-size: 0.9em;
+}
+
+.hero-side {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+@media (max-width: 1240px) {
+  .hero-side {
+    min-width: 300px;
+  }
+}
+.hero-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+@media (max-width: 720px) {
+  .hero-side {
+    min-width: 0;
+  }
+}
+
+/* 52-week range meter */
+.range-meter {
+  min-width: 0;
+}
+.range-meter-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 7px;
+}
+.meter-track {
+  position: relative;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--wash);
+  border: 1px solid var(--border);
+}
+.meter-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 999px;
+  background: var(--series-1);
+  opacity: 0.28;
+}
+.meter-marker {
+  position: absolute;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--series-1);
+  /* 2px surface ring so the marker stays legible over the track */
+  box-shadow: 0 0 0 2px var(--surface-1);
+  transform: translate(-50%, -50%);
+}
+.meter-ends {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 7px;
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
+/* --------------------------------------------------------- filter row ---- */
+
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: center;
+  padding: 2px;
+}
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.filter-label {
+  font-size: 11px;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+.segmented {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+.segmented button {
+  padding: 5px 12px;
+  min-height: 26px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: none;
+  border: 0;
+  border-radius: 999px;
+}
+.segmented button:hover {
+  background: var(--wash);
+  color: var(--text-primary);
+}
+.segmented button[aria-pressed='true'] {
+  background: var(--series-1);
+  color: #fff;
+}
+
+/* --------------------------------------------------------------- tabs ---- */
+
+.tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+}
+.tab {
+  padding: 10px 16px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: none;
+  border: 0;
+  /* Reserve the indicator's space in both states so selecting never shifts the row. */
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  white-space: nowrap;
+}
+.tab:hover {
+  color: var(--text-primary);
+  background: var(--wash);
+}
+.tab[aria-selected='true'] {
+  color: var(--text-primary);
+  border-bottom-color: var(--series-1);
+}
+.tab:focus-visible {
+  outline-offset: -2px;
+}
+
+.tab-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ------------------------------------------------------------- charts ---- */
+
+.card-chart {
+  display: flex;
+  flex-direction: column;
+}
+.chart-frame {
+  position: relative;
+  width: 100%;
+  /* Height includes the x-axis band, so labels are never clipped or scrolled. */
+  min-height: 120px;
+}
+.chart-frame svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* Refetch holds the previous render rather than flashing a skeleton. */
+.is-loading .chart-frame,
+.is-loading #stats {
+  opacity: 0.45;
+  transition: opacity 120ms ease;
+}
+
+.grid-line {
+  stroke: var(--gridline);
+  stroke-width: 1;
+}
+.axis-line {
+  stroke: var(--axis);
+  stroke-width: 1;
+}
+.axis-text {
+  fill: var(--text-muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font);
+}
+.mark-label {
+  fill: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font);
+}
+.crosshair {
+  stroke: var(--axis);
+  stroke-width: 1;
+}
+.hit-area {
+  fill: transparent;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin-bottom: 12px;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.legend-swatch {
+  width: 11px;
+  height: 11px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.legend-line {
+  width: 14px;
+  height: 2px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.chart-tooltip {
+  position: fixed;
+  z-index: 60;
+  min-width: 132px;
+  padding: 9px 11px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  pointer-events: none;
+  font-size: 12px;
+}
+.tip-title {
+  color: var(--text-muted);
+  margin-bottom: 5px;
+}
+.tip-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 3px;
+}
+.tip-key {
+  width: 12px;
+  height: 2px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+/* Values lead, labels follow. */
+.tip-value {
+  font-weight: 650;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+.tip-label {
+  color: var(--text-secondary);
+  margin-left: auto;
+}
+
+/* --------------------------------------------------- chart table twin ---- */
+
+.chart-toggle {
+  display: flex;
+  gap: 4px;
+}
+.link-button {
+  padding: 3px 9px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+.link-button:hover {
+  background: var(--wash);
+  color: var(--text-primary);
+}
+.link-button[aria-pressed='true'] {
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+  background: var(--wash);
+}
+
+.table-scroll {
+  overflow-x: auto;
+  max-height: 320px;
+  overflow-y: auto;
+}
+table.data {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+}
+table.data th,
+table.data td {
+  padding: 6px 10px;
+  text-align: right;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+table.data th:first-child,
+table.data td:first-child {
+  text-align: left;
+  font-variant-numeric: normal;
+}
+table.data thead th {
+  position: sticky;
+  top: 0;
+  background: var(--surface-1);
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+/* -------------------------------------------------- income statement ---- */
+
+.statement-scroll {
+  margin-top: 14px;
+  max-height: none;
+}
+table.statement {
+  min-width: 100%;
+}
+table.statement th,
+table.statement td {
+  padding: 7px 14px;
+}
+/* The line item stays put while the period columns scroll sideways. */
+table.statement tbody th,
+table.statement thead th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--surface-1);
+  font-weight: 400;
+  color: var(--text-secondary);
+  /* A border on a sticky cell scrolls away with the cell, so draw the divider
+     as a shadow that stays put instead. */
+  box-shadow: 1px 0 0 var(--border);
+}
+table.statement thead th:first-child {
+  z-index: 2;
+  font-weight: 600;
+}
+/* Subtotal lines: the rows a reader scans for. */
+table.statement tr.statement-key th,
+table.statement tr.statement-key td {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+table.statement tr.statement-key td {
+  background: var(--wash);
+}
+table.statement tr.statement-key th {
+  box-shadow: 1px 0 0 var(--border);
+  background: color-mix(in srgb, var(--wash) 100%, var(--surface-1));
+}
+
+/* --------------------------------------------------------- stat tiles ---- */
+
+.stats-title {
+  font-size: 11px;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+/* Dense label/value rows, flowed into columns so the groups fill the card
+   instead of leaving ragged gaps under the short ones. */
+.stats-columns {
+  columns: 250px auto;
+  column-gap: 44px;
+  margin-top: 12px;
+}
+.stat-group {
+  break-inside: avoid;
+  margin-bottom: 20px;
+}
+.stat-rows {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  /* No column gap: the label and value each carry half the row rule, so any
+     gap between them would break the line. Spacing comes from padding. */
+  column-gap: 0;
+  margin: 0;
+}
+.stat-rows dt,
+.stat-rows dd {
+  margin: 0;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+.stat-rows dt {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+.stat-rows dd {
+  padding-left: 16px;
+  font-size: 13px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+/* The last pair in a group needs no rule — the group gap separates it. */
+.stat-rows > :nth-last-child(-n + 2) {
+  border-bottom: 0;
+}
+
+.stat-hint {
+  cursor: help;
+  color: var(--text-muted);
+  border-bottom: 1px dotted var(--text-muted);
+}
+
+/* -------------------------------------------------------- quality score ---- */
+
+
+.score-layout {
+  display: grid;
+  grid-template-columns: 148px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+  margin-top: 16px;
+}
+@media (max-width: 640px) {
+  .score-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.score-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 16px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--wash);
+}
+/* Deliberately below the price: a view gets one hero figure, and it is the price. */
+.score-overall {
+  font-size: 38px;
+  font-weight: 680;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+.score-grade {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.score-band-label {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+}
+.score-coverage {
+  margin-top: 6px;
+  font-size: 10.5px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.pillar-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.pillar {
+  border-bottom: 1px solid var(--border);
+}
+.pillar:last-child {
+  border-bottom: 0;
+}
+.pillar > summary {
+  display: grid;
+  grid-template-columns: minmax(110px, 1.1fr) minmax(90px, 1.6fr) 34px 62px 16px;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 2px;
+  cursor: pointer;
+  list-style: none;
+}
+.pillar > summary::-webkit-details-marker {
+  display: none;
+}
+.pillar > summary:hover {
+  background: var(--wash);
+}
+.pillar-name {
+  font-size: 13px;
+  font-weight: 600;
+}
+.pillar-score {
+  font-size: 14px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.pillar-band {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+}
+.pillar-caret {
+  color: var(--text-muted);
+  font-size: 10px;
+  transition: transform 120ms ease;
+}
+.pillar[open] .pillar-caret {
+  transform: rotate(90deg);
+}
+
+/* Meter: the fill carries severity, the track is a wash of the same tone. */
+.score-meter {
+  position: relative;
+  height: 6px;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.score-meter-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 999px;
+}
+
+.pillar-detail {
+  padding: 4px 2px 14px;
+}
+.pillar-basis {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+.pillar-metric {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 34px;
+  gap: 10px;
+  align-items: baseline;
+  padding: 5px 0;
+  font-size: 12.5px;
+  border-top: 1px solid var(--border);
+}
+.pillar-metric-label {
+  color: var(--text-secondary);
+}
+.pillar-metric-value {
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+.pillar-metric-score {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
+.score-figures {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  gap: 12px 20px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.score-method {
+  margin-top: 14px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.score-method summary {
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+.score-method p {
+  margin-top: 8px;
+  line-height: 1.6;
+}
+.score-method ul {
+  margin-top: 8px;
+  padding-left: 18px;
+  list-style: disc;
+  line-height: 1.6;
+}
+
+/* -------------------------------------------------------- analyst card ---- */
+
+.target-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 16px 0 20px;
+}
+.target-cell {
+  text-align: center;
+  padding: 10px 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.target-cell-label {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.target-cell-value {
+  font-size: 17px;
+  font-weight: 650;
+  margin-top: 2px;
+}
+
+.consensus-bar {
+  display: flex;
+  gap: 2px; /* the 2px surface gap doing the separating */
+  height: 10px;
+  margin: 14px 0 10px;
+}
+.consensus-seg {
+  border-radius: 3px;
+  min-width: 3px;
+}
+.consensus-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* ---------------------------------------------------------- about card ---- */
+
+.about-text {
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.6;
+  max-height: 190px;
+  overflow-y: auto;
+}
+.about-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px 18px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.fact-label {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.fact-value {
+  font-size: 13px;
+  font-weight: 600;
+}
+.fact-value a {
+  color: var(--series-1);
+}
+
+/* -------------------------------------------------------- states etc. ---- */
+
+.empty,
+.error-note {
+  padding: 26px 20px;
+  text-align: center;
+  color: var(--text-muted);
+}
+.error-note {
+  color: var(--down-text);
+}
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 13px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  background: color-mix(in srgb, var(--warning) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--warning) 45%, transparent);
+  border-radius: var(--radius-sm);
+}
+
+.skeleton {
+  height: 260px;
+  border-radius: var(--radius);
+  background: linear-gradient(90deg, var(--wash) 25%, transparent 50%, var(--wash) 75%);
+  background-size: 300% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+@keyframes shimmer {
+  to {
+    background-position: -300% 0;
+  }
+}
+
+.footer {
+  max-width: 1520px;
+  margin: 0 auto;
+  padding: 0 24px 40px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media print {
+  .topbar,
+  .watchlist,
+  .filter-row,
+  .chart-toggle {
+    display: none;
+  }
+}
+
+/* ----------------------------------------------------------- screener ---- */
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 13px;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+  background: none;
+  border: 0;
+  text-align: left;
+}
+.nav-item:hover {
+  background: var(--wash);
+  color: var(--text-primary);
+}
+.nav-item[aria-current='true'] {
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--series-1) 12%, transparent);
+  box-shadow: inset 3px 0 0 var(--series-1);
+}
+
+.screener-scroll {
+  max-height: 70vh;
+}
+table.screener th.sortable {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+table.screener th.sortable:hover {
+  color: var(--text-primary);
+  background: var(--wash);
+}
+.sort-caret {
+  color: var(--series-1);
+  font-size: 9px;
+}
+/* The ticker column stays put while the metric columns scroll sideways. */
+table.screener tbody th,
+table.screener thead th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--surface-1);
+  box-shadow: 1px 0 0 var(--border);
+}
+table.screener thead th:first-child {
+  z-index: 2;
+}

@@ -1,0 +1,106 @@
+version: 2
+
+models:
+  - name: dim_security
+    description: One row per tracked security, carrying the REIT flag every downstream model branches on.
+    columns:
+      - name: symbol
+        description: Yahoo ticker. The grain of almost everything downstream.
+        tests: [not_null, unique]
+      - name: currency
+        tests: [not_null]
+      - name: is_reit
+        description: True when Yahoo files the security under an industry beginning "REIT". Decides FFO vs earnings.
+        tests: [not_null]
+      - name: market_cap
+        tests:
+          - positive:
+              config: {severity: warn}
+
+  - name: fct_prices
+    description: Daily bars, merged on (symbol, trade_date) so upstream restatements correct in place.
+    tests:
+      - unique_combination:
+          columns: [symbol, trade_date]
+    columns:
+      - name: symbol
+        tests:
+          - not_null
+          - relationships: {to: ref('dim_security'), field: symbol}
+      - name: trade_date
+        tests: [not_null]
+      - name: close
+        tests: [not_null]
+
+  - name: fct_financials
+    description: Statement lines pivoted to one row per symbol/period.
+    tests:
+      - unique_combination:
+          columns: [symbol, period_type, period_end]
+    columns:
+      - name: symbol
+        tests:
+          - not_null
+          - relationships: {to: ref('dim_security'), field: symbol}
+      - name: period_type
+        tests:
+          - not_null
+          - accepted_values: {values: ['annual', 'quarterly']}
+      - name: period_end
+        tests: [not_null]
+
+  - name: fct_dividends
+    description: Individual dividend payments, with the per-symbol payment cadence.
+    tests:
+      - unique_combination:
+          columns: [symbol, pay_date]
+    columns:
+      - name: amount
+        tests: [not_null]
+      - name: payments_per_year
+        description: Inferred from the median gap between payments. 12 monthly, 4 quarterly, 2 semi-annual, 1 annual.
+        tests:
+          - accepted_values:
+              values: [1, 2, 3, 4, 6, 12]
+              quote: false
+
+  - name: int_dividend_windows
+    description: >
+      Trailing dividend totals bucketed by payment count rather than calendar
+      year. This is the model that fixes the monthly-payer growth bug.
+    tests:
+      - unique_combination:
+          columns: [symbol, window_index]
+
+  - name: mart_quality_score
+    description: Five-pillar quality score, REIT-aware. The serving contract for the dashboard.
+    columns:
+      - name: symbol
+        tests: [not_null, unique]
+      - name: scoring_basis
+        tests:
+          - not_null
+          - accepted_values: {values: ['reit', 'standard']}
+      - name: overall_score
+        tests:
+          - in_range:
+              min_value: 0
+              max_value: 100
+      - name: grade
+        tests:
+          - accepted_values:
+              values: ['A+', 'A', 'B+', 'B', 'C+', 'C', 'D', 'F']
+      - name: coverage_pct
+        tests:
+          - not_null
+          - in_range: {min_value: 0, max_value: 100}
+      - name: pillar_dividend
+        tests: [{in_range: {min_value: 0, max_value: 100}}]
+      - name: pillar_balance_sheet
+        tests: [{in_range: {min_value: 0, max_value: 100}}]
+      - name: pillar_growth
+        tests: [{in_range: {min_value: 0, max_value: 100}}]
+      - name: pillar_profitability
+        tests: [{in_range: {min_value: 0, max_value: 100}}]
+      - name: pillar_valuation
+        tests: [{in_range: {min_value: 0, max_value: 100}}]
