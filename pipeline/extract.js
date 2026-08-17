@@ -23,7 +23,9 @@
  *   node pipeline/extract.js --symbols O,UNP # a subset, for debugging
  */
 
-import { mkdir, readFile, writeFile, appendFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { createWriteStream } from 'node:fs';
+import { createGzip } from 'node:zlib';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -81,25 +83,72 @@ const isStale = (iso, hours) => !iso || Date.now() - Date.parse(iso) > hours * 3
 /* --------------------------------------------------------------- raw writer */
 
 /**
- * One file per entity per run. The run id is in the filename so a partial or
- * failed run is visible in the landing zone rather than silently interleaved
- * with a good one.
+ * One gzipped file per entity per run. The run id is in the filename so a
+ * partial or failed run is visible in the landing zone rather than silently
+ * interleaved with a good one.
+ *
+ * Gzip because the landing zone is committed and this data compresses ~87%:
+ * the S&P 500 at six years of daily bars is ~230MB of JSON and ~30MB gzipped,
+ * and a nightly slice is ~20KB. DuckDB's read_json_auto decompresses .jsonl.gz
+ * transparently, so nothing downstream changes.
+ *
+ * A stream per entity rather than buffering: a full backfill is ~750k rows and
+ * holding them all in memory to compress once would be gratuitous.
  */
 class RawWriter {
   constructor(runId, ingestedAt) {
     this.runId = runId;
     this.ingestedAt = ingestedAt;
     this.counts = {};
+    this.streams = new Map();
+  }
+
+  #streamFor(entity) {
+    let entry = this.streams.get(entity);
+    if (!entry) {
+      const path = join(RAW_DIR, `${entity}__${this.runId}.jsonl.gz`);
+      const gzip = createGzip({ level: 9 });
+      const file = createWriteStream(path);
+      gzip.pipe(file);
+      // Both halves are kept: ending the gzip stream only signals that
+      // compression finished, and the process can still exit before the piped
+      // file stream has flushed — which writes a valid but empty 10-byte gzip.
+      // The close path waits on the file's 'finish' event instead.
+      entry = { gzip, file };
+      this.streams.set(entity, entry);
+    }
+    return entry;
   }
 
   async write(entity, rows) {
     if (!rows.length) return;
-    const path = join(RAW_DIR, `${entity}__${this.runId}.jsonl`);
+    const { gzip } = this.#streamFor(entity);
     const body = rows
       .map((row) => JSON.stringify({ ...row, _ingested_at: this.ingestedAt, _run_id: this.runId }))
       .join('\n');
-    await appendFile(path, body + '\n', 'utf8');
+
+    // Respect backpressure: a fast extract can outrun compression + disk.
+    if (!gzip.write(body + '\n')) {
+      await new Promise((resolve) => gzip.once('drain', resolve));
+    }
     this.counts[entity] = (this.counts[entity] ?? 0) + rows.length;
+  }
+
+  /**
+   * Must be awaited before the process exits, and must wait on the *file*
+   * stream: ending the gzip alone leaves the compressed tail unwritten.
+   */
+  async close() {
+    await Promise.all(
+      [...this.streams.values()].map(
+        ({ gzip, file }) =>
+          new Promise((resolve, reject) => {
+            file.on('finish', resolve);
+            file.on('error', reject);
+            gzip.end();
+          }),
+      ),
+    );
   }
 }
 
@@ -290,6 +339,12 @@ async function main() {
     if (result.errors.length) failures.push({ symbol, errors: result.errors });
     await sleep(THROTTLE_MS);
   }
+
+  // Flush and close the gzip streams FIRST. A half-written member is
+  // unreadable, and advancing the watermark past a slice that never landed
+  // would lose it permanently — the next run would start after data that was
+  // never actually written.
+  await writer.close();
 
   // The watermark file is written only after a clean pass over the symbol list,
   // so a crash mid-run replays that slice next time instead of skipping it.

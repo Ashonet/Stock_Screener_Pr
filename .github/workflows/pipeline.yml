@@ -26,7 +26,7 @@ permissions:
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
 
     steps:
       - uses: actions/checkout@v4
@@ -42,6 +42,22 @@ jobs:
 
       - name: Install dbt
         run: pip install -r pipeline/requirements.txt
+
+      # Index membership drifts. Refreshing the constituent list weekly keeps
+      # additions and removals from silently accumulating, and every symbol is
+      # re-validated against the data source before it enters the universe.
+      #
+      # The day test lives in the shell because Actions has no day-of-week
+      # expression, and it is continue-on-error because a constituent-source
+      # outage should not take the price load down with it.
+      - name: Refresh the S&P 500 universe (Mondays)
+        continue-on-error: true
+        run: |
+          if [ "$(date -u +%u)" = "1" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            node pipeline/build-universe.js
+          else
+            echo "Not Monday - keeping the existing universe."
+          fi
 
       - name: Extract
         run: |
@@ -69,7 +85,7 @@ jobs:
         run: |
           git config user.name  'pipeline'
           git config user.email 'pipeline@users.noreply.github.com'
-          git add warehouse/raw pipeline/state.json
+          git add warehouse/raw pipeline/state.json pipeline/universe.json
           if git diff --staged --quiet; then
             echo 'Nothing new to commit.'
           else

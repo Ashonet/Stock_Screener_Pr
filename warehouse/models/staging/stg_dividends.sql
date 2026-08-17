@@ -3,7 +3,7 @@ with raw as (
 
     select *
     from read_json_auto(
-        '{{ var("raw_dir") }}/dividend__*.jsonl',
+        '{{ var("raw_dir") }}/dividend__*.jsonl*',
         format = 'newline_delimited',
         union_by_name = true
     )

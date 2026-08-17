@@ -11,8 +11,8 @@ a nightly GitHub Actions cron.
 ```
 GitHub Actions (nightly, 22:30 UTC weekdays)
         │
-        ├─ extract      Node · incremental by watermark · warehouse/raw/*.jsonl
-        │                 append-only landing zone, committed to git
+        ├─ extract      Node · incremental by watermark · warehouse/raw/*.jsonl.gz
+        │                 append-only landing zone, gzipped and committed
         │
         ├─ dbt build    4 staging views → 6 marts
         │                 dim_security · fct_prices · fct_financials
@@ -25,10 +25,22 @@ GitHub Actions (nightly, 22:30 UTC weekdays)
               Node server reads the marts — no upstream calls at request time
 ```
 
+Tracks the **full S&P 500** — 503 tickers, since the index carries dual share
+classes.
+
 Why batch rather than live: the upstream rate-limits by IP. A live proxy works
-on a laptop and falls over on a shared host. Scoring 82 companies from four
-years of statements is ~300 upstream calls per page load; against the mart it is
-one local query, which is what makes the screener possible at all.
+on a laptop and falls over on a shared host. Scoring 503 companies from four
+years of statements each is a few thousand upstream calls; against the mart it
+is one local query, which is what makes the screener possible at all.
+
+### The constituent list is fetched, never typed
+
+`pipeline/build-universe.js` pulls the S&P 500 from a published source and then
+**validates every ticker against Yahoo before admitting it**, because index
+membership is not the same as data availability — companies get renamed, and a
+hand-written list rots silently into missing additions and dead tickers. Symbols
+that fail to resolve are dropped and named in `universe.json` rather than
+disappearing quietly. All 503 currently resolve.
 
 ---
 
@@ -77,7 +89,7 @@ tuned until it disappears.
 
 | Model | Grain | Notes |
 |---|---|---|
-| `stg_*` | raw | `read_json_auto` over the landing zone. Every numeric goes through `try_cast`, because Yahoo signals "no value" with an empty object (`market_cap: {}` for Salesforce), and a direct cast fails the whole build on one bad cell. |
+| `stg_*` | raw | `read_json_auto` over the landing zone, reading `.jsonl` and `.jsonl.gz` through one glob. Every numeric goes through `try_cast`, because Yahoo signals "no value" with an empty object (`market_cap: {}` for Salesforce), and a direct cast fails the whole build on one bad cell. |
 | `dim_security` | symbol | Defines `is_reit` once. Every downstream branch reads it rather than re-deriving. |
 | `fct_prices` | symbol × date | **Incremental**, merged on the key. The extract deliberately re-fetches a week of overlap so Yahoo's restatements land and correct in place rather than duplicating. |
 | `fct_financials` | symbol × period | Pivoted from long form. Statement coverage varies by industry — a railway reports no R&D — so raw stays long and widening happens here. |
@@ -123,14 +135,21 @@ input is exposed so a reader can disagree with the grade.
 npm install                                  # duckdb client for the serving layer
 python -m venv .venv && .venv/bin/pip install -r pipeline/requirements.txt
 
-npm run extract:full                         # cold start: ~6 years, 82 symbols
+npm run universe                             # refresh + validate the S&P 500 list
+npm run extract:full                         # cold start: ~6 years x 503 symbols (~25 min)
 npm run warehouse                            # dbt build + test
 npm start                                    # http://127.0.0.1:5173
 ```
 
 Thereafter `npm run pipeline` is incremental — prices from each symbol's
 watermark, statements and dividends only once their staleness window expires, so
-a nightly run costs a few hundred rows rather than a full re-download.
+a nightly run costs ~500 rows (about 20KB gzipped) rather than a full
+re-download.
+
+The landing zone is gzipped: the S&P 500 at six years of daily bars is ~230MB of
+JSON and ~30MB on disk. DuckDB decompresses `.jsonl.gz` transparently, and one
+glob (`price__*.jsonl*`) covers both forms, so the compression is invisible to
+every model.
 
 On Windows the venv binaries are at `.venv/Scripts/` instead of `.venv/bin/`.
 

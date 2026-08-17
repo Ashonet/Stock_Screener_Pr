@@ -13,7 +13,8 @@
     "warehouse": "cd warehouse && dbt build --profiles-dir .",
     "warehouse:refresh": "cd warehouse && dbt build --profiles-dir . --full-refresh",
     "pipeline": "npm run extract && npm run warehouse",
-    "docs": "cd warehouse && dbt docs generate --profiles-dir ."
+    "docs": "cd warehouse && dbt docs generate --profiles-dir .",
+    "universe": "node pipeline/build-universe.js"
   },
   "engines": {
     "node": ">=18"
