@@ -52,7 +52,7 @@ plausible, which is what made them dangerous.
 
 | Test | The bug it came from |
 |---|---|
-| `assert_dividend_years_contiguous` | Yahoo caps the dividend event list at 168 entries on `range=max` and drops the **middle**. Coca-Cola returned 1962–2003, then 2026 — two decades missing behind a chart that looked fine. Fixed by requesting an explicit period window. |
+| `assert_dividend_record_not_truncated` | Yahoo caps the dividend event list at 168 entries on `range=max` and drops the **middle**. Coca-Cola returned 1962–2003, then 2026 — two decades missing behind a chart that looked fine. Fixed by requesting an explicit period window; the test now watches for the cap fingerprint rather than for gaps (see below). |
 | `assert_ebitda_present_with_revenue` | The extractor lower-cased only the first character of Yahoo's metric names, so `annualEBITDA` became `eBITDA`. It resolved to null on **every company**, blanking net-debt/EBITDA, interest coverage and EBITDA margin. Nothing errored; the balance-sheet pillar just quietly scored on one input instead of three. |
 | `assert_no_phantom_dividend_cut` | Dividend growth was measured on calendar-year totals, which misreads every monthly payer: whether a distribution lands on 31 Dec or 1 Jan swings the year by a whole payment. Realty Income's 2024 calendar total sits 6% below 2023 *while it was raising throughout*. Fixed by bucketing on payment count (`int_dividend_windows`). |
 | `assert_payout_ratio_sane` | The payout ratio came from a single reported year. Coca-Cola's 2025 free cash flow was held down by a one-off multi-billion tax deposit, printing a 166% payout on a well-covered dividend. Now averaged over three years. |
@@ -63,11 +63,20 @@ plausible, which is what made them dangerous.
 Three of those tests were themselves wrong on first contact with the full
 universe, which is the honest part of the story:
 
-- **Contiguity was a false positive on T-Mobile**, which paid one special
-  dividend in 2013 and nothing until it initiated a regular payout in 2023 — a
-  genuine ten-year gap, not lost data. The test now only fires when the company
-  was a *regular* payer on both sides of the gap, which is what distinguishes
-  truncation from suspension.
+- **The contiguity test was wrong twice, and then deleted.** First it flagged
+  T-Mobile, which paid one special dividend in 2013 and nothing until 2023.
+  Narrowing it to "was a regular payer either side" survived 82 symbols and then
+  produced **44 false positives** across the S&P 500 — every one a real
+  suspension: the 2008 crisis (AIG, Citigroup, Carnival, Freeport), COVID
+  (Delta, Southwest, Marriott, Expedia, Disney), PG&E's bankruptcy, HCA's LBO.
+  Suspensions are ordinary and suspending companies were regular payers on both
+  sides, so gap *shape* cannot separate them from truncation. It was replaced by
+  a test for the actual failure signature — a record pinned to exactly the
+  168-entry cap with history missing from the middle.
+- **Payment cadence was rounded to an arbitrary integer.** Nothing pays 5 or 11
+  times a year, but Delta (suspended, then resumed unevenly) implied 4.68 and
+  Healthpeak (quarterly → monthly in 2025) implied 11.4. Cadence now snaps to
+  the set companies actually use — 1, 2, 4, 6, 12.
 - **The EBITDA test flagged five banks.** EBITDA is not meaningful for them —
   interest is revenue, not a financing cost to add back — so financials are
   exempt, otherwise a real regression would be buried under expected nulls.
@@ -78,9 +87,9 @@ universe, which is the honest part of the story:
   that is not comparable is worthless — but the claim in the code and docs was
   wrong and is now corrected.
 
-Running `dbt build` currently gives **50 pass, 1 warn**. The warning is Texas
-Instruments and Eli Lilly above 200% FCF payout, which is real: both are in
-heavy capex cycles. A warning that stays on deliberately is more useful than one
+Running `dbt build` gives **49 pass, 2 warn** across 505 securities. The warnings
+are 8 companies above 200% FCF payout (real — heavy capex cycles) and 25
+periods missing EBITDA (healthcare and utilities where Yahoo does not model it). A warning that stays on deliberately is more useful than one
 tuned until it disappears.
 
 ---

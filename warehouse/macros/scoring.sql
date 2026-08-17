@@ -40,3 +40,32 @@
 {% macro metric(name) -%}
     max(case when metric = '{{ name }}' then value end) as {{ name | lower }}
 {%- endmacro %}
+
+
+{#
+    Snap an implied payments-per-year to a real dividend frequency.
+
+    Companies pay annually, semi-annually, quarterly, occasionally bi-monthly,
+    or monthly. Nothing pays 5 or 11 times a year — those are artefacts of
+    rounding an irregular median gap, and they appear whenever a payer's rhythm
+    is disturbed:
+
+      Delta suspended through COVID and resumed unevenly (gaps 56-140 days),
+        implying 4.68/yr, which rounds to 5.
+      Healthpeak switched quarterly -> monthly in 2025, implying 11.4/yr,
+        which rounds to 11.
+
+    Both are quarterly and monthly respectively. Snapping to the known set gets
+    that right where rounding to the nearest integer does not, and it keeps the
+    payment-count windows aligned to a real year.
+#}
+{% macro snap_to_dividend_frequency(median_gap_expr) -%}
+    case
+        when ({{ median_gap_expr }}) is null or ({{ median_gap_expr }}) <= 0 then null
+        when 365.25 / ({{ median_gap_expr }}) < 1.5 then 1
+        when 365.25 / ({{ median_gap_expr }}) < 3   then 2
+        when 365.25 / ({{ median_gap_expr }}) < 5   then 4
+        when 365.25 / ({{ median_gap_expr }}) < 9   then 6
+        else 12
+    end
+{%- endmacro %}

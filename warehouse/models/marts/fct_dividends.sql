@@ -39,10 +39,9 @@ cadence as (
         --
         -- Recent payments only, because companies change frequency. Agree Realty
         -- moved from quarterly to monthly in 2021; a median across its full
-        -- twenty-year record sits between the two regimes and infers 11 payments
-        -- a year, which is neither. What matters for measuring current dividend
-        -- growth is the cadence the company is on now.
-        cast(greatest(1, least(12, round(365.25 / nullif(median(gap_days), 0)))) as integer) as payments_per_year
+        -- twenty-year record sits between the two regimes. What matters for
+        -- measuring current dividend growth is the cadence in force now.
+        {{ snap_to_dividend_frequency('median(gap_days)') }} as payments_per_year
     from gaps
     where gap_days is not null
       and pay_date >= current_date - interval 3 year
@@ -56,7 +55,7 @@ cadence_fallback as (
 
     select
         symbol,
-        cast(greatest(1, least(12, round(365.25 / nullif(median(gap_days), 0)))) as integer) as payments_per_year
+        {{ snap_to_dividend_frequency('median(gap_days)') }} as payments_per_year
     from gaps
     where gap_days is not null
     group by symbol
