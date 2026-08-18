@@ -27,5 +27,5 @@ export const fetchPortfolio = (holdings, range, opts) => get('/api/portfolio', {
 export const fetchScreener = (basis, sector, opts) => get('/api/screener', { basis, sector }, opts);
 export const fetchHealth = (opts) => get('/api/health', {}, opts);
 export const fetchMap = (opts) => get('/api/map', {}, opts);
-export const fetchIncome = (holdings, opts) => get('/api/portfolio/income', { holdings }, opts);
+export const fetchIncome = (holdings, years, opts) => get('/api/portfolio/income', { holdings, years }, opts);
 export const fetchCompare = (symbols, years, opts) => get('/api/compare', { symbols, years }, opts);

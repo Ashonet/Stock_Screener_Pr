@@ -1958,3 +1958,36 @@ table.screener thead th:first-child {
   cursor: help;
   text-decoration: none;
 }
+
+/* -------------------------------------------------------- forecast horizon */
+
+.forecast-horizon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+/* Wide enough for two digits and the spinner, no wider: it sits in a card head
+   beside the title, not in a form. */
+.forecast-years {
+  width: 66px;
+  padding: 5px 8px;
+  min-height: 30px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.forecast-assumptions {
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.forecast-assumptions summary {
+  cursor: pointer;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.forecast-assumptions p {
+  margin: 8px 0 0;
+  max-width: 68ch;
+  line-height: 1.55;
+}

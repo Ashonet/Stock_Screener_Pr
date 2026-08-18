@@ -72,6 +72,7 @@ const STORE = {
   tab: 'sd:tab',
   walletTab: 'sd:walletTab',
   historyPeriod: 'sd:historyPeriod',
+  forecastYears: 'sd:forecastYears',
   period: 'sd:period',
 };
 const REFRESH_MS = 30_000;
@@ -135,6 +136,7 @@ const state = {
   tab: readStore(STORE.tab, 'stats'),
   walletTab: readStore(STORE.walletTab, 'overview'),
   historyPeriod: readStore(STORE.historyPeriod, 'annual'),
+  forecastYears: readStore(STORE.forecastYears, 5),
   period: readStore(STORE.period, 'annual'),
   stock: null,
   quotes: new Map(),
@@ -768,6 +770,7 @@ function setupWallets() {
 }
 
 const walletHandlers = {
+  onForecastYears: (years) => setForecastYears(years),
   onSelectSymbol: (symbol) => {
     addToList(symbol);
     renderWatchlist();
@@ -834,6 +837,7 @@ function renderWalletView() {
     wallet: activeWallet(),
     data: state.walletData,
     income: state.walletIncome,
+    forecastYears: state.forecastYears,
     rangeBlurb: RANGES.find((r) => r.key === state.range)?.blurb ?? '',
     handlers: walletHandlers,
     editing: state.editingHolding,
@@ -871,10 +875,25 @@ async function loadWalletData() {
   }
 }
 
+/**
+ * Re-project over a new horizon.
+ *
+ * Only the forecast is refetched. The valuation and the received-income record
+ * do not depend on how far forward anyone is looking, and reloading them would
+ * make the value chart flicker for a change that cannot affect it.
+ */
+function setForecastYears(years) {
+  state.forecastYears = years;
+  writeStore(STORE.forecastYears, years);
+  renderWalletView();
+  const wallet = activeWallet();
+  if (wallet?.holdings.length) loadWalletIncome(wallet, state.walletToken);
+}
+
 async function loadWalletIncome(wallet, token) {
   state.walletIncome = null;
   try {
-    const income = await api.fetchIncome(holdingsParam(wallet));
+    const income = await api.fetchIncome(holdingsParam(wallet), state.forecastYears);
     if (token !== state.walletToken) return;
     state.walletIncome = income;
   } catch {

@@ -439,10 +439,15 @@ const routes = {
       );
     });
 
+    // Clamped rather than trusted: the horizon comes off a query string, and a
+    // projection is only arithmetic, so nothing stops it running to 10,000
+    // years and producing a number with no meaning attached to it.
+    const years = Math.min(30, Math.max(1, Math.round(Number(url.searchParams.get('years')) || 5)));
+
     const income = buildIncome(holdings, stored);
     // The forecast reads the same dividend record the received-income table
     // does, so the two can never disagree about what a holding pays.
-    const projection = buildIncomeProjection(holdings, stored, { years: 5 });
+    const projection = buildIncomeProjection(holdings, stored, { years });
 
     return {
       ...income,

@@ -645,9 +645,67 @@ const FORECAST_EXCLUSION_COPY = {
  * and a cut is exactly when an income forecast would matter. So the card leads
  * with what the projection assumes rather than burying it under the total.
  */
-function renderForecast(node, chartNode, wallet, data, income, mountChart) {
+function renderForecast(node, chartNode, wallet, data, income, mountChart, handlers, requestedYears) {
   const code = data?.currency ?? 'USD';
   const unit = currencySymbol(code);
+  // The horizon the control shows is the one asked for, not the one the last
+  // response happened to carry, so the buttons do not flick back while a new
+  // projection is in flight.
+  const years = requestedYears ?? income?.projection?.years ?? 5;
+
+  /**
+   * How far out to project.
+   *
+   * Presets for the horizons people actually think in, and a box for anything
+   * else. Committed on change and on blur rather than per keystroke, so typing
+   * "12" does not fire a request for 1 on the way.
+   */
+  const horizon = () => {
+    const input = el('input', {
+      type: 'number',
+      class: 'field forecast-years',
+      min: '1',
+      max: '30',
+      step: '1',
+      value: String(years),
+      'aria-label': 'Years to project',
+      title: 'Between 1 and 30 years',
+      onchange: (event) => commit(event.target.value),
+      onkeydown: (event) => {
+        if (event.key !== 'Enter') return;
+        event.preventDefault();
+        commit(event.target.value);
+      },
+    });
+
+    const commit = (raw) => {
+      const next = Math.min(30, Math.max(1, Math.round(Number(raw))));
+      if (!Number.isFinite(next) || next === years) {
+        input.value = String(years);
+        return;
+      }
+      handlers.onForecastYears(next);
+    };
+
+    return el(
+      'div',
+      { class: 'forecast-horizon' },
+      el(
+        'div',
+        { class: 'segmented' },
+        ...[3, 5, 10, 20].map((n) =>
+          el('button', {
+            type: 'button',
+            text: `${n}y`,
+            'aria-pressed': String(n === years),
+            onclick: () => n !== years && handlers.onForecastYears(n),
+          }),
+        ),
+      ),
+      input,
+      el('span', { class: 'card-sub', style: { marginBottom: 0 }, text: 'years' }),
+    );
+  };
 
   const head = (extra) =>
     el(
@@ -655,6 +713,7 @@ function renderForecast(node, chartNode, wallet, data, income, mountChart) {
       { class: 'card-head' },
       el('h3', { class: 'card-title', text: 'Income forecast' }),
       extra ? el('span', { class: 'card-sub', style: { marginBottom: 0 }, text: extra }) : null,
+      horizon(),
     );
 
   const projection = income?.projection;
@@ -665,7 +724,7 @@ function renderForecast(node, chartNode, wallet, data, income, mountChart) {
     return;
   }
 
-  const { rows = [], byYear = [], totals = {}, excluded = [], years = 5 } = projection;
+  const { rows = [], byYear = [], totals = {}, excluded = [] } = projection;
   node.hidden = false;
 
   const notes = excluded.length
@@ -717,7 +776,19 @@ function renderForecast(node, chartNode, wallet, data, income, mountChart) {
     ),
   );
 
-  render(node, head(`${rows.length} paying holding${rows.length === 1 ? '' : 's'}`), summary, notes);
+  const assumptions = el(
+    'details',
+    { class: 'forecast-assumptions' },
+    el('summary', { text: 'What this assumes' }),
+    el('p', {
+      text:
+        'Each holding grows at its own dividend CAGR, measured over up to five years of rolling twelve-month totals. ' +
+        'That rate describes the years a company chose to raise in, so it cannot see a cut, and a cut is when a forecast like this would matter most. ' +
+        'Share counts are held at today, nothing is reinvested, and tax is ignored.',
+    }),
+  );
+
+  render(node, head(`${rows.length} paying holding${rows.length === 1 ? '' : 's'}`), summary, notes, assumptions);
 
   /* -------------------------------------------------------------- chart */
 
@@ -737,9 +808,6 @@ function renderForecast(node, chartNode, wallet, data, income, mountChart) {
         formatValue: (v) => `${unit}${compact(v)}`,
         ariaLabel: `Projected annual dividend income for ${wallet.name}`,
       }),
-    note:
-      'A five-year CAGR describes the years a company chose to raise in. It cannot see a cut, and a cut is when this would matter most. ' +
-      'Share counts are held at today, nothing is reinvested, and tax is ignored. Read it as "if nothing changes".',
     table: {
       columns: ['Year', 'Projected income'],
       rows: categories.map((c, i) => [c.label, currency(values[i], code)]),
@@ -824,7 +892,7 @@ function hide(node) {
   node.hidden = true;
 }
 
-export function renderWallet({ nodes, wallet, data, income, rangeBlurb, handlers, editing, mountChart }) {
+export function renderWallet({ nodes, wallet, data, income, rangeBlurb, handlers, editing, mountChart, forecastYears }) {
   if (!wallet) {
     render(nodes.hero, el('p', { class: 'empty', text: 'Create a wallet from the sidebar to track a portfolio.' }));
     clear(nodes.chart);
@@ -852,5 +920,5 @@ export function renderWallet({ nodes, wallet, data, income, rangeBlurb, handlers
   renderChart(nodes.chart, wallet, data, rangeBlurb, mountChart);
   renderHoldings(nodes.holdings, wallet, data, handlers, editing);
   renderIncome(nodes.income, nodes.incomeChart, wallet, data, income, mountChart);
-  renderForecast(nodes.forecast, nodes.forecastChart, wallet, data, income, mountChart);
+  renderForecast(nodes.forecast, nodes.forecastChart, wallet, data, income, mountChart, handlers, forecastYears);
 }
