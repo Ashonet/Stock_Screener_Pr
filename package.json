@@ -15,7 +15,7 @@
     "pipeline": "npm run extract && npm run warehouse",
     "docs": "cd warehouse && dbt docs generate --profiles-dir . --static",
     "universe": "node pipeline/build-universe.js",
-    "test": "node --test test/"
+    "test": "node --test test/*.test.js"
   },
   "engines": {
     "node": ">=18"

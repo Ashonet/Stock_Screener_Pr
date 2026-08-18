@@ -28,6 +28,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # `test/*.test.js`, not `test/`. Node 20 scanned a directory argument for
+      # test files; Node 22 treats the same argument as a file to execute and
+      # dies with MODULE_NOT_FOUND before running a single test. Letting the
+      # shell expand the glob passes explicit paths, which every version accepts.
+      #
       # The spec reporter rather than the default TAP: a TAP failure buries the
       # assertion under a hundred lines of passing output. Failures are also
       # echoed as workflow annotations and into the job summary, so the reason a
@@ -41,7 +46,7 @@ jobs:
           # run so the failures actually get surfaced, then the real exit code
           # is returned at the end.
           set +e
-          node --test --test-reporter=spec test/ 2>&1 | tee test-output.txt
+          node --test --test-reporter=spec test/*.test.js 2>&1 | tee test-output.txt
           status=${PIPESTATUS[0]}
           set -e
           if [ $status -ne 0 ]; then
