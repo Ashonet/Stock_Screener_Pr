@@ -2,7 +2,7 @@
  * Market map: the index as a treemap.
  *
  * Tiles are sized by market capitalisation and grouped by sector, so the shape
- * of the index is visible at a glance — a question none of the per-company
+ * of the index is visible at a glance, a question none of the per-company
  * views can answer.
  *
  * On colour. Direction is a diverging scale, and the app already reads
@@ -24,7 +24,7 @@ const MODES = [
   { key: 'score', label: 'Quality score' },
 ];
 
-/** Diverging around zero. Three percent saturates — a big day for a large cap. */
+/** Diverging around zero. Three percent saturates, a big day for a large cap. */
 function changeColour(pct) {
   if (pct == null) return 'var(--surface-2)';
   const t = Math.max(-1, Math.min(1, pct / 3));
@@ -54,7 +54,7 @@ const tileValue = (row, mode) =>
 /**
  * Fit the sector heading to its tile, or leave it out.
  *
- * A label wider than its own tile does not get clipped by anything — it runs on
+ * A label wider than its own tile does not get clipped by anything. It runs on
  * over the neighbouring sector, which is worse than silence. So the total is
  * dropped first, then the name is truncated, and below the width where even a
  * short name would collide the heading is omitted and the tooltip carries it.
@@ -267,7 +267,7 @@ export function renderMap({ node, data, state, handlers }) {
       el('span', {
         class: 'card-sub',
         style: { marginBottom: 0 },
-        text: state.mode === 'score' ? 'Lighter means a lower score' : 'Green up, red down — 3% saturates',
+        text: state.mode === 'score' ? 'Lighter means a lower score' : 'Green up, red down, 3% saturates',
       }),
     ),
     frame,

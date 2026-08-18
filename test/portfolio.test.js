@@ -60,7 +60,7 @@ describe('buildValueSeries', () => {
 
   test('starts only where every holding has a price', () => {
     // B lists a day late. Starting earlier would value the wallet at A alone and
-    // then jump when B appears — which reads as a gain that never happened.
+    // then jump when B appears, which reads as a gain that never happened.
     const series = buildValueSeries([
       { holding: { symbol: 'A', shares: 1 }, chart: bars(t0, [10, 10, 10]) },
       { holding: { symbol: 'B', shares: 1 }, chart: bars(t0 + DAY, [5, 5]) },

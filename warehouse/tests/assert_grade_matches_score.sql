@@ -1,6 +1,6 @@
 -- BUG: the grade was derived from the unrounded score while the card displayed
 -- the rounded one, so they disagreed at every boundary. Realty Income scored
--- 72.6, displayed as "73", and graded as B — while the published ladder says 73
+-- 72.6, displayed as "73", and graded as B, while the published ladder says 73
 -- is a B+. Two sources of truth for one number.
 --
 -- Asserts the letter always matches the number the reader is shown.

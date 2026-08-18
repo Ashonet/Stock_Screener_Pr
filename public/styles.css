@@ -1,5 +1,5 @@
 /* ============================================================================
-   Stock Dashboard — design tokens & layout
+   Stock Dashboard, design tokens & layout
 
    Colors come from a validated palette: the categorical slots clear the
    lightness band, chroma floor, CVD separation and normal-vision floors in
@@ -436,7 +436,7 @@ button {
   justify-content: flex-end;
 }
 
-/* Allocation: one series, one color — length carries the value. */
+/* Allocation: one series, one color, length carries the value. */
 .weight-cell {
   display: flex;
   align-items: center;
@@ -1260,7 +1260,7 @@ table.statement tr.statement-key th {
   text-align: right;
   white-space: nowrap;
 }
-/* The last pair in a group needs no rule — the group gap separates it. */
+/* The last pair in a group needs no rule, the group gap separates it. */
 .stat-rows > :nth-last-child(-n + 2) {
   border-bottom: 0;
 }
@@ -1803,7 +1803,7 @@ table.screener thead th:first-child {
   letter-spacing: 0.05em;
 }
 /* Tile text sits on a coloured fill, so it takes the fill's own contrast rather
-   than a text token — the one documented exception to text wearing ink colours. */
+   than a text token, the one documented exception to text wearing ink colours. */
 .map-symbol {
   fill: var(--text-primary);
   font-family: var(--font);

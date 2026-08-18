@@ -3,7 +3,7 @@
 -- Cadence matters: dividend growth must be measured over a fixed number of
 -- payments, not over calendar years. A monthly payer whose distribution lands
 -- on 31 December in one year and 1 January the next shows a calendar-year drop
--- that never happened — Realty Income's 2024 calendar total sits 6% below 2023
+-- that never happened, Realty Income's 2024 calendar total sits 6% below 2023
 -- while it raised throughout.
 with payments as (
 

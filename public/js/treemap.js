@@ -1,7 +1,7 @@
 /**
  * Squarified treemap layout.
  *
- * The naive alternative — slicing the rectangle alternately by row and column —
+ * The naive alternative, slicing the rectangle alternately by row and column,
  * produces slivers whose area you cannot judge, which defeats the point of
  * sizing by value. Squarifying packs each row so tiles stay as close to square
  * as the values allow (Bruls, Huizing & van Wijk, 2000).

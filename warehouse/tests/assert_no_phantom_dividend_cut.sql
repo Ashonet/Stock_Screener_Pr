@@ -1,7 +1,7 @@
 -- BUG: dividend growth was measured on calendar-year totals, which misreads
 -- every monthly payer. Whether a distribution lands on 31 December or 1 January
--- swings the year by a whole payment — Realty Income's 2024 calendar total sits
--- 6% below 2023 despite it having raised throughout — and the streak metric
+-- swings the year by a whole payment, Realty Income's 2024 calendar total sits
+-- 6% below 2023 despite it having raised throughout, and the streak metric
 -- read that as a cut.
 --
 -- int_dividend_windows buckets by payment COUNT instead. This asserts the fix

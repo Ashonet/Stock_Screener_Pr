@@ -4,8 +4,8 @@
 -- EBITDA margin on EVERY company. Nothing errored; the balance-sheet pillar
 -- just quietly scored on one input instead of three.
 --
--- Banks are exempt. EBITDA is not a meaningful measure for them — interest is
--- revenue, not a financing cost to add back — and Yahoo correctly omits it, so
+-- Banks are exempt. EBITDA is not a meaningful measure for them, interest is
+-- revenue, not a financing cost to add back, and Yahoo correctly omits it, so
 -- including them would bury a real regression under expected nulls.
 {{ config(severity = 'warn') }}
 

@@ -233,7 +233,7 @@ export function sparkline(values, { width = 64, height = 26, color }) {
  * Price history: 2px line over a ~10% wash, crosshair that snaps to the
  * nearest point, and one direct label at the endpoint.
  *
- * X is spaced by index, not clock time — otherwise every weekend and holiday
+ * X is spaced by index, not clock time. Otherwise every weekend and holiday
  * opens a gap the price never actually spent.
  */
 export function areaChart(width, height, opts) {
@@ -284,7 +284,7 @@ export function areaChart(width, height, opts) {
   const x = (i) => pad.left + (i / (points.length - 1)) * plotW;
   const y = (v) => pad.top + plotH - ((v - min) / (max - min)) * plotH;
 
-  /* grid + y axis — solid hairlines, recessive */
+  /* grid + y axis, solid hairlines, recessive */
   const ticks = niceTicks(min, max, 5);
   const grid = svg('g', {});
   for (const t of ticks) {
@@ -324,7 +324,7 @@ export function areaChart(width, height, opts) {
     xAxis,
   );
 
-  /* previous-close reference — a solid hairline, labelled so it is not mystery ink */
+  /* previous-close reference, a solid hairline, labelled so it is not mystery ink */
   if (referenceValue != null) {
     const ry = y(referenceValue);
     if (ry >= pad.top && ry <= pad.top + plotH) {
@@ -385,7 +385,7 @@ export function areaChart(width, height, opts) {
     );
   }
 
-  /* crosshair + tooltip — the reader aims at a date, not at a 2px line */
+  /* crosshair + tooltip, the reader aims at a date, not at a 2px line */
   const cross = svg('g', { opacity: '0' });
   const crossLine = svg('line', { class: 'crosshair', y1: pad.top, y2: pad.top + plotH });
   const crossDot = svg('circle', { r: 4.5, fill: color, stroke: cssVar('--surface-1'), 'stroke-width': 2 });
@@ -456,7 +456,7 @@ export function areaChart(width, height, opts) {
 
 /**
  * Grouped columns on a single shared axis. Every series must be in the same
- * unit — two scales on one plot invent a correlation that is not in the data,
+ * unit: two scales on one plot invent a correlation that is not in the data,
  * so a second unit belongs in a second chart.
  */
 export function columnChart(width, height, opts) {
@@ -507,7 +507,7 @@ export function columnChart(width, height, opts) {
   const baselineY = y(0);
 
   const band = plotW / categories.length;
-  const GAP = 2; // the surface gap does the separating — never a stroke
+  const GAP = 2; // the surface gap does the separating, never a stroke
   const groupWidth = Math.min(band - 14, 24 * series.length + GAP * (series.length - 1));
   const barWidth = Math.max(3, (groupWidth - GAP * (series.length - 1)) / series.length);
 

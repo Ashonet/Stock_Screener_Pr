@@ -2,7 +2,7 @@
  * Geometry tests for the squarified treemap.
  *
  * A treemap that leaks tiles outside its rectangle, overlaps them, or loses
- * area is lying about the values it encodes — and none of that is obvious by
+ * area is lying about the values it encodes, and none of that is obvious by
  * looking at it, which is exactly why it is worth asserting.
  */
 

@@ -1,6 +1,6 @@
 -- BUG: Yahoo's chart endpoint caps the dividend event list at 168 entries on
 -- range=max and drops the MIDDLE of it. Coca-Cola came back with 1962-2003 and
--- then 2026 — two decades missing behind a chart that looked entirely
+-- then 2026, two decades missing behind a chart that looked entirely
 -- plausible. Fixed by requesting an explicit period window instead.
 --
 -- This test started life as "a payer's dividend years must be contiguous", then
@@ -9,7 +9,7 @@
 -- real corporate event: the 2008 crisis (AIG, Citigroup, Carnival, Freeport),
 -- COVID (Delta, Southwest, Marriott, Expedia, Disney), and one-offs like PG&E's
 -- bankruptcy and HCA's leveraged buyout. Suspensions are ordinary, and a
--- company that suspends was almost always a regular payer on both sides — so
+-- company that suspends was almost always a regular payer on both sides, so
 -- gap shape cannot separate a suspension from a truncation, and any test built
 -- on it is 44 false positives pretending to be signal.
 --

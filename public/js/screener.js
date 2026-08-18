@@ -2,7 +2,7 @@
  * Screener: every tracked security ranked by quality score.
  *
  * This view exists because of the warehouse. Scoring 80 companies from four
- * years of statements would be ~300 upstream calls against the live API — far
+ * years of statements would be ~300 upstream calls against the live API, far
  * past what a page load can do and past what the upstream would tolerate.
  * Against the mart it is a single local query, so ranking, filtering and
  * re-sorting are instant.
@@ -30,7 +30,7 @@ const COLUMNS = [
   { key: 'market_cap', label: 'Market cap', kind: 'currency' },
 ];
 
-/** REIT rows are priced on P/FFO, standard rows on P/E — one column, right metric. */
+/** REIT rows are priced on P/FFO, standard rows on P/E. One column, right metric. */
 const valuationMultiple = (row) => (row.is_reit ? row.price_to_ffo : row.trailing_pe);
 
 const cellValue = (row, column) =>
@@ -214,7 +214,7 @@ export function renderScreener({ node, data, state, handlers }) {
       class: 'card-sub',
       style: { marginTop: '12px', marginBottom: 0 },
       text:
-        'REIT rows are priced on P/FFO and operating companies on P/E — the column shows whichever applies. ' +
+        'REIT rows are priced on P/FFO and operating companies on P/E, the column shows whichever applies. ' +
         'Scores are screening heuristics, not investment advice.',
     }),
   );

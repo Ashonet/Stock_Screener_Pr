@@ -1,7 +1,7 @@
 /**
  * Persisted user state: named watchlists and wallets.
  *
- * Everything lives in localStorage — there is no account and no server-side
+ * Everything lives in localStorage. There is no account and no server-side
  * state, so the dashboard is yours alone and works offline apart from prices.
  */
 
@@ -31,7 +31,7 @@ function write(key, value) {
   try {
     localStorage.setItem(key, JSON.stringify(value));
   } catch {
-    /* private browsing — everything still works, it just forgets */
+    /* private browsing, everything still works, it just forgets */
   }
 }
 

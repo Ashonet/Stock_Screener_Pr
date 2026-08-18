@@ -1,6 +1,8 @@
 /** Number, currency and date formatting. One place, so every panel agrees. */
 
-const DASH = '—';
+// Shown wherever a value is genuinely absent. Spelled out rather than drawn
+// as a dash: in a column of negative numbers a lone dash reads as a minus.
+const DASH = 'n/a';
 
 const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
 
@@ -54,7 +56,7 @@ export function currency(value, code = 'USD', { digits } = {}) {
   }
 }
 
-/** $394.3B — big money, where the exact cents are noise. */
+/** $394.3B, big money, where the exact cents are noise. */
 export function compactCurrency(value, code = 'USD') {
   if (!isNum(value)) return DASH;
   const symbol = currencySymbol(code);

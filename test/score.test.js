@@ -13,7 +13,11 @@ import { isREIT, buildScore } from '../lib/score.js';
 
 describe('isREIT', () => {
   test('recognises the industries Yahoo files REITs under', () => {
-    for (const industry of ['REIT - Retail', 'REIT - Industrial', 'REIT—Specialty', 'reit - office']) {
+    // Yahoo is inconsistent about the separator: mostly "REIT - Retail", but
+    // an em dash on some rows. Built from a char code so the source file
+    // stays free of the character while the case still covers it.
+    const emDash = String.fromCharCode(0x2014);
+    for (const industry of ['REIT - Retail', 'REIT - Industrial', `REIT${emDash}Specialty`, 'reit - office']) {
       assert.equal(isREIT({ industry }), true, industry);
     }
   });
@@ -86,7 +90,7 @@ describe('buildScore', () => {
   test('the basis changes the grade for identical financials', () => {
     // The whole thesis in one assertion: the same numbers do not score the same
     // through the two lenses, because the REIT branch measures cash where the
-    // standard branch measures earnings. Direction is not asserted — it depends
+    // standard branch measures earnings. Direction is not asserted, it depends
     // on the thresholds, and pinning it here would make this a change-detector
     // rather than a test.
     const standard = buildScore(fixture({ industry: 'Railroads' }));

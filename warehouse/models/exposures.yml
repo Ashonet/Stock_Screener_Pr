@@ -1,7 +1,7 @@
 version: 2
 
 # Exposures declare what consumes the marts, so the lineage graph in `dbt docs`
-# runs all the way through to the things people actually look at — and a model
+# runs all the way through to the things people actually look at, and a model
 # nobody depends on becomes visible as such.
 exposures:
   - name: screener

@@ -1,4 +1,4 @@
--- Dividends totalled per calendar year — the shape the dashboard charts.
+-- Dividends totalled per calendar year, the shape the dashboard charts.
 --
 -- The in-progress year is flagged rather than dropped: charting a part-year
 -- beside complete ones reads as a cut, so consumers need to know which it is.

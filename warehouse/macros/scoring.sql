@@ -46,7 +46,7 @@
     Snap an implied payments-per-year to a real dividend frequency.
 
     Companies pay annually, semi-annually, quarterly, occasionally bi-monthly,
-    or monthly. Nothing pays 5 or 11 times a year — those are artefacts of
+    or monthly. Nothing pays 5 or 11 times a year. Those are artefacts of
     rounding an irregular median gap, and they appear whenever a payer's rhythm
     is disturbed:
 

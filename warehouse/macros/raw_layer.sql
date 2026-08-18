@@ -22,7 +22,7 @@
     Append the day's scores to the landing zone.
 
     The path is built in Jinja rather than in SQL because DuckDB's COPY ... TO
-    takes a literal destination — 'prefix' || expression is a parser error.
+    takes a literal destination, 'prefix' || expression is a parser error.
 #}
 {% macro export_score_history() -%}
     copy (

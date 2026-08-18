@@ -41,7 +41,7 @@ describe('buildProfile day change when the summary is unavailable', () => {
       {},
       chart({ range: '1y', interval: '1d', previousClose: 150, points: bars([220, 226, 225]) }),
     );
-    // Not 150 — that is the close before the whole year, not yesterday.
+    // Not 150. That is the close before the whole year, not yesterday.
     assert.equal(quote.previousClose, 226);
     assert.equal(quote.change, -1);
   });

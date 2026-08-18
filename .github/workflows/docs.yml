@@ -1,7 +1,7 @@
 name: docs
 
-# Publishes the dbt documentation site — model descriptions, column-level
-# lineage and test coverage — to GitHub Pages.
+# Publishes the dbt documentation site, model descriptions, column-level
+# lineage and test coverage, to GitHub Pages.
 on:
   push:
     branches: [main]

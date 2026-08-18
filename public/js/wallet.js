@@ -4,7 +4,7 @@
  *
  * The value chart holds share counts fixed at what the wallet contains today,
  * so it answers "what has this basket been worth?" rather than replaying a
- * transaction ledger. The subtitle says so — the two are easy to conflate and
+ * transaction ledger. The subtitle says so, the two are easy to conflate and
  * only one of them is what the numbers mean.
  */
 
@@ -124,7 +124,7 @@ function renderHero(node, wallet, data, handlers) {
   render(node, left, right);
 
   const warnings = [];
-  if (data?.unpriced?.length) warnings.push(`No price data for ${data.unpriced.join(', ')} — excluded from the totals.`);
+  if (data?.unpriced?.length) warnings.push(`No price data for ${data.unpriced.join(', ')}, excluded from the totals.`);
   if (data?.mixedCurrency) warnings.push('Holdings are quoted in more than one currency; values are summed as reported, without conversion.');
   for (const text of warnings) {
     node.append(el('div', { class: 'banner', style: { gridColumn: '1 / -1' }, text }));
@@ -327,7 +327,7 @@ function renderHoldings(node, wallet, data, handlers, editing) {
             'div',
             { class: 'weight-cell' },
             el('span', { text: row.weight == null ? DASH : percent(row.weight, { digits: 1 }) }),
-            // One series, one color — bar length already carries the value.
+            // One series, one color, bar length already carries the value.
             el(
               'span',
               { class: 'weight-track', 'aria-hidden': 'true' },

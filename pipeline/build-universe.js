@@ -7,7 +7,7 @@
  * gaps (missing recent additions) and silent errors (tickers that were renamed
  * or delisted). It is fetched, then every symbol is validated against the data
  * source we actually use, because a name being in the index is no guarantee
- * Yahoo serves it under that ticker — Fiserv trades as FI, not FISV.
+ * Yahoo serves it under that ticker. Fiserv trades as FI, not FISV.
  *
  * Symbols that do not resolve are dropped and listed, so the exclusion is
  * visible rather than mysterious.
@@ -91,7 +91,7 @@ async function validate(symbols) {
  *
  * Overwriting universe.json alone would bake survivorship bias into everything
  * downstream: the file holds *today's* members, so six years of history for
- * "the S&P 500" would silently exclude every company that was dropped — and
+ * "the S&P 500" would silently exclude every company that was dropped, and
  * companies get dropped disproportionately because they failed. Any backtest
  * over that gives flattering, wrong answers.
  *

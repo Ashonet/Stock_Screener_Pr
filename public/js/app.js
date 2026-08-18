@@ -102,7 +102,7 @@ const writeStore = (key, value) => {
   try {
     localStorage.setItem(key, JSON.stringify(value));
   } catch {
-    /* private browsing — the dashboard still works, it just forgets */
+    /* private browsing, the dashboard still works, it just forgets */
   }
 };
 
@@ -139,7 +139,7 @@ if (!PERIODS.some((p) => p.key === state.period)) state.period = 'annual';
 const linked = new URLSearchParams(location.search).get('symbol');
 if (linked && SYMBOL_PATTERN.test(linked)) {
   // Opens the company without saving it. A shared link should not silently
-  // edit the recipient's watchlist — the hero carries an explicit control for
+  // edit the recipient's watchlist, the hero carries an explicit control for
   // keeping it.
   state.active = linked.toUpperCase();
   store.view = 'stock';
@@ -486,7 +486,7 @@ function setupLists() {
         renameList(list.id, name);
         renderListPicker();
       },
-      // The last list is never deletable — the sidebar always has one.
+      // The last list is never deletable, the sidebar always has one.
       extra: [
         el('button', {
           class: 'link-button',
@@ -699,7 +699,7 @@ function renderWalletList() {
             { class: 'wl-figures' },
             el('div', {
               class: 'wl-price',
-              text: value == null ? (wallet.holdings.length ? DASH : '—') : compactCurrency(value, 'USD'),
+              text: value == null ? DASH : compactCurrency(value, 'USD'),
             }),
             el(
               'div',
@@ -1045,7 +1045,7 @@ function renderHero(stock) {
     .join(' · ');
 
   // Searching no longer saves what you look at, so keeping a company has to be
-  // an explicit act — and the control has to say which list it would go into.
+  // an explicit act, and the control has to say which list it would go into.
   const listName = activeList()?.name ?? 'watchlist';
   const saved = symbols().includes(quote.symbol);
   const watchToggle = el('button', {
@@ -1115,7 +1115,7 @@ function renderHero(stock) {
         class: 'banner',
         style: { gridColumn: '1 / -1' },
         text:
-          `Showing stored ${stock.servedFromWarehouse.join(' and ')}${asOf} — the live feed is ` +
+          `Showing stored ${stock.servedFromWarehouse.join(' and ')}${asOf}, the live feed is ` +
           `rate-limited right now. Prices are current.`,
       }),
     );
@@ -1176,7 +1176,7 @@ function renderPriceChart(stock) {
   const periodPct = first ? (periodChange / first) * 100 : null;
   const dir = direction(periodChange);
 
-  // The line's color states the period's direction — the same fact the signed
+  // The line's color states the period's direction, the same fact the signed
   // number beside it states, so it is never carried by hue alone.
   const color = dir === 'down' ? cssVar('--down') : dir === 'up' ? cssVar('--up') : cssVar('--series-1');
   const symbol = currencySymbol(code);
@@ -1271,7 +1271,7 @@ function renderStats(stock) {
 
 /* --------------------------------------------------------- quality score ---- */
 
-/** Score bands are a state, so they use status tokens — always beside the
+/** Score bands are a state, so they use status tokens, always beside the
  *  number and the word, never carrying the meaning on their own. */
 function scoreTone(score) {
   if (!Number.isFinite(score)) return cssVar('--text-muted');
@@ -1281,7 +1281,7 @@ function scoreTone(score) {
 }
 
 const scoreBand = (score) =>
-  !Number.isFinite(score) ? '—' : score >= 75 ? 'Strong' : score >= 60 ? 'Solid' : score >= 45 ? 'Mixed' : score >= 30 ? 'Weak' : 'Poor';
+  !Number.isFinite(score) ? DASH : score >= 75 ? 'Strong' : score >= 60 ? 'Solid' : score >= 45 ? 'Mixed' : score >= 30 ? 'Weak' : 'Poor';
 
 function scoreMeter(score) {
   const tone = scoreTone(score);
@@ -1328,8 +1328,8 @@ function renderScore(stock) {
 
   const basisNote =
     score.basis === 'reit'
-      ? `Scored as a REIT — FFO replaces earnings, and the payout is measured against cash flow rather than EPS.`
-      : `Scored as an operating company — earnings, free cash flow and P/E.`;
+      ? `Scored as a REIT: FFO replaces earnings, and the payout is measured against cash flow rather than EPS.`
+      : `Scored as an operating company: earnings, free cash flow and P/E.`;
 
   const pillars = el(
     'div',
@@ -1343,7 +1343,7 @@ function renderScore(stock) {
           {},
           el('span', { class: 'pillar-name', text: p.title }),
           scoreMeter(p.score),
-          el('span', { class: 'pillar-score', style: { color: scoreTone(p.score) }, text: p.score ?? '—' }),
+          el('span', { class: 'pillar-score', style: { color: scoreTone(p.score) }, text: p.score ?? DASH }),
           el('span', { class: 'pillar-band', text: scoreBand(p.score) }),
           el('span', { class: 'pillar-caret', 'aria-hidden': 'true', text: '▶' }),
         ),
@@ -1422,7 +1422,7 @@ function renderScore(stock) {
         el('li', {
           text:
             score.basis === 'reit'
-              ? 'REITs are scored on FFO (net income + depreciation), because depreciation on property that is holding its value pushes reported earnings — and therefore EPS, P/E and any earnings-based payout ratio — far below the cash the business actually produces.'
+              ? 'REITs are scored on FFO (net income + depreciation), because depreciation on property that is holding its value pushes reported earnings (and therefore EPS, P/E and any earnings-based payout ratio) far below the cash the business actually produces.'
               : 'Operating companies are scored on reported earnings, free cash flow and P/E. A REIT would be scored on FFO instead.',
         }),
         el('li', {
@@ -1433,7 +1433,7 @@ function renderScore(stock) {
         }),
         el('li', {
           text:
-            'Thresholds are heuristics chosen for screening, not a validated model, and they differ by basis — 5-6× net debt to EBITDA is normal for a REIT and stretched for an operating company. Every input is shown above so you can disagree with the grade.',
+            'Thresholds are heuristics chosen for screening, not a validated model, and they differ by basis: 5-6× net debt to EBITDA is normal for a REIT and stretched for an operating company. Every input is shown above so you can disagree with the grade.',
         }),
         el('li', { text: 'For research and education. Not investment advice.' }),
       ),
@@ -1503,8 +1503,8 @@ function renderFinancials(stock) {
 /**
  * The reported income statement, one column per period.
  *
- * `emphasis` marks the subtotal lines a reader scans for — revenue down to
- * EBITDA — so the eye can find them without every row shouting.
+ * `emphasis` marks the subtotal lines a reader scans for, revenue down to
+ * EBITDA, so the eye can find them without every row shouting.
  * `derive` covers the two lines Yahoo does not report directly.
  */
 const STATEMENT_ROWS = [
@@ -1575,8 +1575,8 @@ function renderIncomeStatement(stock) {
     }
   };
 
-  // A line nobody reports for this business — a railway has no R&D — is dropped
-  // rather than printed as a row of dashes.
+  // A line nobody reports for this business (a railway has no R&D) is dropped
+  // rather than printed as a row of blanks.
   const present = STATEMENT_ROWS.filter((spec) => rows.some((row) => statementValue(row, spec) != null));
 
   render(
@@ -1649,7 +1649,7 @@ function renderDividends(stock) {
     subtitle:
       `Paid per calendar year, ${code}` + (growth != null ? ` · ${growth > 0 ? '+' : ''}${percent(growth)} year over year` : ''),
     height: 280,
-    // Single series — the title says what is plotted, so no legend box.
+    // Single series, the title says what is plotted, so no legend box.
     draw: (width, height) =>
       columnChart(width, height, {
         categories: rows.map((r) => ({
@@ -1672,7 +1672,7 @@ function renderDividends(stock) {
         // Direct-labelling the newest bar is only honest when the year is done.
         labelLast: !rows.at(-1).partial,
       }),
-    note: partial ? `${partial.year} is still accruing — its bar covers payments made so far this year.` : null,
+    note: partial ? `${partial.year} is still accruing. Its bar covers payments made so far this year.` : null,
     table: {
       columns: ['Year', 'Dividends per share'],
       rows: [...rows]
@@ -1754,7 +1754,7 @@ function renderTargets(stock) {
   }
 
   /* Ratings folded to three ordered classes on the diverging blue/gray/red
-     scale — five near-identical hues would blur, and each class is labelled
+     scale, since five near-identical hues would blur, and each class is labelled
      with its count, so color is never the only channel. */
   let ratings = null;
   if (consensus) {
@@ -2023,7 +2023,7 @@ function setupSearch() {
     renderSearchResults();
   });
 
-  // Ctrl/Cmd-K and "/" both focus search — the two conventions people reach for.
+  // Ctrl/Cmd-K and "/" both focus search, the two conventions people reach for.
   document.addEventListener('keydown', (event) => {
     const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(event.target.tagName);
     if ((event.key === 'k' && (event.ctrlKey || event.metaKey)) || (event.key === '/' && !typing)) {
@@ -2088,7 +2088,7 @@ function startAutoRefresh() {
  * Run one startup step in isolation.
  *
  * Startup used to be a bare sequence, so a single failure took out everything
- * after it — and it failed silently, because nothing was watching. An
+ * after it, and it failed silently, because nothing was watching. An
  * unguarded `dom.navScreener.addEventListener(...)` sitting above `loadStock()`
  * was enough: when the markup and the script disagreed about whether that
  * element existed (a stale cached script against fresh HTML, or a half-applied
@@ -2118,7 +2118,7 @@ function reportStartupFailures() {
   });
   banner.append(
     el('strong', { text: 'Some of the interface failed to start. ' }),
-    el('span', { text: 'A hard reload (Ctrl+Shift+R) usually fixes it — the page and its scripts may be out of step. ' }),
+    el('span', { text: 'A hard reload (Ctrl+Shift+R) usually fixes it: the page and its scripts may be out of step. ' }),
     el('span', { class: 'card-sub', text: failedSteps.join(' · ') }),
   );
   document.querySelector('.layout')?.before(banner);
@@ -2160,7 +2160,7 @@ function init() {
   // is nothing to show, and the error belongs on screen rather than in a banner.
   // The screener is the landing view: it is the one screen that says what this
   // app is, and arriving on a single company assumes you already knew which one
-  // you wanted. A ?symbol= link still opens that company directly — and because
+  // you wanted. A ?symbol= link still opens that company directly, and because
   // selecting one writes the symbol into the URL, refreshing while reading a
   // company keeps you there rather than bouncing back to the list.
   if (linked && dom.detail) {

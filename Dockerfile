@@ -1,7 +1,7 @@
 # Two stages: build the warehouse, then ship a runtime that only carries the
 # result.
 #
-# The warehouse is deliberately not in git — it is derived, and an 84MB binary
+# The warehouse is deliberately not in git. It is derived, and an 84MB binary
 # has no place in a repository. But the app serves from it, so it has to exist
 # in the image. Building it here from the committed landing zone keeps the repo
 # clean, makes the image self-contained, and means the deployed site never calls

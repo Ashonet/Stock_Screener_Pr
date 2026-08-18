@@ -43,7 +43,7 @@ const BACKFILL_YEARS = 6;
 /**
  * Re-fetch this much already-loaded history on every incremental run.
  *
- * Yahoo restates recent bars — a split or dividend adjusts prior closes, and
+ * Yahoo restates recent bars, a split or dividend adjusts prior closes, and
  * the most recent session is provisional until it settles. Overlapping and
  * merging on (symbol, date) means a restatement corrects itself on the next
  * run instead of being frozen in by the watermark.
@@ -112,7 +112,7 @@ class RawWriter {
       gzip.pipe(file);
       // Both halves are kept: ending the gzip stream only signals that
       // compression finished, and the process can still exit before the piped
-      // file stream has flushed — which writes a valid but empty 10-byte gzip.
+      // file stream has flushed, which writes a valid but empty 10-byte gzip.
       // The close path waits on the file's 'finish' event instead.
       entry = { gzip, file };
       this.streams.set(entity, entry);
@@ -207,7 +207,7 @@ function securityRows(symbol, summary, chart) {
 }
 
 /**
- * Financials land in long form — one row per (symbol, period, metric).
+ * Financials land in long form. One row per (symbol, period, metric).
  *
  * Yahoo's statement coverage differs by industry: a railway reports no R&D, a
  * REIT reports no capex. A wide table would need a column per metric and a
@@ -361,7 +361,7 @@ async function main() {
 
   // Flush and close the gzip streams FIRST. A half-written member is
   // unreadable, and advancing the watermark past a slice that never landed
-  // would lose it permanently — the next run would start after data that was
+  // would lose it permanently: the next run would start after data that was
   // never actually written.
   await writer.close();
 
@@ -379,7 +379,7 @@ async function main() {
   // A single bad ticker should not fail the pipeline; a broadly broken upstream
   // should. Anything past a third of the universe means something systemic.
   if (failures.length > symbols.length / 3) {
-    console.error('\nToo many extraction failures — failing the run.');
+    console.error('\nToo many extraction failures, failing the run.');
     process.exit(1);
   }
 }

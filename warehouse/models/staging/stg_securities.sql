@@ -25,7 +25,7 @@ typed as (
         description,
         -- Every numeric goes through varchar and try_cast rather than a direct
         -- cast. The raw layer is untrusted by design, and Yahoo signals "no
-        -- value" with an empty object rather than null — market_cap: {} for
+        -- value" with an empty object rather than null, market_cap: {} for
         -- Salesforce, dividend_yield: {} for Amazon. A direct cast fails the
         -- whole build on one bad cell; try_cast nulls that cell and lets the
         -- rest through, which is what a staging layer is for.

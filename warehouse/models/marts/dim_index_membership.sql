@@ -2,7 +2,7 @@
 --
 -- This model exists to keep survivorship bias out of the warehouse. The
 -- constituent file holds *today's* members, so six years of history for "the
--- S&P 500" would silently exclude every company that was removed — and removals
+-- S&P 500" would silently exclude every company that was removed, and removals
 -- skew heavily toward failures, delistings and takeunders. Any historical study
 -- over current members alone reports the survivors' returns and calls them the
 -- index's.

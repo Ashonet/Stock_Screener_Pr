@@ -1,7 +1,7 @@
 -- Reported statement lines, long form: one row per symbol/period/metric.
 --
--- Long rather than wide because statement coverage varies by industry — a
--- railway reports no R&D, a REIT reports no capex — and Yahoo adds and drops
+-- Long rather than wide because statement coverage varies by industry, a
+-- railway reports no R&D, a REIT reports no capex, and Yahoo adds and drops
 -- lines without notice. Widening happens in the marts, where each consumer
 -- picks the columns it needs.
 with raw as (

@@ -3,7 +3,7 @@
  *
  * Two jobs, no dependencies:
  *  1. Serve the static dashboard out of ./public
- *  2. Proxy Yahoo Finance — the browser cannot call it directly (CORS), and
+ *  2. Proxy Yahoo Finance, the browser cannot call it directly (CORS), and
  *     routing through here lets us cache, so a dashboard full of tickers makes
  *     a handful of upstream requests rather than dozens.
  */
@@ -84,7 +84,7 @@ function symbolList(raw, max = 60) {
 /* ------------------------------------------------------------------- routes */
 
 const routes = {
-  /** Liveness for a platform health check — deliberately touches no upstream. */
+  /** Liveness for a platform health check, deliberately touches no upstream. */
   async '/api/health'() {
     return {
       ok: true,
@@ -103,7 +103,7 @@ const routes = {
    */
   async '/api/screener'(url) {
     if (!warehouse.isReady()) {
-      throw new UpstreamError('The warehouse has not been built yet — run the pipeline first.', 503);
+      throw new UpstreamError('The warehouse has not been built yet, run the pipeline first.', 503);
     }
 
     const rows = await warehouse.screener();
@@ -126,7 +126,7 @@ const routes = {
   /** Treemap data: market cap for size, the last session's move for colour. */
   async '/api/map'() {
     if (!warehouse.isReady()) {
-      throw new UpstreamError('The warehouse has not been built yet — run the pipeline first.', 503);
+      throw new UpstreamError('The warehouse has not been built yet, run the pipeline first.', 503);
     }
     const rows = await warehouse.marketMap();
 
@@ -244,7 +244,7 @@ const routes = {
 
     // Fall back to stored data when the session-gated endpoints are
     // unavailable. On a laptop that is occasional; on a shared host, where the
-    // upstream rate-limits by IP, it is routine — and the difference between a
+    // upstream rate-limits by IP, it is routine, and the difference between a
     // page of dashes and a page of slightly stale numbers is the whole point of
     // having a warehouse. Each piece falls back independently, so a live
     // statement set is still used even if the profile call failed.
@@ -394,7 +394,7 @@ const routes = {
 
 async function serveStatic(req, res, pathname) {
   const rel = pathname === '/' ? 'index.html' : decodeURIComponent(pathname).replace(/^\/+/, '');
-  // Resolve inside PUBLIC_DIR only — reject anything that escapes it.
+  // Resolve inside PUBLIC_DIR only, reject anything that escapes it.
   const target = normalize(join(PUBLIC_DIR, rel));
   if (target !== PUBLIC_DIR && !target.startsWith(PUBLIC_DIR + sep)) {
     res.writeHead(403).end('Forbidden');

@@ -4,7 +4,7 @@ name: pipeline
 #
 # The whole point of running this on a schedule is that the app no longer calls
 # Yahoo at request time. Serving reads the warehouse, so the dashboard is not
-# exposed to upstream rate limits or outages — only this job is, and it retries.
+# exposed to upstream rate limits or outages, only this job is, and it retries.
 on:
   schedule:
     - cron: '30 22 * * 1-5'

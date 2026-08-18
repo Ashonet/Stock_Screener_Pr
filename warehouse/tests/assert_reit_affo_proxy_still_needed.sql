@@ -6,7 +6,7 @@
 -- (Realty Income and Prologis among them), so a true AFFO is simply not
 -- computable for all of them.
 --
--- Note this is NOT "no REIT reports capex" — an earlier read of two tickers
+-- Note this is NOT "no REIT reports capex", an earlier read of two tickers
 -- suggested that and it was wrong. Most do. But mixing true AFFO for some REITs
 -- with a cash-flow proxy for others would make the payout column incomparable
 -- across the screener, which is the one thing a screener must not be. So the
