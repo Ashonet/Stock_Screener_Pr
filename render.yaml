@@ -1,0 +1,37 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+#
+# With this file in the repo there is nothing to fill in by hand: Render reads
+# it and configures the service. Every setting below is one that has to be right
+# or the deploy fails in a way that is hard to diagnose from the dashboard.
+
+services:
+  - type: web
+    name: stock-screener
+    runtime: docker
+    plan: free
+    region: frankfurt
+    branch: main
+
+    # The image is two-stage: it installs dbt, builds the warehouse from the
+    # committed landing zone, and copies only the result into a Node runtime.
+    # First build takes several minutes because of that; later ones are cached.
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+
+    # Answers without touching Yahoo, so the health check cannot be knocked over
+    # by an upstream outage or a rate limit. Render's placeholder is /healthz,
+    # which does not exist here — pointing at it would make Render conclude the
+    # service is broken and restart it in a loop.
+    healthCheckPath: /api/health
+
+    # Every push to main redeploys, including the nightly pipeline's data
+    # commits. The live screener therefore refreshes itself with no action.
+    autoDeploy: true
+
+    envVars:
+      # The server defaults to 127.0.0.1, which means "this machine only" —
+      # correct on a laptop and unreachable from outside a container. Without
+      # this the deploy builds cleanly and answers nothing.
+      - key: HOST
+        value: 0.0.0.0
+      # PORT is injected by Render; server.js already reads it.
