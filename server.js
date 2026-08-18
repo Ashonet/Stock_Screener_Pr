@@ -386,6 +386,8 @@ const routes = {
       range,
       points: series.points,
       startedAt: series.startedAt,
+      startReason: series.startReason,
+      firstPurchase: series.firstPurchase,
       holdings: rows,
       totals,
       currency: currencies[0] ?? 'USD',
@@ -487,12 +489,22 @@ const routes = {
     });
 
     // Names carried alongside the maths so the legend reads as companies rather
-    // than tickers; a missing name is not worth failing the request over.
-    const quotes = await cached(`quotes:${symbols.join(',')}`, TTL.quotes, () => yahoo.getQuotes(symbols)).catch(() => []);
-    const names = new Map(quotes.map((q) => [q.symbol, q.name]));
+    // than tickers. The warehouse answers first because it needs no upstream
+    // call at all; quotes only fill the gaps for symbols outside the universe.
+    const names = warehouse.isReady() ? await warehouse.namesFor(symbols).catch(() => new Map()) : new Map();
+    const unnamed = symbols.filter((symbol) => !names.has(symbol));
+    if (unnamed.length) {
+      const quotes = await cached(`quotes:${unnamed.join(',')}`, TTL.quotes, () => yahoo.getQuotes(unnamed)).catch(() => []);
+      for (const q of quotes) if (q.name) names.set(q.symbol, q.name);
+    }
 
     const comparison = buildComparison(stored);
-    for (const entry of comparison.series) entry.name = names.get(entry.symbol) ?? entry.symbol;
+    // Left null rather than defaulted to the ticker. A name that is just the
+    // ticker again renders as "O, O", which reads as a bug because it is one.
+    for (const entry of comparison.series) {
+      const name = names.get(entry.symbol);
+      entry.name = name && name !== entry.symbol ? name : null;
+    }
 
     return { ...comparison, years, unavailable, requested: symbols };
   },

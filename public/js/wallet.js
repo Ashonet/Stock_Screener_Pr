@@ -179,7 +179,9 @@ function renderChart(node, wallet, data, rangeBlurb, mountChart) {
       }),
     note:
       data.startedAt && !intraday
-        ? `Series starts ${shortDate(data.startedAt)}, the earliest date every holding has a price for.`
+        ? data.startReason === 'purchase'
+          ? `Series starts ${shortDate(data.startedAt)}, your earliest purchase date. Share counts are held at today's throughout, so this values the basket you hold now rather than replaying what you bought when.`
+          : `Series starts ${shortDate(data.startedAt)}, the earliest date every holding has a price for.`
         : null,
     table: {
       columns: ['Date', 'Value'],

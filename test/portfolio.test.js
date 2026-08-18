@@ -170,3 +170,58 @@ describe('priceHoldings', () => {
     assert.ok(Math.abs(totals.dayChangePercent - (10 / 90) * 100) < 1e-9);
   });
 });
+
+describe('buildValueSeries start date', () => {
+  const chartFrom = (startMs, closes) => ({ points: closes.map((c, i) => ({ t: startMs + i * DAY, c })) });
+  const day0 = Date.UTC(2024, 0, 1);
+
+  test('starts at the earliest purchase date when prices reach further back', () => {
+    // Prices run from 1 Jan; the wallet was not bought until the 5th. Valuing
+    // the basket across the first four days reports a return nobody earned.
+    const entries = [
+      { holding: { symbol: 'A', shares: 10, boughtAt: '2024-01-05' }, chart: chartFrom(day0, [1, 2, 3, 4, 5, 6, 7]) },
+    ];
+    const series = buildValueSeries(entries);
+
+    assert.equal(series.startedAt, Date.UTC(2024, 0, 5));
+    assert.equal(series.startReason, 'purchase');
+    assert.equal(series.points.length, 3, 'the 5th, 6th and 7th');
+    assert.equal(series.points[0].c, 50);
+  });
+
+  test('the earliest purchase across several holdings wins', () => {
+    const entries = [
+      { holding: { symbol: 'A', shares: 1, boughtAt: '2024-01-06' }, chart: chartFrom(day0, [1, 1, 1, 1, 1, 1, 1]) },
+      { holding: { symbol: 'B', shares: 1, boughtAt: '2024-01-03' }, chart: chartFrom(day0, [2, 2, 2, 2, 2, 2, 2]) },
+    ];
+    assert.equal(buildValueSeries(entries).startedAt, Date.UTC(2024, 0, 3));
+  });
+
+  test('price coverage still wins when it starts after the purchase', () => {
+    // Bought in 2023 but this holding only has prices from 2024, so the series
+    // cannot begin earlier without inventing a value for it.
+    const entries = [
+      { holding: { symbol: 'A', shares: 1, boughtAt: '2023-01-01' }, chart: chartFrom(day0, [1, 2, 3]) },
+    ];
+    const series = buildValueSeries(entries);
+
+    assert.equal(series.startedAt, day0);
+    assert.equal(series.startReason, 'coverage');
+  });
+
+  test('holdings with no purchase date fall back to price coverage', () => {
+    const entries = [{ holding: { symbol: 'A', shares: 1, boughtAt: null }, chart: chartFrom(day0, [1, 2, 3]) }];
+    const series = buildValueSeries(entries);
+
+    assert.equal(series.startedAt, day0);
+    assert.equal(series.startReason, 'coverage');
+    assert.equal(series.firstPurchase, null);
+  });
+
+  test('clipping can be turned off', () => {
+    const entries = [
+      { holding: { symbol: 'A', shares: 1, boughtAt: '2024-01-05' }, chart: chartFrom(day0, [1, 2, 3, 4, 5, 6, 7]) },
+    ];
+    assert.equal(buildValueSeries(entries, { fromFirstPurchase: false }).startedAt, day0);
+  });
+});

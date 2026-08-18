@@ -155,7 +155,10 @@ export function renderCompare({ node, data, state, handlers }) {
   const base = data.base ?? 10_000;
   const series = data.series.map((s, i) => ({
     symbol: s.symbol,
-    name: s.name ?? s.symbol,
+    // Null when the name is unknown or is just the ticker again, so the legend
+    // never reads "O, O". Guarded here as well as on the server because the
+    // legend is the visible symptom and should not depend on the fix upstream.
+    name: s.name && s.name !== s.symbol ? s.name : null,
     color: cssVar(SERIES_VARS[i % SERIES_VARS.length]),
     points: totalReturn ? s.total : s.price,
   }));
@@ -178,7 +181,7 @@ export function renderCompare({ node, data, state, handlers }) {
       .filter(Boolean)
       .join(' · '),
     height: 380,
-    legend: series.map((s) => ({ name: `${s.symbol} · ${s.name}`, color: s.color, shape: 'line' })),
+    legend: series.map((s) => ({ name: s.name ? `${s.symbol} · ${s.name}` : s.symbol, color: s.color, shape: 'line' })),
     draw: (width, height) =>
       comparePlot(width, height, {
         series,

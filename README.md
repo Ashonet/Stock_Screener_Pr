@@ -263,7 +263,7 @@ the live-data dashboard, just without the screener.
 ### Tests and CI
 
 ```bash
-npm test          # 86 unit tests, no network, no database
+npm test          # 91 unit tests, no network, no database
 npm run warehouse # 50 dbt assertions against the committed raw layer
 npm run docs      # self-contained lineage site at warehouse/target/static_index.html
 ```
@@ -421,7 +421,11 @@ Caveats that actually bite:
   property sales and adds back impairments, which Yahoo does not report, so a
   REIT that sold heavily in a year will score with an inflated FFO.
 - The wallet value chart holds share counts at what you hold *today*. It is a
-  basket valuation, not a transaction-ledger replay.
+  basket valuation, not a transaction-ledger replay. It does start at your
+  earliest purchase date rather than at whatever the price history reaches
+  back to, so it never values a basket across years before any of it was
+  owned, but between that date and a later purchase it still counts shares
+  you had not bought yet.
 - These are undocumented endpoints. They are stable in practice but can change
   without notice; the tests are the tripwire.
 - For research and education. Not investment advice.
