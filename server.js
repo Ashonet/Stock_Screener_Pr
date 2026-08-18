@@ -346,11 +346,19 @@ async function serveStatic(req, res, pathname) {
 
     const body = await readFile(target);
     const ext = extname(target).toLowerCase();
+
+    // The page and its modules are versioned together but have no fingerprinted
+    // URLs, so a browser holding one and fetching the other produces a mismatch:
+    // the script looks for elements the markup no longer has, or the reverse.
+    // `no-cache` only asks for revalidation, which a module cache can skip.
+    // These files are a few hundred KB on a self-hosted dashboard, so refetching
+    // them costs nothing next to the confusion of a half-stale page.
+    const volatile = ext === '.html' || ext === '.js' || ext === '.css';
+
     res.writeHead(200, {
       'content-type': MIME[ext] ?? 'application/octet-stream',
       'content-length': body.length,
-      // The app is small and edited live; revalidate rather than cache.
-      'cache-control': 'no-cache',
+      'cache-control': volatile ? 'no-store, must-revalidate' : 'no-cache',
     });
     res.end(req.method === 'HEAD' ? undefined : body);
   } catch {
