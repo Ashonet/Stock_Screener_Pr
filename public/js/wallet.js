@@ -10,7 +10,7 @@
 
 import { el, render, clear } from './dom.js';
 import { areaChart, columnChart, cssVar } from './charts.js';
-import { buildGoal, timeWeightedReturn, requiredContribution } from './goal.js';
+import { buildGoal, timeWeightedReturn, buildContributionPlan } from './goal.js';
 import {
   ARROW,
   DASH,
@@ -1071,23 +1071,26 @@ function renderGoal(node, chartNode, wallet, data, income, mountChart, handlers,
 
   // The wallet's own return, chain-linked so the money paid in when a holding
   // joined is not counted as growth. Price only, since the value series is
-  // built from closes, so the yield is added back for a total return.
+  // built from closes, which is exactly what the reinvestment comparison needs:
+  // one case adds the yield back, the other does not.
   const twr = timeWeightedReturn(data?.points ?? [], (data?.contributions ?? []).map((c) => c.t));
-  const measuredReturn = twr.annualisedPct == null ? null : twr.annualisedPct + goal.yieldPct;
-  const assumedReturn = goalState.returnPct ?? measuredReturn;
+  // An override is read as a total return, so the no-reinvestment case takes
+  // the yield back off it.
+  const priceReturn = goalState.returnPct != null ? goalState.returnPct - goal.yieldPct : twr.annualisedPct;
 
   const plan =
-    assumedReturn == null
+    priceReturn == null
       ? null
-      : requiredContribution({
+      : buildContributionPlan({
           value: goal.value,
           requiredValue: goal.requiredValue,
           years: goalState.years,
-          annualReturnPct: assumedReturn,
+          priceReturnPct: priceReturn,
+          yieldPct: goal.yieldPct,
         });
 
   const planBody = () => {
-    if (assumedReturn == null) {
+    if (!plan) {
       return el('p', {
         class: 'empty',
         text:
@@ -1097,33 +1100,67 @@ function renderGoal(node, chartNode, wallet, data, income, mountChart, handlers,
       });
     }
 
-    if (plan?.alreadyThere) {
-      return el('p', {
-        class: 'card-sub',
-        style: { marginBottom: 0 },
-        text: `At ${percent(assumedReturn, { digits: 1 })} a year, what is already invested reaches ${currency(plan.futureValueOfCurrent, code)} in ${goalState.years} years, which clears the goal without adding anything further.`,
-      });
-    }
+    const money = (v) => currency(v, code);
+    const row = (label, scenario, hint) =>
+      el(
+        'tr',
+        {},
+        el('th', { scope: 'row' }, label, el('div', { class: 'card-sub', style: { margin: 0 }, text: hint })),
+        el('td', { text: percent(scenario.annualReturnPct, { digits: 1 }) }),
+        el(
+          'td',
+          {},
+          scenario.alreadyThere ? el('span', { class: 'muted', text: 'nothing needed' }) : money(scenario.perMonth),
+        ),
+        el(
+          'td',
+          {},
+          scenario.alreadyThere ? el('span', { class: 'muted', text: 'nothing needed' }) : money(scenario.perYear),
+        ),
+        el('td', { text: money(scenario.futureValueOfCurrent) }),
+      );
+
+    const table = el(
+      'table',
+      { class: 'data' },
+      el(
+        'thead',
+        {},
+        el(
+          'tr',
+          {},
+          ...['Dividends', 'Growth a year', 'Per month', 'Per year', `Current grows to`].map((label) =>
+            el('th', { scope: 'col', text: label }),
+          ),
+        ),
+      ),
+      el(
+        'tbody',
+        {},
+        row('Reinvested', plan.reinvested, 'price growth plus the yield'),
+        row('Taken as cash', plan.spent, 'price growth alone'),
+      ),
+    );
+
+    const cost = plan.identical
+      ? 'This wallet pays no dividend, so the two policies are the same policy.'
+      : `Spending the dividends rather than reinvesting them costs ${money(plan.extraPerMonth)} a month, or ${money(plan.extraPerYear)} a year, in extra contributions to arrive at the same place on the same date.`;
+
+    const provenance =
+      goalState.returnPct == null && twr.annualisedPct != null
+        ? `Price growth is this wallet's own, ${percent(twr.annualisedPct, { digits: 1 })} chain-linked across its purchases over ${twr.years.toFixed(1)} years, and the yield is ${percent(goal.yieldPct, { digits: 2 })}.`
+        : 'The rate is the one you set, with the yield taken off it for the cash case.';
 
     return el(
       'div',
       {},
-      el(
-        'div',
-        { class: 'income-summary' },
-        stat('Per month', currency(plan.perMonth, code), `for ${goalState.years} years`),
-        stat('Per year', currency(plan.perYear, code), 'paid at each year end'),
-        stat('Assumed return', percent(assumedReturn, { digits: 1 }), goalState.returnPct == null ? "this wallet's own" : 'set by you'),
-        stat('Already invested grows to', currency(plan.futureValueOfCurrent, code), `by year ${goalState.years}`),
-      ),
-      el(
-        'p',
-        { class: 'card-sub', style: { marginTop: '10px', marginBottom: 0 } },
-        `The monthly figure is not the yearly one over twelve: paid through the year rather than at the end of it, it compounds for longer, so less is needed. `,
-        goalState.returnPct == null && twr.annualisedPct != null
-          ? `The rate is this wallet's own, ${percent(twr.annualisedPct, { digits: 1 })} of price growth chain-linked across its purchases plus ${percent(goal.yieldPct, { digits: 2 })} of yield, measured over ${twr.years.toFixed(1)} years.`
-          : 'The rate is the one you set.',
-      ),
+      el('div', { class: 'table-scroll' }, table),
+      el('p', { class: 'card-sub', style: { marginTop: '10px', marginBottom: 0 }, text: cost }),
+      el('p', {
+        class: 'card-sub',
+        style: { marginTop: '6px', marginBottom: 0 },
+        text: `${provenance} The monthly figure is not the yearly one over twelve: paid through the year rather than at the end of it, it compounds for longer, so less is needed.`,
+      }),
     );
   };
 
@@ -1208,6 +1245,7 @@ function renderGoal(node, chartNode, wallet, data, income, mountChart, handlers,
           'Dividends are not income on top of that withdrawal, they are the part of it that arrives without selling, and the gap between the yield and the rate is what has to be sold. ' +
           "Today's yield is assumed to hold as the portfolio grows, which is the weakest part: a portfolio that grows mostly on price ends up yielding less and would need to sell more than this shows. " +
           'The contribution plan assumes the wallet keeps earning what it has earned so far, measured over a period short enough that it may not mean much, and that every payment is made on time and never missed. ' +
+          'Reinvesting is assumed to happen at no cost and with nothing lost to tax, which favours it slightly over the cash case in reality. ' +
           'Nothing here accounts for inflation, tax or a dividend being cut. In real terms a target fixed today buys less in thirty years than it does now.',
       }),
     ),

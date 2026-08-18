@@ -247,3 +247,46 @@ export function requiredContribution({ value, requiredValue, years, annualReturn
     shortfallAtTarget: gap,
   };
 }
+
+/**
+ * The same plan under both dividend policies.
+ *
+ * Reinvesting is not a small adjustment to the return, it is most of the
+ * return for anything with a real yield. A portfolio growing 1.6% a year on
+ * price and paying 3.3% compounds at 4.9% if the dividends go back in and at
+ * 1.6% if they are spent, which is a threefold difference in rate and a far
+ * larger one in what has to be contributed to hit a target by a fixed date.
+ *
+ * The two cases differ only in the rate, because that is the only thing
+ * reinvestment changes here: dividends taken as cash leave the portfolio and
+ * stop compounding, and dividends put back in are indistinguishable from
+ * growth. Nothing is double counted in either direction.
+ *
+ * @param {object} args
+ * @param {number} args.priceReturnPct  annual growth excluding dividends
+ * @param {number} args.yieldPct        annual dividends as a share of value
+ */
+export function buildContributionPlan({ value, requiredValue, years, priceReturnPct, yieldPct = 0 }) {
+  if (!Number.isFinite(priceReturnPct)) return null;
+
+  const reinvested = requiredContribution({
+    value,
+    requiredValue,
+    years,
+    annualReturnPct: priceReturnPct + yieldPct,
+  });
+  const spent = requiredContribution({ value, requiredValue, years, annualReturnPct: priceReturnPct });
+
+  if (!reinvested || !spent) return null;
+
+  return {
+    reinvested: { ...reinvested, annualReturnPct: priceReturnPct + yieldPct },
+    spent: { ...spent, annualReturnPct: priceReturnPct },
+    // What not reinvesting costs, which is the number the comparison exists to
+    // produce. Zero when the portfolio pays nothing, since then the two
+    // policies are the same policy.
+    extraPerMonth: Math.max(0, spent.perMonth - reinvested.perMonth),
+    extraPerYear: Math.max(0, spent.perYear - reinvested.perYear),
+    identical: yieldPct === 0,
+  };
+}

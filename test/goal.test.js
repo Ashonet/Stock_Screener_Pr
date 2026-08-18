@@ -10,7 +10,7 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { buildGoal, timeWeightedReturn, requiredContribution } from '../public/js/goal.js';
+import { buildGoal, timeWeightedReturn, requiredContribution, buildContributionPlan } from '../public/js/goal.js';
 
 const YEAR = 365.25 * 86_400_000;
 const now = Date.UTC(2026, 0, 1);
@@ -235,5 +235,44 @@ describe('requiredContribution', () => {
     assert.equal(requiredContribution({ value: 1, requiredValue: 100, years: 0, annualReturnPct: 5 }), null);
     assert.equal(requiredContribution({ value: 1, requiredValue: 0, years: 10, annualReturnPct: 5 }), null);
     assert.equal(requiredContribution({ value: 1, requiredValue: 100, years: 10, annualReturnPct: null }), null);
+  });
+});
+
+describe('buildContributionPlan', () => {
+  const base = { value: 16_000, requiredValue: 1_000_000, years: 30 };
+
+  test('reinvesting lowers what has to be contributed', () => {
+    const plan = buildContributionPlan({ ...base, priceReturnPct: 1.6, yieldPct: 3.3 });
+
+    assert.ok(plan.reinvested.perMonth < plan.spent.perMonth, 'reinvesting needs less in');
+    assert.ok(plan.extraPerMonth > 0);
+    assert.ok(Math.abs(plan.reinvested.annualReturnPct - 4.9) < 1e-9);
+    assert.ok(Math.abs(plan.spent.annualReturnPct - 1.6) < 1e-9);
+  });
+
+  test('the gap is the cost of spending the dividends', () => {
+    const plan = buildContributionPlan({ ...base, priceReturnPct: 1.6, yieldPct: 3.3 });
+    assert.ok(Math.abs(plan.extraPerMonth - (plan.spent.perMonth - plan.reinvested.perMonth)) < 1e-9);
+    assert.ok(Math.abs(plan.extraPerYear - (plan.spent.perYear - plan.reinvested.perYear)) < 1e-9);
+  });
+
+  test('a portfolio paying nothing makes the two policies identical', () => {
+    const plan = buildContributionPlan({ ...base, priceReturnPct: 7, yieldPct: 0 });
+
+    assert.equal(plan.identical, true);
+    assert.equal(plan.reinvested.perMonth, plan.spent.perMonth);
+    assert.equal(plan.extraPerMonth, 0);
+  });
+
+  test('reinvesting can clear the goal on its own while spending does not', () => {
+    const plan = buildContributionPlan({ value: 400_000, requiredValue: 1_000_000, years: 30, priceReturnPct: 0.5, yieldPct: 3.5 });
+
+    assert.equal(plan.reinvested.alreadyThere, true, 'compounds past the target unaided');
+    assert.equal(plan.spent.alreadyThere, false, 'but not with the dividends taken out');
+    assert.ok(plan.spent.perMonth > 0);
+  });
+
+  test('an unmeasurable return yields no plan rather than a guess', () => {
+    assert.equal(buildContributionPlan({ ...base, priceReturnPct: null, yieldPct: 3 }), null);
   });
 });

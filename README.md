@@ -263,7 +263,7 @@ the live-data dashboard, just without the screener.
 ### Tests and CI
 
 ```bash
-npm test          # 118 unit tests, no network, no database
+npm test          # 123 unit tests, no network, no database
 npm run warehouse # 50 dbt assertions against the committed raw layer
 npm run docs      # self-contained lineage site at warehouse/target/static_index.html
 ```
@@ -377,6 +377,14 @@ the contribution per month and per year that closes the gap, solved from
 yearly one over twelve, because twelve payments spread through the year
 compound for longer than one at the end of it, so both are computed on their
 own terms.
+
+The plan is given twice, **with the dividends reinvested and with them taken
+as cash**, because for anything with a real yield that choice is most of the
+answer rather than a detail. This wallet grows 1.6% a year on price and yields
+3.3%, so it compounds at 4.9% reinvested and at 1.6% spent, and over thirty
+years that is $1,166 a month against $2,122. The difference, what not
+reinvesting costs to arrive at the same place on the same date, is reported on
+its own line.
 
 The rate behind that is the wallet's own, and getting it honestly is the
 interesting part. The plain change in value is not a return, because the
