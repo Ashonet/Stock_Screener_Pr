@@ -294,18 +294,34 @@ async function loadMarket() {
       ...indices.map((index) =>
         el(
           'li',
-          { class: 'market-item' },
-          el('span', { class: 'market-label', text: index.label }),
-          el('span', {
-            class: 'market-value',
-            text: index.price == null ? DASH : ratio(index.price, { digits: index.symbol === '^TNX' ? 2 : 2 }),
-          }),
-          deltaNode(null, index.changePercent, 'USD', { size: 'small' }),
+          {},
+          // A button rather than a styled div: the strip is the fastest route
+          // into the index everything else is measured against, and a real
+          // button brings keyboard focus, Enter and Space with it.
+          el(
+            'button',
+            {
+              class: 'market-item',
+              type: 'button',
+              title: `Open ${index.label}`,
+              'aria-label': `Open ${index.label}`,
+              onclick: () => selectSymbol(index.symbol),
+            },
+            el('span', { class: 'market-label', text: index.label }),
+            el('span', {
+              class: 'market-value',
+              text: index.price == null ? DASH : ratio(index.price, { digits: 2 }),
+            }),
+            deltaNode(null, index.changePercent, 'USD', { size: 'small' }),
+          ),
         ),
       ),
     );
   } catch {
-    render(dom.marketStrip, el('li', { class: 'market-item' }, el('span', { class: 'market-label', text: 'Market data unavailable' })));
+    render(
+      dom.marketStrip,
+      el('li', {}, el('span', { class: 'market-item market-item-static' }, el('span', { class: 'market-label', text: 'Market data unavailable' }))),
+    );
   }
 }
 

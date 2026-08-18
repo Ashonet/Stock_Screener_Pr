@@ -360,11 +360,37 @@ button {
   align-items: baseline;
   gap: 8px;
   padding: 10px 16px;
+  border: 0;
   border-right: 1px solid var(--border);
   white-space: nowrap;
+  /* Reset the button back to the row it looks like, then let the states below
+     put the affordance back. */
+  width: 100%;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
 }
-.market-item:last-child {
+.market-list > li:last-child .market-item {
   border-right: 0;
+}
+.market-item:hover {
+  background: var(--wash);
+}
+.market-item:hover .market-label {
+  color: var(--text-primary);
+}
+.market-item:focus-visible {
+  outline: 2px solid var(--series-1);
+  outline-offset: -2px;
+}
+/* The "unavailable" row is a message, not a control. */
+.market-item-static {
+  cursor: default;
+}
+.market-item-static:hover {
+  background: none;
 }
 .market-label {
   color: var(--text-secondary);
