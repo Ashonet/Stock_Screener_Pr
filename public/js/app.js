@@ -679,10 +679,12 @@ function showStockView() {
 
 /** Exactly one pane visible; the nav highlight follows it. */
 function setVisibleView(view) {
-  dom.detail.hidden = view !== 'stock';
-  dom.walletView.hidden = view !== 'wallet';
-  dom.screenerView.hidden = view !== 'screener';
-  dom.navScreener.setAttribute('aria-current', String(view === 'screener'));
+  // Optional-chained throughout: a missing pane must not stop the others being
+  // shown, or one absent element blanks the whole app.
+  if (dom.detail) dom.detail.hidden = view !== 'stock';
+  if (dom.walletView) dom.walletView.hidden = view !== 'wallet';
+  if (dom.screenerView) dom.screenerView.hidden = view !== 'screener';
+  dom.navScreener?.setAttribute('aria-current', String(view === 'screener'));
 }
 
 /* ----------------------------------------------------------------- screener */
@@ -1832,21 +1834,69 @@ function startAutoRefresh() {
   window.addEventListener('scroll', hideTooltip, { passive: true });
 }
 
+/**
+ * Run one startup step in isolation.
+ *
+ * Startup used to be a bare sequence, so a single failure took out everything
+ * after it — and it failed silently, because nothing was watching. An
+ * unguarded `dom.navScreener.addEventListener(...)` sitting above `loadStock()`
+ * was enough: when the markup and the script disagreed about whether that
+ * element existed (a stale cached script against fresh HTML, or a half-applied
+ * deploy), init threw there and the detail panels simply never rendered. No
+ * error, no clue, just blank cards.
+ *
+ * Wiring the sidebar is not a precondition for showing a company, so a step
+ * that fails now reports itself and the rest still runs.
+ */
+function step(name, fn) {
+  try {
+    fn();
+  } catch (err) {
+    console.error(`[init] ${name} failed:`, err);
+    failedSteps.push(`${name}: ${err.message}`);
+  }
+}
+
+const failedSteps = [];
+
+/** A broken startup should say so rather than looking like empty data. */
+function reportStartupFailures() {
+  if (!failedSteps.length) return;
+  const banner = el('div', {
+    class: 'banner',
+    style: { margin: '12px 24px 0', display: 'block' },
+  });
+  banner.append(
+    el('strong', { text: 'Some of the interface failed to start. ' }),
+    el('span', { text: 'A hard reload (Ctrl+Shift+R) usually fixes it — the page and its scripts may be out of step. ' }),
+    el('span', { class: 'card-sub', text: failedSteps.join(' · ') }),
+  );
+  document.querySelector('.layout')?.before(banner);
+}
+
 function init() {
-  renderFilters();
-  renderListPicker();
-  renderWatchlist();
-  renderWalletList();
-  setupLists();
-  setupWallets();
-  setupTabs();
-  dom.navScreener.addEventListener('click', showScreenerView);
-  setupSearch();
-  setupTheme();
+  step('filters', renderFilters);
+  step('watchlist picker', renderListPicker);
+  step('watchlist', renderWatchlist);
+  step('wallet list', renderWalletList);
+  step('watchlist controls', setupLists);
+  step('wallet controls', setupWallets);
+  step('tabs', setupTabs);
+  step('screener nav', () => {
+    // Thrown rather than optional-chained: swallowing a missing element keeps
+    // the app alive but hides the fact that the markup and the script disagree,
+    // which is worth surfacing even though it is no longer fatal.
+    if (!dom.navScreener) throw new Error('#nav-screener is missing from the page');
+    dom.navScreener.addEventListener('click', showScreenerView);
+  });
+  step('search', setupSearch);
+  step('theme', setupTheme);
 
   loadMarket();
 
-  if (store.view === 'screener') {
+  // The main view is loaded outside the guarded steps: if this cannot run there
+  // is nothing to show, and the error belongs on screen rather than in a banner.
+  if (store.view === 'screener' && dom.screenerView) {
     showScreenerView();
   } else if (store.view === 'wallet' && activeWallet()) {
     setVisibleView('wallet');
@@ -1859,6 +1909,7 @@ function init() {
 
   loadWatchlistQuotes().then(loadSparklines);
   startAutoRefresh();
+  reportStartupFailures();
 }
 
 init();
