@@ -263,7 +263,7 @@ the live-data dashboard, just without the screener.
 ### Tests and CI
 
 ```bash
-npm test          # 109 unit tests, no network, no database
+npm test          # 118 unit tests, no network, no database
 npm run warehouse # 50 dbt assertions against the committed raw layer
 npm run docs      # self-contained lineage site at warehouse/target/static_index.html
 ```
@@ -370,6 +370,23 @@ yielding 1.2% drawn at 3% has to sell the other 1.8% every year; one yielding
 need half the portfolio they actually do, so the tab reports the gap between
 the rate and the yield at today's value and at the target, alongside the value
 at which dividends alone would cover it.
+
+It also answers what it takes to get there: a horizon of 1 to 50 years, and
+the contribution per month and per year that closes the gap, solved from
+`FV = PV(1+r)^n + PMT x ((1+r)^n - 1) / r`. The monthly figure is not the
+yearly one over twelve, because twelve payments spread through the year
+compound for longer than one at the end of it, so both are computed on their
+own terms.
+
+The rate behind that is the wallet's own, and getting it honestly is the
+interesting part. The plain change in value is not a return, because the
+series steps up whenever a holding joins. So it is **chain-linked**: the
+series is cut at every purchase, each stretch measured on its own, and the
+pieces multiplied together, which leaves the contribution jumps outside the
+product. On the wallet used while building this the raw change reads +353.8%
+and the time-weighted return is 1.6% a year. Yield is added back for a total
+return, since the value series is built from closes and has no dividends in
+it. The rate can be overridden.
 
 Growth since the first purchase is shown but **not annualised where holdings
 were bought later**. The wallet's series starts with the first holding alone

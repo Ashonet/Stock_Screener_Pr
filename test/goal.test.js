@@ -10,7 +10,7 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { buildGoal } from '../public/js/goal.js';
+import { buildGoal, timeWeightedReturn, requiredContribution } from '../public/js/goal.js';
 
 const YEAR = 365.25 * 86_400_000;
 const now = Date.UTC(2026, 0, 1);
@@ -156,5 +156,84 @@ describe('growth since the first purchase is not a return', () => {
 
     assert.ok(Math.abs(g.sinceStart.annualisedPct - 10) < 0.01);
     assert.equal(g.sinceStart.withContributions, false);
+  });
+});
+
+describe('timeWeightedReturn', () => {
+  const day = 86_400_000;
+  const t0 = Date.UTC(2024, 0, 1);
+  const pts = (values, step = 365.25 * day) => values.map((c, i) => ({ t: t0 + i * step, c }));
+
+  test('a contribution is not counted as a gain', () => {
+    // 100 grows to 110, then 100 is paid in (210), then it grows to 231.
+    // The return is 10% then 10%, so 21% total, not the 131% the raw change
+    // from 100 to 231 would suggest.
+    const points = [
+      { t: t0, c: 100 },
+      { t: t0 + 365.25 * day, c: 110 },
+      { t: t0 + 366 * day, c: 210 },
+      { t: t0 + 731 * day, c: 231 },
+    ];
+    const twr = timeWeightedReturn(points, [t0 + 366 * day]);
+
+    assert.ok(Math.abs(twr.totalPct - 21) < 0.01, `got ${twr.totalPct}`);
+    assert.ok(Math.abs(twr.annualisedPct - 10) < 0.2, `got ${twr.annualisedPct}`);
+  });
+
+  test('with no contributions it is just the change', () => {
+    const twr = timeWeightedReturn(pts([100, 121]), []);
+    assert.ok(Math.abs(twr.totalPct - 21) < 1e-9);
+    assert.ok(Math.abs(twr.annualisedPct - 21) < 0.01, 'one year, so the rate is the change');
+  });
+
+  test('no annualised rate under a year', () => {
+    const twr = timeWeightedReturn(pts([100, 110], 30 * day), []);
+    assert.ok(twr.totalPct > 0);
+    assert.equal(twr.annualisedPct, null);
+  });
+
+  test('too little to measure returns nothing rather than zero', () => {
+    assert.equal(timeWeightedReturn([], []).totalPct, null);
+    assert.equal(timeWeightedReturn([{ t: t0, c: 100 }], []).totalPct, null);
+  });
+});
+
+describe('requiredContribution', () => {
+  test('solves the payment that reaches the target', () => {
+    // 10,000 growing at 7% for 10 years reaches 19,672, leaving 80,328 of a
+    // 100,000 target to come from contributions.
+    const c = requiredContribution({ value: 10_000, requiredValue: 100_000, years: 10, annualReturnPct: 7 });
+
+    assert.ok(Math.abs(c.futureValueOfCurrent - 19_671.51) < 1, `got ${c.futureValueOfCurrent}`);
+    // Check it by replaying the annuity forward.
+    const fv = c.futureValueOfCurrent + c.perYear * ((1.07 ** 10 - 1) / 0.07);
+    assert.ok(Math.abs(fv - 100_000) < 1, `annual payments reach ${fv}`);
+  });
+
+  test('the monthly figure is less than a twelfth of the yearly one', () => {
+    // Paid through the year rather than at the end of it, so it compounds for
+    // longer and less is needed.
+    const c = requiredContribution({ value: 10_000, requiredValue: 100_000, years: 10, annualReturnPct: 7 });
+    assert.ok(c.perMonth * 12 < c.perYear, `${c.perMonth * 12} should undercut ${c.perYear}`);
+    assert.ok(c.perMonth * 12 > c.perYear * 0.9, 'but not by much');
+  });
+
+  test('a zero return divides the gap evenly rather than dividing by zero', () => {
+    const c = requiredContribution({ value: 0, requiredValue: 120_000, years: 10, annualReturnPct: 0 });
+    assert.equal(c.perYear, 12_000);
+    assert.equal(c.perMonth, 1000);
+  });
+
+  test('already on track reports nothing needed, not a negative payment', () => {
+    const c = requiredContribution({ value: 900_000, requiredValue: 1_000_000, years: 30, annualReturnPct: 7 });
+    assert.equal(c.alreadyThere, true);
+    assert.equal(c.perMonth, 0);
+    assert.equal(c.perYear, 0);
+  });
+
+  test('nonsensical inputs are refused', () => {
+    assert.equal(requiredContribution({ value: 1, requiredValue: 100, years: 0, annualReturnPct: 5 }), null);
+    assert.equal(requiredContribution({ value: 1, requiredValue: 0, years: 10, annualReturnPct: 5 }), null);
+    assert.equal(requiredContribution({ value: 1, requiredValue: 100, years: 10, annualReturnPct: null }), null);
   });
 });

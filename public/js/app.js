@@ -75,6 +75,8 @@ const STORE = {
   forecastYears: 'sd:forecastYears',
   goalTarget: 'sd:goalTarget',
   goalRate: 'sd:goalRate',
+  goalYears: 'sd:goalYears',
+  goalReturn: 'sd:goalReturn',
   period: 'sd:period',
 };
 const REFRESH_MS = 30_000;
@@ -143,7 +145,14 @@ const state = {
   // The withdrawal rate defaults to 3%, which is the convention the tab is
   // built around, but it is state rather than a constant because it is the
   // assumption the whole page rests on.
-  goal: { target: readStore(STORE.goalTarget, 30_000), rate: readStore(STORE.goalRate, 3) },
+  goal: {
+    target: readStore(STORE.goalTarget, 30_000),
+    rate: readStore(STORE.goalRate, 3),
+    years: readStore(STORE.goalYears, 20),
+    // Null means "use the rate this wallet has actually earned". Only set
+    // once someone overrides it.
+    returnPct: readStore(STORE.goalReturn, null),
+  },
   period: readStore(STORE.period, 'annual'),
   stock: null,
   quotes: new Map(),
@@ -785,6 +794,7 @@ const walletHandlers = {
   // valuation and income already in hand, so changing either needs no request.
   onGoalTarget: (value) => setGoal({ target: Math.max(0, Math.round(Number(value) || 0)) }),
   onGoalRate: (value) => setGoal({ rate: Math.min(10, Math.max(0.1, Number(value) || 3)) }),
+  onGoalYears: (value) => setGoal({ years: Math.min(50, Math.max(1, Math.round(Number(value) || 20))) }),
   onSelectSymbol: (symbol) => {
     addToList(symbol);
     renderWatchlist();
@@ -903,6 +913,8 @@ function setGoal(patch) {
   state.goal = { ...state.goal, ...patch };
   writeStore(STORE.goalTarget, state.goal.target);
   writeStore(STORE.goalRate, state.goal.rate);
+  writeStore(STORE.goalYears, state.goal.years);
+  writeStore(STORE.goalReturn, state.goal.returnPct);
   renderWalletView();
 }
 
