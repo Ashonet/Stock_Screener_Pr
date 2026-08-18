@@ -15,7 +15,7 @@
  */
 
 import { el, svg, render } from './dom.js';
-import { chartCard, niceTicks, showTooltip, hideTooltip, cssVar } from './charts.js';
+import { chartCard, columnChart, niceTicks, showTooltip, hideTooltip, cssVar } from './charts.js';
 import { axisDate, compact, currency, percent, shortDate } from './format.js';
 
 /** Categorical series tokens, in the order they are handed out. */
@@ -133,21 +133,247 @@ function comparePlot(width, height, { series, base, formatValue, ariaLabel }) {
   return node;
 }
 
-/* -------------------------------------------------------------------- view */
+/* ------------------------------------------------------------ grade study */
 
-export function renderCompare({ node, data, state, handlers }) {
-  const form = buildForm(state, handlers);
+const GRADE_BASIS = [
+  ['then', 'Grade known then', 'The grade each company held when the window opened. A strategy you could have run.'],
+  ['now', "Today's grades", 'Today’s grades applied backwards. Not a strategy: a company earns its grade partly by having done well over the very period being measured.'],
+];
+
+/**
+ * Equal-weight portfolios by grade, over each window.
+ *
+ * Mean and median are both drawn, and the gap between them is most of what
+ * there is to see: one holding up 39x lifts a sixty-stock equal-weight basket
+ * by tens of points, so the mean is what the portfolio really earned while the
+ * median is what its typical member did. Neither alone is the answer.
+ */
+function renderGradeStudy({ node, data, state, handlers }) {
+  const basisPicker = el(
+    'div',
+    { class: 'segmented' },
+    ...GRADE_BASIS.map(([key, label, title]) =>
+      el('button', {
+        type: 'button',
+        text: label,
+        title,
+        'aria-pressed': String(state.basis === key),
+        onclick: () => key !== state.basis && handlers.onBasis(key),
+      }),
+    ),
+  );
 
   if (data?.error) {
-    render(node, form, el('p', { class: 'error-note', text: data.error }));
+    render(node, el('div', { class: 'card' }, basisPicker, el('p', { class: 'error-note', text: data.error })));
     return;
   }
   if (!data) {
-    render(node, form, el('p', { class: 'empty', text: 'Loading.' }));
+    render(
+      node,
+      el(
+        'div',
+        { class: 'card' },
+        basisPicker,
+        el('p', { class: 'empty', text: 'Grading every company at every past year end. This takes a moment the first time.' }),
+      ),
+    );
+    return;
+  }
+
+  const windows = data.windows ?? [];
+  const usable = windows.filter((w) => w.available);
+  const active = usable.find((w) => w.years === state.years) ?? usable[0];
+
+  const windowPicker = el(
+    'div',
+    { class: 'segmented' },
+    ...windows.map((w) =>
+      el('button', {
+        type: 'button',
+        text: `${w.years}y`,
+        disabled: w.available ? null : '',
+        title: w.available ? `From ${w.start}` : w.reason,
+        'aria-pressed': String(active?.years === w.years),
+        onclick: () => w.available && handlers.onYears(w.years),
+      }),
+    ),
+  );
+
+  const controls = el(
+    'div',
+    { class: 'card' },
+    el(
+      'div',
+      { class: 'card-head' },
+      el('h3', { class: 'card-title', text: 'Equal-weight portfolios by grade' }),
+      el('span', { class: 'card-sub', style: { marginBottom: 0 }, text: `${data.graded} companies graded` }),
+    ),
+    el('div', { class: 'grade-controls' }, basisPicker, windowPicker),
+    state.basis === 'now'
+      ? el('p', {
+          class: 'banner-inline',
+          text: "Today's grades applied backwards. A company earns its grade partly by having done well over the period being measured, so this is not a strategy anyone could have run.",
+        })
+      : null,
+  );
+
+  if (!active) {
+    render(
+      node,
+      controls,
+      el(
+        'div',
+        { class: 'card' },
+        el('p', {
+          class: 'empty',
+          text: 'No window can be studied yet. The warehouse holds six years of prices, and a grade has to have been knowable before the window opened.',
+        }),
+      ),
+    );
+    return;
+  }
+
+  /* -------------------------------------------------------------- chart */
+
+  const meanColour = cssVar('--series-1');
+  const medianColour = cssVar('--series-2');
+  const chartHost = el('div', { class: 'card card-chart' });
+  const tableHost = el('div', { class: 'card' });
+
+  render(node, controls, chartHost, tableHost);
+
+  chartCard(chartHost, {
+    title: `Return by grade over ${active.years} year${active.years === 1 ? '' : 's'}`,
+    subtitle: `from ${active.start} · equal money in each member, held · universe average ${signed(active.universeMean)}`,
+    height: 320,
+    legend: [
+      { name: 'Portfolio (mean)', color: meanColour },
+      { name: 'Typical member (median)', color: medianColour },
+    ],
+    draw: (width, height) =>
+      columnChart(width, height, {
+        categories: active.rows.map((r) => ({ label: r.grade, tooltipLabel: `Grade ${r.grade} (${r.count} companies)` })),
+        series: [
+          { key: 'mean', name: 'Portfolio (mean)', color: meanColour, values: active.rows.map((r) => r.totalReturn) },
+          { key: 'median', name: 'Typical member (median)', color: medianColour, values: active.rows.map((r) => r.medianReturn) },
+        ],
+        formatValue: (v) => signed(v),
+        ariaLabel: `Total return by grade over ${active.years} years`,
+      }),
+    table: {
+      columns: ['Grade', 'Companies', 'Portfolio', 'Median'],
+      rows: active.rows.map((r) => [r.grade, String(r.count), signed(r.totalReturn), signed(r.medianReturn)]),
+    },
+  });
+
+  /* -------------------------------------------------------------- table */
+
+  render(
+    tableHost,
+    el(
+      'div',
+      { class: 'card-head' },
+      el('h3', { class: 'card-title', text: 'Every grade' }),
+      el('span', {
+        class: 'card-sub',
+        style: { marginBottom: 0 },
+        text: `${active.topGrade} less ${active.bottomGrade}: ${signed(active.spread)} points`,
+      }),
+    ),
+    el(
+      'div',
+      { class: 'table-scroll' },
+      el(
+        'table',
+        { class: 'data' },
+        el(
+          'thead',
+          {},
+          el(
+            'tr',
+            {},
+            ...['Grade', 'Companies', 'Portfolio', 'A year', 'Median', 'Up', 'Best', 'Worst'].map((label) =>
+              el('th', { scope: 'col', text: label }),
+            ),
+          ),
+        ),
+        el(
+          'tbody',
+          {},
+          ...active.rows.map((r) =>
+            el(
+              'tr',
+              {},
+              el('th', { scope: 'row', text: r.grade }),
+              el('td', { text: String(r.count) }),
+              el('td', { text: signed(r.totalReturn) }),
+              el('td', { text: r.annualisedReturn == null ? '' : signed(r.annualisedReturn) }),
+              el('td', { text: signed(r.medianReturn) }),
+              el('td', { text: `${r.positive}/${r.count}` }),
+              el('td', {}, el('span', { class: 'muted', text: `${r.best.symbol} ` }), signed(r.best.totalReturn)),
+              el('td', {}, el('span', { class: 'muted', text: `${r.worst.symbol} ` }), signed(r.worst.totalReturn)),
+            ),
+          ),
+        ),
+      ),
+    ),
+    el(
+      'details',
+      { class: 'forecast-assumptions' },
+      el('summary', { text: 'How to read this' }),
+      el('p', {
+        text:
+          'Equal money into every company holding the grade, bought once and never rebalanced, so the portfolio column is the mean of its members and that is genuinely what the basket returned. ' +
+          'The median says what its typical member did, and where the two diverge sharply a handful of holdings are carrying the result. ' +
+          'The universe is the index as it stands today, so companies dropped along the way are missing and removals skew toward failures: every grade is flattered, the low ones most. ' +
+          'Six years of one market regime is not evidence about a scoring method, and returns here are total returns with distributions included.',
+      }),
+    ),
+  );
+}
+
+/* -------------------------------------------------------------------- view */
+
+const COMPARE_TABS = [
+  ['tickers', 'Tickers'],
+  ['grades', 'By grade'],
+];
+
+export function renderCompare({ node, data, state, handlers, grades }) {
+  const tabs = el(
+    'div',
+    { class: 'tabs', role: 'tablist', 'aria-label': 'Compare sections' },
+    ...COMPARE_TABS.map(([key, label]) =>
+      el('button', {
+        class: 'tab',
+        type: 'button',
+        role: 'tab',
+        text: label,
+        'aria-selected': String(state.tab === key),
+        onclick: () => key !== state.tab && handlers.onTab(key),
+      }),
+    ),
+  );
+
+  if (state.tab === 'grades') {
+    const body = el('div', {});
+    render(node, tabs, body);
+    renderGradeStudy({ node: body, data: grades, state: state.grades, handlers });
+    return;
+  }
+
+  const form = buildForm(state, handlers);
+
+  if (data?.error) {
+    render(node, tabs, form, el('p', { class: 'error-note', text: data.error }));
+    return;
+  }
+  if (!data) {
+    render(node, tabs, form, el('p', { class: 'empty', text: 'Loading.' }));
     return;
   }
   if (!data.series?.length) {
-    render(node, form, el('p', { class: 'empty', text: 'Nothing to compare. Add at least two tickers with overlapping history.' }));
+    render(node, tabs, form, el('p', { class: 'empty', text: 'Nothing to compare. Add at least two tickers with overlapping history.' }));
     return;
   }
 
@@ -169,7 +395,7 @@ export function renderCompare({ node, data, state, handlers }) {
   const chartHost = el('div', { class: 'card card-chart' });
   const summary = el('div', { class: 'card' });
 
-  render(node, form, chartHost, summary);
+  render(node, tabs, form, chartHost, summary);
 
   chartCard(chartHost, {
     title: totalReturn ? 'Growth of $10,000, dividends reinvested' : 'Growth of $10,000, price only',

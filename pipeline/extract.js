@@ -37,8 +37,17 @@ const RAW_DIR = join(ROOT, 'warehouse', 'raw');
 const STATE_PATH = join(ROOT, 'pipeline', 'state.json');
 const UNIVERSE_PATH = join(ROOT, 'pipeline', 'universe.json');
 
-/** Price history to pull on a cold start. */
-const BACKFILL_YEARS = 6;
+/**
+ * Price history to pull on a cold start.
+ *
+ * Six years covers the dashboard's ranges and keeps a cold start to about
+ * twenty-five minutes. The grade study wants more: its ten and twenty year
+ * windows cannot be computed from six years of prices at all, and report
+ * themselves unavailable rather than quietly measuring a shorter period. Raise
+ * it with BACKFILL_YEARS=20 and re-run `npm run extract:full` to fill them in,
+ * at roughly three times the rows and the runtime.
+ */
+const BACKFILL_YEARS = Math.min(30, Math.max(1, Number(process.env.BACKFILL_YEARS) || 6));
 
 /**
  * Re-fetch this much already-loaded history on every incremental run.

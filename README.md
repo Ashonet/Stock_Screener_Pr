@@ -263,7 +263,7 @@ the live-data dashboard, just without the screener.
 ### Tests and CI
 
 ```bash
-npm test          # 123 unit tests, no network, no database
+npm test          # 135 unit tests, no network, no database
 npm run warehouse # 50 dbt assertions against the committed raw layer
 npm run docs      # self-contained lineage site at warehouse/target/static_index.html
 ```
@@ -418,6 +418,32 @@ and 40% with distributions, so **90% of its return is the dividend**, against
 0.5% of NVIDIA's. `adjClose` is adjusted for splits and distributions and
 `close` for splits only, so running both through the same rebasing gives the
 split exactly, with no reinvestment model of ours to be wrong about.
+
+### Does the score predict anything?
+
+The Compare view's second tab answers the question the rest of the project
+invites: split the same money evenly across every company holding a grade, hold
+it, and see where each grade's portfolio ends up. Windows of 1, 3, 5, 10 and 20
+years, mean and median side by side.
+
+The grade used to form the portfolio is the whole methodology, so it is a
+control rather than a default. **Grade known then** uses the grade each company
+held when the window opened, which is a strategy that could have been run.
+**Today's grades** applies current grades backwards, which is not a strategy and
+cannot be: a company earns an A partly by having done well over the very period
+being measured. The tab says so above the numbers rather than below them.
+
+The finding so far is unflattering and is published as such. Over one year the
+ladder inverts: D and F portfolios beat A+. Over five years on today's grades
+the medians order roughly as intended (A+ +62.8%, F +20.3%) while the means do
+not, because equal-weight means are carried by a few holdings, and one 39x
+position lifts a sixty-stock basket by tens of points on its own. Both are
+reported for exactly that reason: the mean is what the basket really earned and
+the median is what its typical member did.
+
+Six years of one market regime is not evidence about a scoring method, the
+universe is today's index so departed companies are missing, and the low grades
+are flattered most by that. All three are stated on the card.
 
 **Market map**: the index as a squarified treemap, grouped by sector and sized
 by market cap, shaded either by day change or by quality score. The layout is

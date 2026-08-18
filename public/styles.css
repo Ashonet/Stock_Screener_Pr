@@ -2037,3 +2037,28 @@ table.screener thead th:first-child {
   font-variant-numeric: tabular-nums;
   color: var(--text-muted);
 }
+
+/* ------------------------------------------------------------ grade study */
+
+.grade-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 4px 0 2px;
+}
+.segmented button[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+/* A caveat that has to be read before the numbers, not after them. Bordered
+   rather than coloured, so it does not read as a status. */
+.banner-inline {
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--wash);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}

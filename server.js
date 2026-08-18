@@ -21,6 +21,7 @@ import { parseHoldings, buildValueSeries, priceHoldings } from './lib/portfolio.
 import { buildIncome, buildIncomeProjection } from './lib/income.js';
 import { buildComparison } from './lib/compare.js';
 import { buildScoreHistory } from './lib/scoreHistory.js';
+import { gradePortfolios, gradesAsOf, GRADE_ORDER } from './lib/gradeStudy.js';
 import { cached, stats as cacheStats } from './lib/cache.js';
 import * as warehouse from './lib/warehouse.js';
 
@@ -82,6 +83,11 @@ function cleanSymbol(raw) {
 
 function symbolList(raw, max = 60) {
   return [...new Set(String(raw ?? '').split(',').map(cleanSymbol).filter(Boolean))].slice(0, max);
+}
+
+/** `2024-01-31` plus n days, as an ISO date. */
+function addDays(isoDate, days) {
+  return new Date(Date.parse(`${isoDate}T00:00:00Z`) + days * 86_400_000).toISOString().slice(0, 10);
 }
 
 /* ------------------------------------------------------------------- routes */
@@ -513,6 +519,97 @@ const routes = {
     }
 
     return { ...comparison, years, unavailable, requested: symbols };
+  },
+
+  /**
+   * Equal-weight portfolios by grade, over several windows.
+   *
+   * The heavy part is grading 500 companies at every past reporting date, so
+   * the timelines are built once and cached for six hours. They only change
+   * when the pipeline lands new statements, which is nightly at most.
+   */
+  async '/api/compare/grades'(url) {
+    if (!warehouse.isReady()) {
+      throw new UpstreamError('The warehouse has not been built yet, run the pipeline first.', 503);
+    }
+
+    const basis = url.searchParams.get('basis') === 'now' ? 'now' : 'then';
+    const windows = [1, 3, 5, 10, 20];
+
+    // Grade timelines: every company, graded at each of its past year ends by
+    // the same scorer the rest of the app uses.
+    const timelines = await cached('grades:timelines', 6 * 60 * 60_000, async () => {
+      const { securities, financials, dividends } = await warehouse.scoringInputs();
+      const closes = await warehouse.monthlyHistory(
+        securities.map((s) => s.symbol),
+        { years: 25 },
+      );
+
+      const out = new Map();
+      for (const security of securities) {
+        const rows = financials.get(security.symbol);
+        if (!rows?.length) continue;
+        const history = buildScoreHistory({
+          summary: { summaryProfile: { industry: security.industry } },
+          financials: rows,
+          dividendPayments: dividends.get(security.symbol) ?? [],
+          closes: closes.get(security.symbol) ?? [],
+          periodType: 'annual',
+        });
+        // Oldest first, so "the latest period that had closed" is a scan.
+        if (history.periods.length) out.set(security.symbol, [...history.periods].reverse());
+      }
+      return out;
+    });
+
+    const current = await cached('grades:current', 60 * 60_000, async () => {
+      const rows = await warehouse.screener();
+      return new Map(rows.filter((r) => r.grade).map((r) => [r.symbol, r.grade]));
+    });
+
+    const today = new Date();
+    const results = [];
+
+    for (const years of windows) {
+      const start = new Date(Date.UTC(today.getUTCFullYear() - years, today.getUTCMonth(), today.getUTCDate()))
+        .toISOString()
+        .slice(0, 10);
+
+      const returns = await cached(`grades:returns:${start}`, 6 * 60 * 60_000, () => warehouse.returnsSince(start));
+
+      // A window the price history does not reach is reported as such rather
+      // than quietly computed over whatever fraction of it exists, which would
+      // label a two-year return as twenty.
+      const covered = returns.filter((r) => r.startDate <= addDays(start, 10));
+      if (covered.length < 20) {
+        results.push({
+          years,
+          available: false,
+          reason: 'price history does not reach back this far',
+          symbolsWithPrices: covered.length,
+        });
+        continue;
+      }
+
+      const grades = basis === 'now' ? current : gradesAsOf(timelines, start);
+      const study = gradePortfolios(covered, grades, years);
+
+      results.push({
+        years,
+        available: study.rows.length > 0,
+        reason: study.rows.length ? null : 'no company could be graded as at this date',
+        start,
+        ...study,
+      });
+    }
+
+    return {
+      basis,
+      windows: results,
+      gradeOrder: GRADE_ORDER,
+      graded: timelines.size,
+      asOf: today.toISOString().slice(0, 10),
+    };
   },
 
   async '/api/market'() {

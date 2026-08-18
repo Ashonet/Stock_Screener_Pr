@@ -164,7 +164,9 @@ const state = {
   mapData: null,
   map: { mode: 'change' },
   compareData: null,
-  compare: { symbols: [], years: 10, mode: 'total' },
+  compare: { symbols: [], years: 10, mode: 'total', tab: 'tickers', grades: { basis: 'then', years: 3 } },
+  gradeStudy: null,
+  gradeToken: 0,
   editingHolding: null,
   loading: false,
   requestToken: 0,
@@ -985,6 +987,7 @@ function renderCompareView() {
   renderCompare({
     node: dom.compareCard,
     data: state.compareData,
+    grades: state.gradeStudy,
     state: state.compare,
     handlers: {
       onSymbols: (raw) => {
@@ -1011,8 +1014,38 @@ function renderCompareView() {
         state.compare.mode = mode;
         renderCompareView();
       },
+      onTab: (tab) => {
+        state.compare.tab = tab;
+        renderCompareView();
+        if (tab === 'grades' && !state.gradeStudy) loadGradeStudy();
+      },
+      // The basis changes which grade forms each portfolio, so it needs the
+      // server again. The window does not: every window comes back together.
+      onBasis: (basis) => {
+        state.compare.grades.basis = basis;
+        state.gradeStudy = null;
+        renderCompareView();
+        loadGradeStudy();
+      },
+      onYears: (years) => {
+        state.compare.grades.years = years;
+        renderCompareView();
+      },
     },
   });
+}
+
+async function loadGradeStudy() {
+  const token = ++state.gradeToken;
+  try {
+    const data = await api.fetchGradeStudy(state.compare.grades.basis);
+    if (token !== state.gradeToken) return;
+    state.gradeStudy = data;
+  } catch (err) {
+    if (token !== state.gradeToken) return;
+    state.gradeStudy = { error: err.message };
+  }
+  renderCompareView();
 }
 
 async function loadCompare() {
