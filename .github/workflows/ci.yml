@@ -19,19 +19,45 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: '22'
 
       - name: Install dependencies
         run: npm ci
 
+      # The spec reporter rather than the default TAP: a TAP failure buries the
+      # assertion under a hundred lines of passing output. Failures are also
+      # echoed as workflow annotations and into the job summary, so the reason a
+      # run went red is visible on the run page without opening the log.
       - name: Unit tests
-        run: node --test test/
+        shell: bash
+        run: |
+          node --version
+          # GitHub runs `shell: bash` with -e, which would abort here on the
+          # first failing test and skip the reporting below. Disabled around the
+          # run so the failures actually get surfaced, then the real exit code
+          # is returned at the end.
+          set +e
+          node --test --test-reporter=spec test/ 2>&1 | tee test-output.txt
+          status=${PIPESTATUS[0]}
+          set -e
+          if [ $status -ne 0 ]; then
+            {
+              echo "### Unit test failures"
+              echo '```'
+              grep -E "not ok|AssertionError|Error:|✖" test-output.txt | head -40
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+            grep -E "not ok|AssertionError|Error:" test-output.txt | head -20 | while IFS= read -r line; do
+              echo "::error::${line}"
+            done
+          fi
+          exit $status
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
           cache: pip
@@ -47,7 +73,7 @@ jobs:
 
       - name: Upload dbt artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: dbt-target
           path: warehouse/target/
