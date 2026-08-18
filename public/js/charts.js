@@ -452,6 +452,26 @@ export function areaChart(width, height, opts) {
   return node;
 }
 
+/**
+ * How many categories to skip between x labels so they do not collide.
+ *
+ * A label per band is fine for four fiscal years and unreadable for forty-three
+ * months: at ~16px a band the text runs into its neighbours and the axis turns
+ * to mush. Width is estimated at ~6.2px per character, the same heuristic the
+ * bar value labels use, plus a small gutter so adjacent labels do not touch.
+ *
+ * Callers apply the stride from the RIGHT, so the most recent period is always
+ * labelled rather than being left off by one. Nothing is lost by thinning:
+ * every band keeps its hit target and tooltip, and the table twin carries all
+ * of them.
+ */
+export function axisLabelStride(labels, band) {
+  if (!(band > 0)) return 1;
+  const longest = labels.reduce((n, label) => Math.max(n, String(label ?? '').length), 0);
+  if (!longest) return 1;
+  return Math.max(1, Math.ceil((longest * 6.2 + 10) / band));
+}
+
 /* ------------------------------------------------------------- column chart */
 
 /**
@@ -508,6 +528,8 @@ export function columnChart(width, height, opts) {
 
   const band = plotW / categories.length;
   const GAP = 2; // the surface gap does the separating, never a stroke
+
+  const labelStride = axisLabelStride(categories.map((c) => c.label), band);
   const groupWidth = Math.min(band - 14, 24 * series.length + GAP * (series.length - 1));
   const barWidth = Math.max(3, (groupWidth - GAP * (series.length - 1)) / series.length);
 
@@ -543,10 +565,15 @@ export function columnChart(width, height, opts) {
         const fits = text.length * 6.2 <= Math.max(barWidth + GAP + 26, 52);
         if (fits) {
           const above = value >= 0;
+          // The last bar sits against the right edge, and pad.right is only
+          // wide enough for the axis itself, so a centred label on it would
+          // hang off the viewBox and be cut in half. Clamped to stay inside.
+          const half = (text.length * 6.2) / 2;
+          const centre = bx + barWidth / 2;
           node.append(
             svg('text', {
               class: 'mark-label',
-              x: bx + barWidth / 2,
+              x: Math.min(Math.max(centre, pad.left + half), width - half),
               y: above ? Math.max(11, y(value) - 7) : y(value) + 14,
               'text-anchor': 'middle',
               text,
@@ -556,16 +583,18 @@ export function columnChart(width, height, opts) {
       }
     });
 
-    /* x tick */
-    node.append(
-      svg('text', {
-        class: 'axis-text',
-        x: pad.left + band * ci + band / 2,
-        y: pad.top + plotH + 18,
-        'text-anchor': 'middle',
-        text: category.label,
-      }),
-    );
+    /* x tick, on the stride that fits */
+    if ((categories.length - 1 - ci) % labelStride === 0) {
+      node.append(
+        svg('text', {
+          class: 'axis-text',
+          x: pad.left + band * ci + band / 2,
+          y: pad.top + plotH + 18,
+          'text-anchor': 'middle',
+          text: category.label,
+        }),
+      );
+    }
 
     /* the band is the hit target, so the pointer never has to find a thin bar */
     const hit = svg('rect', {
