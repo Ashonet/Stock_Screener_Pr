@@ -26,3 +26,4 @@ export const fetchMarket = (opts) => get('/api/market', {}, opts).then((r) => r.
 export const fetchPortfolio = (holdings, range, opts) => get('/api/portfolio', { holdings, range }, opts);
 export const fetchScreener = (basis, sector, opts) => get('/api/screener', { basis, sector }, opts);
 export const fetchHealth = (opts) => get('/api/health', {}, opts);
+export const fetchMap = (opts) => get('/api/map', {}, opts);

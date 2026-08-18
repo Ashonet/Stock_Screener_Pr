@@ -26,6 +26,7 @@ import {
 } from './store.js';
 import { renderWallet } from './wallet.js';
 import { renderScreener } from './screener.js';
+import { renderMap } from './map.js';
 import { chartCard, areaChart, columnChart, sparkline, dataTable, cssVar, hideTooltip } from './charts.js';
 import {
   ARROW,
@@ -119,6 +120,8 @@ const state = {
   walletData: null,
   screenerData: null,
   screener: { sortKey: 'overall_score', sortDir: 'desc', basis: 'all', sector: 'all' },
+  mapData: null,
+  map: { mode: 'change' },
   editingHolding: null,
   loading: false,
   requestToken: 0,
@@ -151,6 +154,9 @@ const dom = {
   listEdit: document.getElementById('list-edit'),
   listForm: document.getElementById('list-form'),
   navScreener: document.getElementById('nav-screener'),
+  navMap: document.getElementById('nav-map'),
+  mapView: document.getElementById('map-view'),
+  mapCard: document.getElementById('map-card'),
   screenerCount: document.getElementById('screener-count'),
   screenerView: document.getElementById('screener-view'),
   screenerCard: document.getElementById('screener-card'),
@@ -842,7 +848,46 @@ function setVisibleView(view) {
   if (dom.detail) dom.detail.hidden = view !== 'stock';
   if (dom.walletView) dom.walletView.hidden = view !== 'wallet';
   if (dom.screenerView) dom.screenerView.hidden = view !== 'screener';
+  if (dom.mapView) dom.mapView.hidden = view !== 'map';
   dom.navScreener?.setAttribute('aria-current', String(view === 'screener'));
+  dom.navMap?.setAttribute('aria-current', String(view === 'map'));
+}
+
+/* --------------------------------------------------------------- market map */
+
+function renderMapView() {
+  renderMap({
+    node: dom.mapCard,
+    data: state.mapData,
+    state: state.map,
+    handlers: {
+      onSelectSymbol: (symbol) => selectSymbol(symbol),
+      onMode: (mode) => {
+        state.map.mode = mode;
+        renderMapView();
+      },
+    },
+  });
+}
+
+async function loadMap() {
+  try {
+    state.mapData = await api.fetchMap();
+  } catch (err) {
+    state.mapData = { error: err.message };
+  }
+  renderMapView();
+}
+
+function showMapView() {
+  store.view = 'map';
+  saveView();
+  clearSymbolFromUrl();
+  setVisibleView('map');
+  renderWatchlist();
+  renderWalletList();
+  renderMapView();
+  if (!state.mapData) loadMap();
 }
 
 /* ----------------------------------------------------------------- screener */
@@ -2087,6 +2132,10 @@ function init() {
   step('watchlist controls', setupLists);
   step('wallet controls', setupWallets);
   step('tabs', setupTabs);
+  step('map nav', () => {
+    if (!dom.navMap) throw new Error('#nav-map is missing from the page');
+    dom.navMap.addEventListener('click', showMapView);
+  });
   step('screener nav', () => {
     // Thrown rather than optional-chained: swallowing a missing element keeps
     // the app alive but hides the fact that the markup and the script disagree,
@@ -2117,6 +2166,8 @@ function init() {
   if (linked && dom.detail) {
     showStockView();
     loadStock();
+  } else if (store.view === 'map' && dom.mapView) {
+    showMapView();
   } else if (store.view === 'wallet' && activeWallet()) {
     setVisibleView('wallet');
     renderWalletView();

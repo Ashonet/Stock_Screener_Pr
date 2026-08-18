@@ -100,8 +100,11 @@ export function loadStore() {
   store.activeWalletId = store.wallets.some((w) => w.id === activeWallet) ? activeWallet : store.wallets[0]?.id ?? null;
 
   const view = read(KEYS.view, 'stock');
-  store.view =
-    view === 'screener' ? 'screener' : view === 'wallet' && store.activeWalletId ? 'wallet' : 'stock';
+  store.view = ['screener', 'map'].includes(view)
+    ? view
+    : view === 'wallet' && store.activeWalletId
+      ? 'wallet'
+      : 'stock';
 
   return store;
 }

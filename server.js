@@ -123,6 +123,31 @@ const routes = {
     };
   },
 
+  /** Treemap data: market cap for size, the last session's move for colour. */
+  async '/api/map'() {
+    if (!warehouse.isReady()) {
+      throw new UpstreamError('The warehouse has not been built yet — run the pipeline first.', 503);
+    }
+    const rows = await warehouse.marketMap();
+
+    // Grouped server-side so the client receives the shape it draws, rather
+    // than re-deriving the same grouping on every repaint.
+    const sectors = new Map();
+    for (const row of rows) {
+      if (!sectors.has(row.sector)) sectors.set(row.sector, { sector: row.sector, marketCap: 0, children: [] });
+      const group = sectors.get(row.sector);
+      group.marketCap += row.market_cap ?? 0;
+      group.children.push(row);
+    }
+
+    return {
+      sectors: [...sectors.values()].sort((a, b) => b.marketCap - a.marketCap),
+      total: rows.length,
+      totalMarketCap: rows.reduce((sum, r) => sum + (r.market_cap ?? 0), 0),
+      asOf: rows[0]?.trade_date ?? null,
+    };
+  },
+
   async '/api/sectors'() {
     if (!warehouse.isReady()) throw new UpstreamError('The warehouse has not been built yet.', 503);
     return { sectors: await warehouse.sectorSummary() };

@@ -1781,3 +1781,57 @@ table.screener thead th:first-child {
     display: none;
   }
 }
+
+/* ------------------------------------------------------- market map ---- */
+
+.map-frame {
+  width: 100%;
+  min-height: 420px;
+}
+.map-frame svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.map-sector-label {
+  fill: var(--text-secondary);
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+/* Tile text sits on a coloured fill, so it takes the fill's own contrast rather
+   than a text token — the one documented exception to text wearing ink colours. */
+.map-symbol {
+  fill: var(--text-primary);
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 700;
+  pointer-events: none;
+}
+.map-value {
+  fill: var(--text-secondary);
+  font-family: var(--font);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+.map-tile {
+  cursor: pointer;
+}
+.map-tile rect {
+  transition: opacity 90ms ease;
+}
+.map-tile:hover rect {
+  opacity: 0.78;
+}
+.map-tile:focus-visible {
+  outline: none;
+}
+.map-tile:focus-visible rect {
+  stroke: var(--text-primary);
+  stroke-width: 2;
+}
