@@ -1631,3 +1631,8 @@ table.screener thead th:first-child {
 table.screener thead th:first-child {
   z-index: 2;
 }
+
+/* An unpopulated count badge should not render as an empty grey blob. */
+.pill:empty {
+  display: none;
+}
