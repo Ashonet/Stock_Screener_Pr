@@ -1688,3 +1688,55 @@ table.screener thead th:first-child {
   border-color: color-mix(in srgb, var(--down-text) 45%, transparent);
   background: none;
 }
+
+/* --------------------------------------------------- nav & empty states ---- */
+
+.nav-label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.nav-icon {
+  width: 15px;
+  height: 15px;
+  color: var(--series-1);
+  flex-shrink: 0;
+}
+
+/* An empty state should offer the action, not just report the absence. */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 16px;
+}
+.empty-state p {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.watchlist-hint strong {
+  color: var(--text-secondary);
+  font-weight: 700;
+}
+
+/* The search field advertises its shortcut. */
+.search-kbd {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 2px 6px;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--wash);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  pointer-events: none;
+}
+.search input:focus ~ .search-kbd {
+  display: none;
+}

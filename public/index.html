@@ -46,6 +46,7 @@
           aria-controls="search-results"
           aria-autocomplete="list"
         />
+        <kbd class="search-kbd">Ctrl K</kbd>
         <ul id="search-results" class="search-results" role="listbox" aria-label="Search results" hidden></ul>
       </div>
 
@@ -73,7 +74,12 @@
       <aside class="sidebar">
         <section class="panel">
           <button id="nav-screener" class="nav-item" type="button">
-            <span>Screener</span>
+            <span class="nav-label">
+              <svg class="nav-icon" viewBox="0 0 20 20" aria-hidden="true">
+                <path d="M3 5h14M6 10h8M9 15h2" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+              Screener
+            </span>
             <span id="screener-count" class="pill"></span>
           </button>
         </section>
@@ -89,7 +95,7 @@
           </div>
           <div id="list-form" class="inline-form" hidden></div>
           <ul id="watchlist" class="watchlist-list"></ul>
-          <p class="watchlist-hint">Search above to add a ticker.</p>
+          <p class="watchlist-hint">Use <strong>+</strong> to add a ticker, or search above to look one up.</p>
         </section>
 
         <section class="panel" aria-labelledby="wallets-heading">

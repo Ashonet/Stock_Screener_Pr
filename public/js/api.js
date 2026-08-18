@@ -25,3 +25,4 @@ export const fetchStock = (symbol, range, period, opts) => get('/api/stock', { s
 export const fetchMarket = (opts) => get('/api/market', {}, opts).then((r) => r.indices);
 export const fetchPortfolio = (holdings, range, opts) => get('/api/portfolio', { holdings, range }, opts);
 export const fetchScreener = (basis, sector, opts) => get('/api/screener', { basis, sector }, opts);
+export const fetchHealth = (opts) => get('/api/health', {}, opts);

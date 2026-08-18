@@ -624,7 +624,31 @@ function tickerForm(node) {
 /** Sidebar wallet rows, valued from the quotes already on hand. */
 function renderWalletList() {
   if (!store.wallets.length) {
-    render(dom.walletList, el('li', { class: 'empty', style: { padding: '14px' }, text: 'No wallets yet.' }));
+    // An empty state that only reports the emptiness leaves the reader hunting
+    // for the control; this one is the control.
+    render(
+      dom.walletList,
+      el(
+        'li',
+        { class: 'empty-state' },
+        el('p', { text: 'Track a portfolio’s value, cost basis and gain over time.' }),
+        el('button', {
+          class: 'primary-button',
+          type: 'button',
+          text: 'Create a wallet',
+          onclick: () =>
+            nameForm(dom.walletForm, {
+              label: 'Wallet name',
+              confirmText: 'Create',
+              onSubmit: (name) => {
+                const wallet = createWallet(name);
+                renderWalletList();
+                selectWallet(wallet.id);
+              },
+            }),
+        }),
+      ),
+    );
     return;
   }
 
@@ -1944,6 +1968,16 @@ function setupSearch() {
     renderSearchResults();
   });
 
+  // Ctrl/Cmd-K and "/" both focus search — the two conventions people reach for.
+  document.addEventListener('keydown', (event) => {
+    const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(event.target.tagName);
+    if ((event.key === 'k' && (event.ctrlKey || event.metaKey)) || (event.key === '/' && !typing)) {
+      event.preventDefault();
+      dom.search.focus();
+      dom.search.select();
+    }
+  });
+
   dom.search.addEventListener('blur', () => setTimeout(closeSearch, 120));
   document.addEventListener('click', (event) => {
     if (!event.target.closest('.search')) closeSearch();
@@ -2054,6 +2088,14 @@ function init() {
   step('theme', setupTheme);
 
   loadMarket();
+  // Cheap: the health endpoint already reports how many securities are scored,
+  // so the sidebar shows the count without pulling the whole screener payload.
+  api
+    .fetchHealth()
+    .then((h) => {
+      if (h?.warehouse?.scored) dom.screenerCount.textContent = String(h.warehouse.scored);
+    })
+    .catch(() => {});
 
   // The main view is loaded outside the guarded steps: if this cannot run there
   // is nothing to show, and the error belongs on screen rather than in a banner.
