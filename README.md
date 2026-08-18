@@ -1,5 +1,9 @@
 # Stock analytics platform
 
+[![ci](https://github.com/Ashonet/Stock_Screener_Pr/actions/workflows/ci.yml/badge.svg)](https://github.com/Ashonet/Stock_Screener_Pr/actions/workflows/ci.yml)
+[![pipeline](https://github.com/Ashonet/Stock_Screener_Pr/actions/workflows/pipeline.yml/badge.svg)](https://github.com/Ashonet/Stock_Screener_Pr/actions/workflows/pipeline.yml)
+[![licence: MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
+
 An end-to-end analytics stack over public equity data: an incremental extraction
 pipeline, a dbt warehouse with data-quality tests, and a dashboard and screener
 served from the marts.
@@ -371,3 +375,14 @@ Caveats that actually bite:
 - These are undocumented endpoints. They are stable in practice but can change
   without notice; the tests are the tripwire.
 - For research and education. Not investment advice.
+
+---
+
+## Licence
+
+MIT, see [LICENSE](LICENSE).
+
+That covers the code. It does not cover the market data the pipeline retrieves,
+which belongs to its providers and is subject to their terms. The committed
+landing zone is there to make the build and its tests reproducible without
+network access, not to publish a dataset.
