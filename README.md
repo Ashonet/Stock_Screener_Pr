@@ -224,7 +224,7 @@ the live-data dashboard, just without the screener.
 ### Tests and CI
 
 ```bash
-npm test          # 37 unit tests, no network, no database
+npm test          # 61 unit tests, no network, no database
 npm run warehouse # 50 dbt assertions against the committed raw layer
 npm run docs      # self-contained lineage site at warehouse/target/static_index.html
 ```
@@ -243,8 +243,15 @@ deterministic, and cannot be broken by a rate limit or a Yahoo outage.
 
 The unit tests target the functions where bugs actually occurred: series
 alignment across holdings with different histories, partial cost-basis coverage,
-the REIT branch, the day-change fallback, and the grade-matches-score invariant.
-They do not sweep the API for coverage's sake.
+the REIT branch, the day-change fallback, treemap geometry, dividend
+eligibility boundaries, and the grade-matches-score invariant. They do not sweep
+the API for coverage's sake.
+
+The most recent one they caught: `Number(null)` is `0`, not `NaN`, so testing a
+cost basis *after* conversion read "no cost basis given" as "bought at zero",
+and every holding saved without one came back at `$0.00` on the next load and
+reported the entire position as gain. Absence is now checked before conversion,
+in both the parser and the browser store.
 
 ### Swapping DuckDB for Postgres
 
@@ -280,13 +287,36 @@ companies show P/E in the same column, since that is the comparable measure for
 each.
 
 **Watchlists**: as many named lists as you like. **Wallets**: portfolios with
-share counts and optional cost basis, showing value over time, day change, gain
-against cost and per-position weight.
+share counts, optional cost basis and optional purchase date, showing value over
+time, day change, gain against cost and per-position weight.
+
+**Dividend income**: what a wallet has actually been paid, as a month-by-month
+chart, a per-holding summary and a full payment ledger. Two things make the
+numbers honest rather than approximately right:
+
+- **Eligibility is decided on the ex-dividend date, strictly after the purchase
+  date.** Yahoo's dividend events are ex-dates, not pay dates, and the buyer on
+  an ex-date does not receive that distribution. Counting it would overstate the
+  first year of every position, so the boundary is `>`, not `>=`.
+- **A holding with no purchase date is excluded and named,** rather than assumed
+  to have been held forever. The share count is today's applied back to the
+  purchase date, which overstates a position that was topped up; the card says
+  so instead of presenting the total as settled fact.
 
 **Per-security view**: price chart (1D–MAX, crosshair, table view), then three
 tabs: key statistics as one dense card, financials (revenue/net income,
 dividends per share, full income statement), and the quality score with every
 pillar input expanded.
+
+**Compare**: several securities rebased to the same start date and the same
+starting amount, with a toggle between total return and price only. The toggle
+is the point of the view. A price chart says what a share did, not what owning
+it did, and for anything with a yield those differ enough to invert the ranking:
+over the window the warehouse currently holds, Realty Income is up 4% on price
+and 40% with distributions, so **90% of its return is the dividend**, against
+0.5% of NVIDIA's. `adjClose` is adjusted for splits and distributions and
+`close` for splits only, so running both through the same rebasing gives the
+split exactly, with no reinvestment model of ours to be wrong about.
 
 **Market map**: the index as a squarified treemap, grouped by sector and sized
 by market cap, shaded either by day change or by quality score. The layout is

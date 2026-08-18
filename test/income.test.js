@@ -1,0 +1,160 @@
+/**
+ * Tests for dividend income attribution.
+ *
+ * The cases that matter here are the boundaries, because every one of them is
+ * a way to report income the wallet never received: counting the payment that
+ * went ex on the day you bought, counting a payer you hold with no purchase
+ * date on record, or dropping months that paid nothing and flattering the
+ * monthly average.
+ */
+
+import { test, describe } from 'node:test';
+import assert from 'node:assert/strict';
+
+import { buildIncome } from '../lib/income.js';
+import { parseHoldings, parseDate } from '../lib/portfolio.js';
+
+const dividends = (entries) => new Map(entries);
+
+/** Quarterly payments of a fixed amount, on the 15th. */
+const quarterly = (year, count, perShare) =>
+  Array.from({ length: count }, (_, i) => ({
+    exDate: `${year + Math.floor(i / 4)}-${String((i % 4) * 3 + 1).padStart(2, '0')}-15`,
+    perShare,
+  }));
+
+describe('buildIncome eligibility', () => {
+  test('counts only payments that went ex after the purchase date', () => {
+    const record = dividends([['KO', quarterly(2024, 4, 0.5)]]);
+    const income = buildIncome([{ symbol: 'KO', shares: 100, boughtAt: '2024-06-01' }], record, { asOf: '2025-01-01' });
+
+    // Jan and Apr are before the purchase; Jul and Oct are after.
+    assert.equal(income.payments.length, 2);
+    assert.deepEqual(
+      income.payments.map((p) => p.exDate),
+      ['2024-10-15', '2024-07-15'],
+    );
+    assert.equal(income.totals.total, 100);
+  });
+
+  test('buying on the ex-date pays nothing, so that payment is excluded', () => {
+    // The rule is strictly-after, not on-or-after: an ex-date buyer does not
+    // receive the distribution. Off-by-one here inflates every first year.
+    const record = dividends([['KO', [{ exDate: '2024-07-15', perShare: 0.5 }]]]);
+    const income = buildIncome([{ symbol: 'KO', shares: 100, boughtAt: '2024-07-15' }], record, { asOf: '2025-01-01' });
+
+    assert.equal(income.payments.length, 0);
+    assert.deepEqual(income.excluded, [{ symbol: 'KO', reason: 'none-since-purchase' }]);
+  });
+
+  test('a holding with no purchase date is named, never assumed', () => {
+    const record = dividends([['KO', quarterly(2020, 20, 0.5)]]);
+    const income = buildIncome([{ symbol: 'KO', shares: 100, boughtAt: null }], record, { asOf: '2025-01-01' });
+
+    assert.equal(income.totals.total, 0);
+    assert.deepEqual(income.excluded, [{ symbol: 'KO', reason: 'no-purchase-date' }]);
+  });
+
+  test('a non-payer is reported as having no record rather than as zero income', () => {
+    const income = buildIncome([{ symbol: 'NVDA', shares: 10, boughtAt: '2020-01-01' }], new Map(), { asOf: '2025-01-01' });
+    assert.deepEqual(income.excluded, [{ symbol: 'NVDA', reason: 'no-dividend-record' }]);
+  });
+
+  test('payments after the as-of date are ignored', () => {
+    const record = dividends([['O', [{ exDate: '2026-12-31', perShare: 0.27 }]]]);
+    const income = buildIncome([{ symbol: 'O', shares: 100, boughtAt: '2020-01-01' }], record, { asOf: '2026-06-30' });
+    assert.equal(income.payments.length, 0);
+  });
+});
+
+describe('buildIncome aggregation', () => {
+  test('a month that paid nothing still appears in the series', () => {
+    // Without the gap months a quarterly payer draws as four adjacent bars and
+    // looks exactly like a monthly one.
+    const record = dividends([['KO', quarterly(2024, 4, 0.5)]]);
+    const income = buildIncome([{ symbol: 'KO', shares: 100, boughtAt: '2023-12-01' }], record, { asOf: '2024-12-31' });
+
+    assert.equal(income.months.length, 10); // Jan to Oct inclusive
+    assert.deepEqual(income.months.slice(0, 3), [
+      { month: '2024-01', amount: 50 },
+      { month: '2024-02', amount: 0 },
+      { month: '2024-03', amount: 0 },
+    ]);
+  });
+
+  test('the monthly average excludes the month still in progress', () => {
+    const record = dividends([['O', [
+      { exDate: '2024-01-10', perShare: 1 },
+      { exDate: '2024-02-10', perShare: 1 },
+      { exDate: '2024-03-10', perShare: 1 },
+    ]]]);
+    const income = buildIncome([{ symbol: 'O', shares: 100, boughtAt: '2023-12-01' }], record, { asOf: '2024-03-20' });
+
+    // March is incomplete, so the average is over January and February only.
+    assert.equal(income.totals.monthlyAverage, 100);
+  });
+
+  test('totals split by symbol, largest first', () => {
+    const record = dividends([
+      ['O', [{ exDate: '2024-02-10', perShare: 0.25 }]],
+      ['KO', [{ exDate: '2024-02-15', perShare: 0.5 }]],
+    ]);
+    const income = buildIncome(
+      [
+        { symbol: 'O', shares: 100, boughtAt: '2023-01-01' },
+        { symbol: 'KO', shares: 200, boughtAt: '2023-01-01' },
+      ],
+      record,
+      { asOf: '2024-06-01' },
+    );
+
+    assert.deepEqual(
+      income.bySymbol.map((r) => [r.symbol, r.amount]),
+      [
+        ['KO', 100],
+        ['O', 25],
+      ],
+    );
+    assert.equal(income.totals.total, 125);
+    assert.equal(income.totals.symbolCount, 2);
+  });
+
+  test('an empty wallet produces an empty record rather than throwing', () => {
+    const income = buildIncome([], new Map(), { asOf: '2025-01-01' });
+    assert.deepEqual(income.payments, []);
+    assert.deepEqual(income.months, []);
+    assert.equal(income.totals.monthlyAverage, null);
+    assert.equal(income.totals.bestMonth, null);
+  });
+});
+
+describe('purchase dates on the wire', () => {
+  test('the holdings parameter round-trips a date', () => {
+    const [holding] = parseHoldings('AAPL:10:150.25:2024-03-08');
+    assert.deepEqual(holding, { symbol: 'AAPL', shares: 10, cost: 150.25, boughtAt: '2024-03-08' });
+  });
+
+  test('a date can be given without a cost basis', () => {
+    const [holding] = parseHoldings('AAPL:10::2024-03-08');
+    assert.equal(holding.cost, null);
+    assert.equal(holding.boughtAt, '2024-03-08');
+  });
+
+  test('a date that never existed is rejected, not rolled forward', () => {
+    // new Date('2025-02-30') silently becomes 2 March. Accepting it would shift
+    // a position's income window to a day it was never bought on.
+    assert.equal(parseDate('2025-02-30'), null);
+    assert.equal(parseDate('2024-02-29'), '2024-02-29'); // a real leap day
+  });
+
+  test('a future purchase date is rejected', () => {
+    const nextYear = new Date(Date.now() + 400 * 86_400_000).toISOString().slice(0, 10);
+    assert.equal(parseDate(nextYear), null);
+  });
+
+  test('junk in the date slot leaves the holding usable', () => {
+    const [holding] = parseHoldings('AAPL:10:150:not-a-date');
+    assert.equal(holding.boughtAt, null);
+    assert.equal(holding.shares, 10);
+  });
+});

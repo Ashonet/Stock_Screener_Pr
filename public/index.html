@@ -68,6 +68,14 @@
         <span>Map</span>
       </button>
 
+      <button id="nav-compare" class="nav-screener" type="button" title="Rebase several tickers side by side, with and without dividends">
+        <svg class="nav-icon" viewBox="0 0 20 20" aria-hidden="true">
+          <path d="M2.5 15.5 7 9l3.5 3.5L17.5 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M2.5 17.5h15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" opacity="0.45" />
+        </svg>
+        <span>Compare</span>
+      </button>
+
       <div class="topbar-actions">
         <span id="refresh-status" class="refresh-status" aria-live="polite"></span>
         <button id="theme-toggle" class="icon-button" type="button" aria-label="Switch to light theme">
@@ -180,6 +188,8 @@
 
         <div id="wallet-chart-card" class="card card-chart"></div>
         <div id="wallet-holdings" class="card"></div>
+        <div id="wallet-income" class="card"></div>
+        <div id="wallet-income-chart" class="card card-chart"></div>
       </section>
 
       <section id="screener-view" class="detail" aria-live="polite" hidden>
@@ -188,6 +198,10 @@
 
       <section id="map-view" class="detail" aria-live="polite" hidden>
         <div id="map-card" class="card"></div>
+      </section>
+
+      <section id="compare-view" class="detail" aria-live="polite" hidden>
+        <div id="compare-card"></div>
       </section>
     </main>
 

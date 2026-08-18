@@ -47,6 +47,36 @@ const cleanSymbol = (s) => {
   return SYMBOL_PATTERN.test(up) ? up : null;
 };
 
+/**
+ * An ISO date that is real and not in the future, or null.
+ *
+ * The round-trip check is deliberate: `Date.parse('2025-02-30')` rolls forward
+ * to 2 March rather than failing, so a typo would be stored as a date that
+ * never happened and silently shift a position's income window.
+ */
+/**
+ * A number that is genuinely present, or null.
+ *
+ * `Number(null)` is 0 rather than NaN, so testing after conversion turned every
+ * holding saved without a cost basis into one bought at zero the next time the
+ * wallet was loaded, and the table then showed the entire position as gain.
+ */
+export const optionalNumber = (value) => {
+  if (value == null) return null;
+  const text = String(value).trim();
+  if (text === '') return null;
+  const num = Number(text);
+  return Number.isFinite(num) && num >= 0 ? num : null;
+};
+
+export const cleanDate = (value) => {
+  const text = String(value ?? '').trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) return null;
+  const ms = Date.parse(`${text}T00:00:00Z`);
+  if (!Number.isFinite(ms) || new Date(ms).toISOString().slice(0, 10) !== text) return null;
+  return ms > Date.now() ? null : text;
+};
+
 function normaliseList(raw) {
   if (!raw || typeof raw !== 'object') return null;
   const symbols = Array.isArray(raw.symbols) ? [...new Set(raw.symbols.map(cleanSymbol).filter(Boolean))] : [];
@@ -59,9 +89,13 @@ function normaliseWallet(raw) {
     .map((h) => {
       const symbol = cleanSymbol(h?.symbol);
       const shares = Number(h?.shares);
-      const cost = Number(h?.cost);
       if (!symbol || !Number.isFinite(shares) || shares <= 0) return null;
-      return { symbol, shares, cost: Number.isFinite(cost) && cost >= 0 ? cost : null };
+      return {
+        symbol,
+        shares,
+        cost: optionalNumber(h?.cost),
+        boughtAt: cleanDate(h?.boughtAt),
+      };
     })
     .filter(Boolean);
   return { id: String(raw.id || newId('wal')), name: String(raw.name || 'Wallet').slice(0, 40), holdings };
@@ -100,7 +134,7 @@ export function loadStore() {
   store.activeWalletId = store.wallets.some((w) => w.id === activeWallet) ? activeWallet : store.wallets[0]?.id ?? null;
 
   const view = read(KEYS.view, 'stock');
-  store.view = ['screener', 'map'].includes(view)
+  store.view = ['screener', 'map', 'compare'].includes(view)
     ? view
     : view === 'wallet' && store.activeWalletId
       ? 'wallet'
@@ -197,14 +231,14 @@ export function deleteWallet(id) {
 }
 
 /** Adding a symbol that is already held tops up the position rather than duplicating it. */
-export function upsertHolding(walletId, { symbol, shares, cost }) {
+export function upsertHolding(walletId, { symbol, shares, cost, boughtAt }) {
   const wallet = store.wallets.find((w) => w.id === walletId);
   const clean = cleanSymbol(symbol);
   const qty = Number(shares);
   if (!wallet || !clean || !Number.isFinite(qty) || qty <= 0) return false;
 
-  const basis = Number(cost);
-  const price = Number.isFinite(basis) && basis >= 0 ? basis : null;
+  const price = optionalNumber(cost);
+  const bought = cleanDate(boughtAt);
   const existing = wallet.holdings.find((h) => h.symbol === clean);
 
   if (existing) {
@@ -217,23 +251,29 @@ export function upsertHolding(walletId, { symbol, shares, cost }) {
       existing.cost = price;
     }
     existing.shares = totalShares;
+    // Keep the earliest date, because that is when the position began. Income
+    // then counts every payment the position has seen, on today's share count
+    // throughout. Without a lot ledger one of the two has to be approximate,
+    // and the wallet view says which.
+    const dates = [existing.boughtAt, bought].filter(Boolean).sort();
+    existing.boughtAt = dates[0] ?? null;
   } else {
-    wallet.holdings.push({ symbol: clean, shares: qty, cost: price });
+    wallet.holdings.push({ symbol: clean, shares: qty, cost: price, boughtAt: bought });
   }
 
   saveWallets();
   return true;
 }
 
-export function updateHolding(walletId, symbol, { shares, cost }) {
+export function updateHolding(walletId, symbol, { shares, cost, boughtAt }) {
   const wallet = store.wallets.find((w) => w.id === walletId);
   const holding = wallet?.holdings.find((h) => h.symbol === symbol);
   if (!holding) return false;
 
   const qty = Number(shares);
   if (Number.isFinite(qty) && qty > 0) holding.shares = qty;
-  const basis = Number(cost);
-  holding.cost = Number.isFinite(basis) && basis >= 0 ? basis : null;
+  holding.cost = optionalNumber(cost);
+  holding.boughtAt = cleanDate(boughtAt);
 
   saveWallets();
   return true;
@@ -246,6 +286,18 @@ export function removeHolding(walletId, symbol) {
   saveWallets();
 }
 
-/** The query string `/api/portfolio` expects. */
+/**
+ * The query string `/api/portfolio` expects: `SYMBOL:shares:cost:boughtAt`.
+ *
+ * The cost slot is held open when a date is given without one, so the date
+ * lands in the fourth field rather than being read as a cost basis.
+ */
 export const holdingsParam = (wallet) =>
-  (wallet?.holdings ?? []).map((h) => `${h.symbol}:${h.shares}${h.cost != null ? `:${h.cost}` : ''}`).join(',');
+  (wallet?.holdings ?? [])
+    .map((h) => {
+      const parts = [h.symbol, h.shares];
+      if (h.cost != null || h.boughtAt) parts.push(h.cost ?? '');
+      if (h.boughtAt) parts.push(h.boughtAt);
+      return parts.join(':');
+    })
+    .join(',');

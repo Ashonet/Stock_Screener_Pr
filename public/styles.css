@@ -29,6 +29,9 @@
   --series-1: #2a78d6;
   --series-2: #eb6834;
   --series-3: #1baf7a;
+  --series-4: #8a5cd0;
+  --series-5: #a67400;
+  --series-6: #c2549b;
 
   /* Status (state) */
   --up: #0ca30c;
@@ -60,6 +63,9 @@
     --series-1: #3987e5;
     --series-2: #d95926;
     --series-3: #199e70;
+    --series-4: #a37ae0;
+    --series-5: #cc9a26;
+    --series-6: #e07ab0;
     --up: #0ca30c;
     --down: #e66767;
     --up-text: #0ca30c;
@@ -84,6 +90,9 @@
   --series-1: #3987e5;
   --series-2: #d95926;
   --series-3: #199e70;
+  --series-4: #a37ae0;
+  --series-5: #cc9a26;
+  --series-6: #e07ab0;
   --up: #0ca30c;
   --down: #e66767;
   --up-text: #0ca30c;
@@ -1834,4 +1843,88 @@ table.screener thead th:first-child {
 .map-tile:focus-visible rect {
   stroke: var(--text-primary);
   stroke-width: 2;
+}
+
+/* ------------------------------------------------------- income + compare */
+
+/* The rebase reference on the compare plot. Solid, recessive, and labelled,
+   so it reads as the starting amount rather than as unexplained ink. */
+.ref-line {
+  stroke: var(--axis);
+  stroke-width: 1;
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+/* Native date control, sized to sit level with the number fields beside it.
+   Left to the platform otherwise: its picker and locale beat anything hand-made. */
+.field-date {
+  min-width: 148px;
+  font-family: var(--font);
+}
+
+.income-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
+  gap: 2px;
+  margin: 4px 0 14px;
+}
+.income-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px;
+  background: var(--surface-1);
+}
+.income-stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.income-stat-value {
+  font-size: 21px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+.income-stat-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.income-tables {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+  gap: 24px;
+  margin-top: 20px;
+}
+@media (max-width: 900px) {
+  .income-tables {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+/* The ledger is the one table that can run to hundreds of rows, so it scrolls
+   in place rather than pushing everything below it off the page. */
+.income-ledger {
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.compare-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.compare-field {
+  flex: 1 1 260px;
+  min-width: 200px;
+}
+.compare-years {
+  width: 82px;
 }

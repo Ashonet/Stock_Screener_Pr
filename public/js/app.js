@@ -25,6 +25,7 @@ import {
   SYMBOL_PATTERN,
 } from './store.js';
 import { renderWallet } from './wallet.js';
+import { renderCompare } from './compare.js';
 import { renderScreener } from './screener.js';
 import { renderMap } from './map.js';
 import { chartCard, areaChart, columnChart, sparkline, dataTable, cssVar, hideTooltip } from './charts.js';
@@ -118,14 +119,18 @@ const state = {
   quotes: new Map(),
   sparks: new Map(),
   walletData: null,
+  walletIncome: null,
   screenerData: null,
   screener: { sortKey: 'overall_score', sortDir: 'desc', basis: 'all', sector: 'all' },
   mapData: null,
   map: { mode: 'change' },
+  compareData: null,
+  compare: { symbols: [], years: 10, mode: 'total' },
   editingHolding: null,
   loading: false,
   requestToken: 0,
   walletToken: 0,
+  compareToken: 0,
 };
 
 const symbols = () => activeList()?.symbols ?? [];
@@ -155,6 +160,11 @@ const dom = {
   listForm: document.getElementById('list-form'),
   navScreener: document.getElementById('nav-screener'),
   navMap: document.getElementById('nav-map'),
+  navCompare: document.getElementById('nav-compare'),
+  walletIncome: document.getElementById('wallet-income'),
+  walletIncomeChart: document.getElementById('wallet-income-chart'),
+  compareView: document.getElementById('compare-view'),
+  compareCard: document.getElementById('compare-card'),
   mapView: document.getElementById('map-view'),
   mapCard: document.getElementById('map-card'),
   screenerCount: document.getElementById('screener-count'),
@@ -784,9 +794,16 @@ function afterWalletEdit() {
 
 function renderWalletView() {
   renderWallet({
-    nodes: { hero: dom.walletHero, chart: dom.walletChart, holdings: dom.walletHoldings },
+    nodes: {
+      hero: dom.walletHero,
+      chart: dom.walletChart,
+      holdings: dom.walletHoldings,
+      income: dom.walletIncome,
+      incomeChart: dom.walletIncomeChart,
+    },
     wallet: activeWallet(),
     data: state.walletData,
+    income: state.walletIncome,
     rangeBlurb: RANGES.find((r) => r.key === state.range)?.blurb ?? '',
     handlers: walletHandlers,
     editing: state.editingHolding,
@@ -798,12 +815,17 @@ async function loadWalletData() {
   const wallet = activeWallet();
   if (!wallet || !wallet.holdings.length) {
     state.walletData = null;
+    state.walletIncome = null;
     renderWalletView();
     return;
   }
 
   const token = ++state.walletToken;
   dom.walletView.classList.add('is-loading');
+  // Income is a separate request on purpose: it is a per-symbol dividend
+  // history and slower than the valuation, so letting it land on its own keeps
+  // the value chart from waiting on it.
+  loadWalletIncome(wallet, token);
   try {
     const data = await api.fetchPortfolio(holdingsParam(wallet), state.range);
     if (token !== state.walletToken) return;
@@ -819,12 +841,29 @@ async function loadWalletData() {
   }
 }
 
+async function loadWalletIncome(wallet, token) {
+  state.walletIncome = null;
+  try {
+    const income = await api.fetchIncome(holdingsParam(wallet));
+    if (token !== state.walletToken) return;
+    state.walletIncome = income;
+  } catch {
+    // A failed income call must not blank the wallet: an empty record renders
+    // as "nothing recorded yet", which is the same shape as a genuinely empty
+    // one and leaves the valuation above it untouched.
+    if (token !== state.walletToken) return;
+    state.walletIncome = { payments: [], months: [], bySymbol: [], totals: {}, excluded: [] };
+  }
+  renderWalletView();
+}
+
 function selectWallet(id) {
   store.activeWalletId = id;
   store.view = 'wallet';
   clearSymbolFromUrl();
   state.editingHolding = null;
   state.walletData = null;
+  state.walletIncome = null;
   saveWallets();
   saveView();
   setVisibleView('wallet');
@@ -849,8 +888,78 @@ function setVisibleView(view) {
   if (dom.walletView) dom.walletView.hidden = view !== 'wallet';
   if (dom.screenerView) dom.screenerView.hidden = view !== 'screener';
   if (dom.mapView) dom.mapView.hidden = view !== 'map';
+  if (dom.compareView) dom.compareView.hidden = view !== 'compare';
   dom.navScreener?.setAttribute('aria-current', String(view === 'screener'));
   dom.navMap?.setAttribute('aria-current', String(view === 'map'));
+  dom.navCompare?.setAttribute('aria-current', String(view === 'compare'));
+}
+
+/* ------------------------------------------------------------------ compare */
+
+function renderCompareView() {
+  renderCompare({
+    node: dom.compareCard,
+    data: state.compareData,
+    state: state.compare,
+    handlers: {
+      onSymbols: (raw) => {
+        const symbols = raw
+          .split(/[,\s]+/)
+          .map((s) => s.trim().toUpperCase())
+          .filter(Boolean)
+          .slice(0, 6);
+        if (symbols.length < 2) {
+          state.compareData = { error: 'Give at least two tickers to compare.' };
+          renderCompareView();
+          return;
+        }
+        state.compare.symbols = symbols;
+        loadCompare();
+      },
+      onYears: (years) => {
+        state.compare.years = years;
+        loadCompare();
+      },
+      // A mode switch is a repaint of data already in hand, not a refetch:
+      // both series come back in the same response.
+      onMode: (mode) => {
+        state.compare.mode = mode;
+        renderCompareView();
+      },
+    },
+  });
+}
+
+async function loadCompare() {
+  const token = ++state.compareToken;
+  state.compareData = null;
+  renderCompareView();
+  try {
+    const data = await api.fetchCompare(state.compare.symbols.join(','), state.compare.years);
+    if (token !== state.compareToken) return;
+    state.compareData = data;
+  } catch (err) {
+    if (token !== state.compareToken) return;
+    state.compareData = { error: err.message };
+  }
+  renderCompareView();
+}
+
+function showCompareView() {
+  store.view = 'compare';
+  saveView();
+  clearSymbolFromUrl();
+  setVisibleView('compare');
+  renderWatchlist();
+  renderWalletList();
+  // Seed from the watchlist the first time, so the view opens with something
+  // to look at rather than an empty form.
+  if (!state.compare.symbols.length) {
+    const seed = (activeList()?.symbols ?? []).slice(0, 4);
+    state.compare.symbols = seed.length >= 2 ? seed : ['O', 'KO', 'NVDA', 'UNP'];
+  }
+  renderCompareView();
+  if (!state.compareData) loadCompare();
 }
 
 /* --------------------------------------------------------------- market map */
@@ -2135,6 +2244,10 @@ function init() {
   step('map nav', () => {
     if (!dom.navMap) throw new Error('#nav-map is missing from the page');
     dom.navMap.addEventListener('click', showMapView);
+  });
+  step('compare nav', () => {
+    if (!dom.navCompare) throw new Error('#nav-compare is missing from the page');
+    dom.navCompare.addEventListener('click', showCompareView);
   });
   step('screener nav', () => {
     // Thrown rather than optional-chained: swallowing a missing element keeps

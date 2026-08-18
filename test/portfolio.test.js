@@ -17,8 +17,17 @@ const bars = (start, closes) => ({ points: closes.map((c, i) => ({ t: start + i 
 
 describe('parseHoldings', () => {
   test('parses symbol, shares and optional cost', () => {
-    assert.deepEqual(parseHoldings('AAPL:10:150'), [{ symbol: 'AAPL', shares: 10, cost: 150 }]);
-    assert.deepEqual(parseHoldings('AAPL:10'), [{ symbol: 'AAPL', shares: 10, cost: null }]);
+    assert.deepEqual(parseHoldings('AAPL:10:150'), [{ symbol: 'AAPL', shares: 10, cost: 150, boughtAt: null }]);
+    assert.deepEqual(parseHoldings('AAPL:10'), [{ symbol: 'AAPL', shares: 10, cost: null, boughtAt: null }]);
+  });
+
+  test('an omitted cost is absent, not zero', () => {
+    // Number(null) and Number('') are both 0, so testing after conversion read
+    // "no cost basis" as "bought at zero" and reported the whole position as
+    // gain. Every empty spelling has to come back null.
+    for (const raw of ['AAPL:10', 'AAPL:10:', 'AAPL:10::2024-01-02', 'AAPL:10: :2024-01-02']) {
+      assert.equal(parseHoldings(raw)[0].cost, null, raw);
+    }
   });
 
   test('uppercases and de-duplicates', () => {
@@ -40,7 +49,7 @@ describe('parseHoldings', () => {
   });
 
   test('a negative cost basis is dropped, the holding is kept', () => {
-    assert.deepEqual(parseHoldings('AAPL:10:-3'), [{ symbol: 'AAPL', shares: 10, cost: null }]);
+    assert.deepEqual(parseHoldings('AAPL:10:-3'), [{ symbol: 'AAPL', shares: 10, cost: null, boughtAt: null }]);
   });
 });
 

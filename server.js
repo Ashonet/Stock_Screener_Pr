@@ -18,6 +18,8 @@ import { UpstreamError } from './lib/yahoo.js';
 import { buildProfile, dividendsByYear } from './lib/profile.js';
 import { buildScore } from './lib/score.js';
 import { parseHoldings, buildValueSeries, priceHoldings } from './lib/portfolio.js';
+import { buildIncome } from './lib/income.js';
+import { buildComparison } from './lib/compare.js';
 import { cached, stats as cacheStats } from './lib/cache.js';
 import * as warehouse from './lib/warehouse.js';
 
@@ -355,6 +357,103 @@ const routes = {
       mixedCurrency: currencies.length > 1,
       unpriced: series.coverage.filter((c) => !c.priced).map((c) => c.symbol),
     };
+  },
+
+  /**
+   * Dividend income a wallet has actually received.
+   *
+   * The warehouse answers this for tracked names without a single upstream
+   * call, which matters because it is a per-symbol dividend history and doing
+   * it live would be one request per holding on every page load. Anything
+   * outside the tracked universe falls back to Yahoo, so a wallet holding a
+   * mid-cap the index does not carry still reports its income.
+   */
+  async '/api/portfolio/income'(url) {
+    const holdings = parseHoldings(url.searchParams.get('holdings'));
+    if (!holdings.length) throw new UpstreamError('At least one holding is required', 400);
+
+    const symbols = holdings.map((h) => h.symbol);
+    const stored = warehouse.isReady() ? await warehouse.dividendsFor(symbols) : new Map();
+
+    // Only the gaps go upstream, and a failure on one symbol drops that symbol
+    // from the total rather than failing the request: a partial income record
+    // that names what is missing beats no income record at all.
+    const missing = symbols.filter((symbol) => !stored.has(symbol));
+    const fetched = await Promise.allSettled(
+      missing.map((symbol) =>
+        cached(`longhistory:${symbol}`, TTL.financials, () => yahoo.getLongHistory(symbol, 20)),
+      ),
+    );
+
+    const unavailable = [];
+    missing.forEach((symbol, i) => {
+      const result = fetched[i];
+      if (result.status !== 'fulfilled') {
+        unavailable.push(symbol);
+        return;
+      }
+      stored.set(
+        symbol,
+        (result.value.dividends ?? [])
+          .map((d) => ({ exDate: new Date(d.t).toISOString().slice(0, 10), perShare: d.amount }))
+          .sort((a, b) => a.exDate.localeCompare(b.exDate)),
+      );
+    });
+
+    const income = buildIncome(holdings, stored);
+    return {
+      ...income,
+      unavailable,
+      sources: {
+        warehouse: symbols.filter((symbol) => !missing.includes(symbol)),
+        live: missing.filter((symbol) => !unavailable.includes(symbol)),
+      },
+    };
+  },
+
+  /**
+   * Rebased total-return and price-return series for up to six symbols.
+   *
+   * Monthly resolution throughout. The view compares multi-year shapes, and a
+   * daily payload for six names is two orders of magnitude larger for a
+   * difference nobody can see at this scale.
+   */
+  async '/api/compare'(url) {
+    const symbols = [
+      ...new Set(
+        String(url.searchParams.get('symbols') ?? '')
+          .split(',')
+          .map((s) => s.trim().toUpperCase())
+          .filter((s) => /^[A-Z0-9.^=-]{1,20}$/.test(s)),
+      ),
+    ].slice(0, 6);
+
+    if (symbols.length < 2) throw new UpstreamError('Give at least two tickers to compare', 400);
+
+    const years = Math.min(20, Math.max(1, Number(url.searchParams.get('years')) || 10));
+    const stored = warehouse.isReady() ? await warehouse.monthlyHistory(symbols, { years }) : new Map();
+
+    const missing = symbols.filter((symbol) => !stored.has(symbol));
+    const fetched = await Promise.allSettled(
+      missing.map((symbol) => cached(`longhistory:${symbol}`, TTL.financials, () => yahoo.getLongHistory(symbol, years))),
+    );
+
+    const unavailable = [];
+    missing.forEach((symbol, i) => {
+      const result = fetched[i];
+      if (result.status === 'fulfilled' && result.value.points?.length) stored.set(symbol, result.value.points);
+      else unavailable.push(symbol);
+    });
+
+    // Names carried alongside the maths so the legend reads as companies rather
+    // than tickers; a missing name is not worth failing the request over.
+    const quotes = await cached(`quotes:${symbols.join(',')}`, TTL.quotes, () => yahoo.getQuotes(symbols)).catch(() => []);
+    const names = new Map(quotes.map((q) => [q.symbol, q.name]));
+
+    const comparison = buildComparison(stored);
+    for (const entry of comparison.series) entry.name = names.get(entry.symbol) ?? entry.symbol;
+
+    return { ...comparison, years, unavailable, requested: symbols };
   },
 
   async '/api/market'() {
