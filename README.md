@@ -29,17 +29,49 @@ GitHub Actions (nightly, 22:30 UTC weekdays)
               Node server reads the marts, no upstream calls at request time
 ```
 
-Tracks the **full S&P 500**: 503 tickers, since the index carries dual share
-classes.
+Tracks **5,466 companies**: the full S&P 500 (503, the index carries dual share
+classes), every common stock listed on the **Nasdaq** (4,328), and the
+**Russell 2000** (1,986). 1,351 of them sit in more than one, and
+`dim_index_membership` keeps a separate spell per index rather than collapsing
+them.
+
+### Two tiers, because the tail is not free
+
+The S&P 500 costs about 29MB of committed raw and twenty-five minutes to
+backfill. Five and a half thousand names at the same treatment is roughly
+350MB in git, nine million price rows and five hours against an upstream that
+rate-limits by IP, against a nightly budget of sixty minutes. So membership
+decides how much of a symbol is fetched:
+
+| Tier | Members | Fetched | History |
+|---|---|---|---|
+| deep | S&P 500, 503 | prices, financials, dividends, profile | 6 years |
+| wide | Nasdaq and Russell 2000, 4,963 | prices only | 2 years |
+
+The scorer needs statements, so only the deep tier is graded and appears in the
+screener. The wide tier can be charted, searched and measured for return, which
+is what it claims to support and no more. Either tier is selectable with
+`--tier`, and `--deep all` will happily fetch everything at the cost above.
+
+The nightly job runs the deep tier and a separate weekly job runs the wide one,
+because the tail does not move differently for being refreshed daily and would
+not fit the window if it did.
 
 Why batch rather than live: the upstream rate-limits by IP. A live proxy works
 on a laptop and falls over on a shared host. Scoring 503 companies from four
 years of statements each is a few thousand upstream calls; against the mart it
 is one local query, which is what makes the screener possible at all.
 
-### The constituent list is fetched, never typed
+### The constituent lists are fetched, never typed
 
-`pipeline/build-universe.js` pulls the S&P 500 from a published source and then
+The three sources are not equivalent and the code says so: the S&P 500 is a
+curated index with a published constituent file, the Nasdaq list is every
+common stock *listed on* an exchange rather than an index at all, and the
+Russell 2000 has no free official list so it is read from a tracking fund's
+disclosed holdings, which lags reconstitution and is an approximation rather
+than the index.
+
+`pipeline/build-universe.js` pulls them from published sources and then
 **validates every ticker against Yahoo before admitting it**, because index
 membership is not the same as data availability. Companies get renamed, and a
 hand-written list rots silently into missing additions and dead tickers. Symbols
@@ -125,7 +157,7 @@ whether the raw and adjusted closes moved together, which is true of every
 Monster's 2023 split as missed and doubled three years of prior prices. What
 marks a missed split is the raw close stepping by the ratio itself.
 
-Running `dbt build` gives **72 pass, 3 warn** across 505 securities. The warnings
+Running `dbt build` gives **73 pass, 3 warn** across the universe. The warnings
 are 8 companies above 200% FCF payout (real, heavy capex cycles) and 25
 periods missing EBITDA (healthcare and utilities where Yahoo does not model it). A warning that stays on deliberately is more useful than one
 tuned until it disappears.

@@ -1,0 +1,58 @@
+name: pipeline-wide
+
+# The long tail, weekly.
+#
+# The nightly job covers the deep tier: the five hundred companies whose
+# statements the screener reads. This one covers the other five thousand, which
+# carry prices only and are refreshed on Saturdays because nothing about them
+# needs to be a day fresh, and because extracting them takes hours against an
+# upstream that rate-limits by IP.
+on:
+  schedule:
+    - cron: '0 6 * * 6'
+  workflow_dispatch:
+
+concurrency:
+  # Shares the group with the nightly job: the raw layer has one writer.
+  group: pipeline
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    # Nearly the maximum a job is allowed. Five thousand symbols against a
+    # rate-limited upstream is measured in hours, not minutes.
+    timeout-minutes: 350
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install dbt
+        run: pip install -r pipeline/requirements.txt
+
+      - name: Extract the wide tier
+        run: node pipeline/extract.js --tier wide
+
+      - name: Build and test the warehouse
+        working-directory: warehouse
+        run: dbt build --profiles-dir .
+
+      - name: Commit the new slice
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add warehouse/raw pipeline/state.json
+          git diff --staged --quiet || git commit -m "chore: wide tier price slice"
+          git push

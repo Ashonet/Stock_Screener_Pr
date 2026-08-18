@@ -50,6 +50,18 @@ const UNIVERSE_PATH = join(ROOT, 'pipeline', 'universe.json');
 const BACKFILL_YEARS = Math.min(30, Math.max(1, Number(process.env.BACKFILL_YEARS) || 6));
 
 /**
+ * How far back the wide tier goes.
+ *
+ * Shorter on purpose. The deep tier is five hundred companies and the wide tier
+ * is nearly five thousand, so the tail dominates every cost there is: at six
+ * years each it is roughly 350MB of committed raw and five hours against an
+ * upstream that rate-limits by IP, against a nightly budget of sixty minutes.
+ * Two years is enough to chart a name, search it and measure a recent return,
+ * which is all the wide tier claims to support.
+ */
+const WIDE_BACKFILL_YEARS = Math.min(30, Math.max(1, Number(process.env.WIDE_BACKFILL_YEARS) || 2));
+
+/**
  * Re-fetch this much already-loaded history on every incremental run.
  *
  * Yahoo restates recent bars, a split or dividend adjusts prior closes, and
@@ -256,11 +268,12 @@ function splitRatio(bars, previous) {
 
 /* ------------------------------------------------------------------- driver */
 
-async function extractSymbol(symbol, state, writer, { full }) {
+async function extractSymbol(symbol, state, writer, { full, deep = true }) {
   const priceWatermark = state.prices?.[symbol] ?? null;
   const coldStart = full || !priceWatermark;
+  const backfillYears = deep ? BACKFILL_YEARS : WIDE_BACKFILL_YEARS;
   const since = coldStart
-    ? Date.now() - BACKFILL_YEARS * 365.25 * DAY_MS
+    ? Date.now() - backfillYears * 365.25 * DAY_MS
     : Date.parse(priceWatermark) - BACKFILL_OVERLAP_DAYS * DAY_MS;
 
   const result = { symbol, prices: 0, financials: 0, dividends: 0, security: 0, errors: [], resplit: false };
@@ -288,7 +301,7 @@ async function extractSymbol(symbol, state, writer, { full }) {
       const ratio = splitRatio(bars, state.closes?.[symbol]);
       if (ratio) {
         console.log(`  ${symbol}: prices restated by ${ratio.toFixed(4)}x, re-fetching the full history`);
-        bars = await yahoo.getDailyBars(symbol, Date.now() - BACKFILL_YEARS * 365.25 * DAY_MS);
+        bars = await yahoo.getDailyBars(symbol, Date.now() - backfillYears * 365.25 * DAY_MS);
         result.resplit = true;
       }
     }
@@ -337,6 +350,17 @@ async function extractSymbol(symbol, state, writer, { full }) {
   } catch (err) {
     result.errors.push(`prices: ${err.message}`);
   }
+
+  /*
+   * Everything below this line is the deep tier only.
+   *
+   * The scorer needs statements, so a company without them cannot be graded and
+   * does not appear in the screener. Fetching them for five thousand names
+   * would triple the run time and the stored bytes to populate a table nothing
+   * reads. A wide-tier symbol is charted, searched and measured; it is not
+   * scored, and the universe file says which is which.
+   */
+  if (!deep) return result;
 
   // Company profile and valuation snapshot.
   if (full || isStale(state.security?.[symbol], STALENESS_HOURS.security)) {
@@ -395,9 +419,18 @@ async function main() {
   const only = flagValue('--symbols');
 
   const universe = await readJSON(UNIVERSE_PATH, { symbols: [] });
-  const symbols = only
+  const tierFlag = flagValue('--tier');
+  // A universe built before tiers existed has no `deep` list, and every symbol
+  // in it was fetched in full. Treating that as all-deep keeps an old file
+  // behaving exactly as it did.
+  const deepSet = new Set((universe.deep ?? universe.symbols ?? []).map((s) => s.toUpperCase()));
+
+  let symbols = only
     ? only.split(',').map((s) => s.trim().toUpperCase()).filter(Boolean)
     : [...new Set(universe.symbols.map((s) => s.toUpperCase()))];
+
+  if (tierFlag === 'deep') symbols = symbols.filter((s) => deepSet.has(s));
+  else if (tierFlag === 'wide') symbols = symbols.filter((s) => !deepSet.has(s));
 
   if (!symbols.length) {
     console.error('No symbols to extract.');
@@ -417,11 +450,19 @@ async function main() {
   const runId = ingestedAt.replace(/[:.]/g, '-');
   const writer = new RawWriter(runId, ingestedAt);
 
-  console.log(`run ${runId} · ${symbols.length} symbols · ${full ? 'full backfill' : 'incremental'}`);
+  // An explicit --symbols run is all deep, so the count has to say so too.
+  const deepCount = only ? symbols.length : symbols.filter((s) => deepSet.has(s)).length;
+  console.log(
+    `run ${runId} · ${symbols.length} symbols ` +
+      `(${deepCount} deep, ${symbols.length - deepCount} wide) · ${full ? 'full backfill' : 'incremental'}`,
+  );
 
   const failures = [];
   for (const [index, symbol] of symbols.entries()) {
-    const result = await extractSymbol(symbol, state, writer, { full });
+    // An explicit --symbols run is treated as deep, since asking for one name
+    // by hand means wanting all of it.
+    const deep = only ? true : deepSet.has(symbol);
+    const result = await extractSymbol(symbol, state, writer, { full, deep });
     const parts = [
       result.prices ? `${result.prices}p` : null,
       result.financials ? `${result.financials}f` : null,

@@ -14,6 +14,11 @@ on:
         description: 'Ignore watermarks and re-download all history'
         type: boolean
         default: false
+      tier:
+        description: 'Which tier to extract'
+        type: choice
+        options: [deep, wide, all]
+        default: deep
 
 concurrency:
   # Never let two runs write the raw layer at once.
@@ -29,13 +34,13 @@ jobs:
     timeout-minutes: 60
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: '22'
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
           cache: pip
@@ -50,21 +55,36 @@ jobs:
       # The day test lives in the shell because Actions has no day-of-week
       # expression, and it is continue-on-error because a constituent-source
       # outage should not take the price load down with it.
-      - name: Refresh the S&P 500 universe (Mondays)
+      - name: Refresh the universe (Mondays)
         continue-on-error: true
         run: |
           if [ "$(date -u +%u)" = "1" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            node pipeline/build-universe.js
+            node pipeline/build-universe.js --indexes all --deep sp500 --validate deep
           else
             echo "Not Monday - keeping the existing universe."
           fi
 
+      # Deep tier only on a schedule.
+      #
+      # The universe is about 5,500 names across the S&P 500, the Nasdaq listing
+      # and the Russell 2000. Extracting all of them takes hours against an
+      # upstream that rate-limits by IP, which does not fit a nightly window and
+      # would not be worth it if it did: the tail moves the same way whether it
+      # is refreshed daily or weekly, and only the deep tier carries the
+      # statements the screener actually reads.
+      #
+      # The wide tier is a separate scheduled run, and either can be forced from
+      # the dispatch input.
       - name: Extract
         run: |
+          TIER="${{ inputs.tier }}"
+          TIER="${TIER:-deep}"
+          ARGS=""
+          [ "$TIER" != "all" ] && ARGS="--tier $TIER"
           if [ "${{ inputs.full_refresh }}" = "true" ]; then
-            node pipeline/extract.js --full
+            node pipeline/extract.js --full $ARGS
           else
-            node pipeline/extract.js
+            node pipeline/extract.js $ARGS
           fi
 
       - name: Build and test the warehouse
@@ -75,7 +95,7 @@ jobs:
       # from the artifact rather than only from the log.
       - name: Upload dbt artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: dbt-target
           path: warehouse/target/

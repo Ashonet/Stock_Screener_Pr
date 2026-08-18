@@ -110,11 +110,16 @@ models:
       Index membership as a slowly-changing dimension (Type 2). Exists so
       historical queries can filter to who was actually in the index at the time,
       rather than inheriting survivorship bias from today's constituent list.
+      One row per symbol per index per spell: a company can sit in the S&P 500
+      and the Nasdaq listing at once, with different spells in each.
     tests:
       - unique_combination:
-          columns: [symbol, valid_from]
+          columns: [symbol, index_name, valid_from]
     columns:
       - name: symbol
+        tests: [not_null]
+      - name: index_name
+        description: Which index this spell belongs to.
         tests: [not_null]
       - name: valid_from
         tests: [not_null]

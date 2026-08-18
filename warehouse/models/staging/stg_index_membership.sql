@@ -12,6 +12,10 @@ with raw as (
 
 select distinct
     upper(trim(symbol))              as symbol,
+    -- Observations written before the universe covered more than one index
+    -- carry no index_name, and every one of them was the S&P 500. Defaulting
+    -- keeps that history readable rather than orphaning it under a null.
+    coalesce(index_name, 'sp500')    as index_name,
     cast(observed_at as timestamp)   as observed_at,
     cast(observed_at as date)        as observed_on,
     source
