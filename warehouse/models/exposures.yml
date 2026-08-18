@@ -1,0 +1,51 @@
+version: 2
+
+# Exposures declare what consumes the marts, so the lineage graph in `dbt docs`
+# runs all the way through to the things people actually look at — and a model
+# nobody depends on becomes visible as such.
+exposures:
+  - name: screener
+    label: S&P 500 quality screener
+    type: application
+    maturity: high
+    url: http://127.0.0.1:5173/
+    description: >
+      Ranks every tracked security by quality score, filterable by sector and
+      scoring basis. Reads the marts directly; makes no upstream API calls.
+    depends_on:
+      - ref('mart_quality_score')
+      - ref('dim_security')
+    owner:
+      name: Samuel Ashton
+      email: samuelashton030@gmail.com
+
+  - name: security_dashboard
+    label: Per-security dashboard
+    type: application
+    maturity: high
+    description: >
+      Price history, key statistics, income statement, dividends and the quality
+      score for a single security.
+    depends_on:
+      - ref('mart_quality_score')
+      - ref('dim_security')
+      - ref('fct_prices')
+      - ref('fct_financials')
+      - ref('fct_dividend_years')
+    owner:
+      name: Samuel Ashton
+      email: samuelashton030@gmail.com
+
+  - name: score_movers
+    label: Score movers
+    type: analysis
+    maturity: medium
+    description: >
+      Largest quality-score changes since the previous run. The clearest reason
+      the warehouse exists: a live API can say what a company looks like now, but
+      not what changed, because nobody stored yesterday.
+    depends_on:
+      - ref('mart_score_movers')
+    owner:
+      name: Samuel Ashton
+      email: samuelashton030@gmail.com

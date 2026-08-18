@@ -18,7 +18,7 @@ GitHub Actions (nightly, 22:30 UTC weekdays)
         │                 dim_security · fct_prices · fct_financials
         │                 fct_dividends · int_dividend_windows · mart_quality_score
         │
-        └─ dbt test     51 assertions · 7 of them written from real bugs
+        └─ dbt test     64 assertions · 8 of them written from real bugs
                               │
                     warehouse.duckdb (derived, gitignored)
                               │
@@ -91,6 +91,54 @@ Running `dbt build` gives **49 pass, 2 warn** across 505 securities. The warning
 are 8 companies above 200% FCF payout (real — heavy capex cycles) and 25
 periods missing EBITDA (healthcare and utilities where Yahoo does not model it). A warning that stays on deliberately is more useful than one
 tuned until it disappears.
+
+---
+
+## Survivorship bias, and how it is kept out
+
+The constituent file holds **today's** members. Six years of history for "the
+S&P 500" built on that would silently exclude every company removed from the
+index — and removals skew heavily toward failures, delistings and takeunders.
+Any backtest over it reports the *survivors'* returns and calls them the index's.
+It is the most common way a finance dataset lies to you, and the first version of
+this warehouse had it.
+
+`build-universe.js` therefore appends a full membership observation on every run
+instead of overwriting, and `dim_index_membership` folds those observations into
+`valid_from` / `valid_to` intervals — a slowly-changing dimension, Type 2. Index
+membership at any past date is then reconstructable:
+
+```sql
+select symbol
+from dim_index_membership
+where date '2026-03-01' between valid_from and coalesce(valid_to, date '9999-12-31')
+```
+
+`assert_membership_spells_do_not_overlap` guards the derivation, because
+gaps-and-islands logic is exactly the sort that quietly produces overlapping
+spells and double-counts members.
+
+The history is thin today — it starts accumulating from the first run, and no
+amount of cleverness can recover membership from before the pipeline existed.
+Being explicit about that is the point: the bias is bounded and visible rather
+than invisible and unbounded.
+
+## Score history: why a warehouse at all
+
+`mart_quality_score` is recomputed nightly, and a post-hook appends each day's
+scores back into the landing zone. `fct_score_history` reads them, and
+`mart_score_movers` ranks the largest changes since the previous run.
+
+This is the clearest answer to *"why not just call the API?"* — a live API can
+tell you what a company looks like now. It cannot tell you what **changed**,
+because nobody stored yesterday.
+
+History lives in the append-only raw layer rather than in a dbt snapshot for a
+specific reason: snapshots need a target that survives between runs, and this
+warehouse is derived — gitignored, rebuilt from raw on every build — so a
+snapshot table would reset to empty each time. Writing the day's scores back into
+raw keeps history durable under the same rules as every other source, and it
+survives `--full-refresh`.
 
 ---
 
@@ -171,6 +219,31 @@ while the pipeline runs.
 The app degrades rather than fails if the warehouse is missing: `lib/warehouse.js`
 opens it read-only and returns empty on absence, so a fresh clone still serves
 the live-data dashboard, just without the screener.
+
+### Tests and CI
+
+```bash
+npm test          # 23 unit tests, no network, no database
+npm run warehouse # 64 dbt assertions against the committed raw layer
+npm run docs      # self-contained lineage site at warehouse/target/static_index.html
+```
+
+Three workflows:
+
+| Workflow | Trigger | Does |
+|---|---|---|
+| `ci` | every push and PR | unit tests, then a full `dbt build` against the committed raw layer |
+| `pipeline` | nightly, 22:30 UTC weekdays | incremental extract, rebuild, commit the new slice |
+| `docs` | push to main | publishes the dbt lineage site to GitHub Pages |
+
+`ci` deliberately makes **no upstream calls**. The committed landing zone is
+enough to build and test the entire warehouse, so the checks are fast,
+deterministic, and cannot be broken by a rate limit or a Yahoo outage.
+
+The unit tests target the functions where bugs actually occurred — series
+alignment across holdings with different histories, partial cost-basis coverage,
+the REIT branch, and the grade-matches-score invariant — rather than sweeping the
+API for coverage's sake.
 
 ### Swapping DuckDB for Postgres
 

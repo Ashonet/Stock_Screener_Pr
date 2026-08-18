@@ -1,3 +1,5 @@
+{{ config(post_hook="{{ export_score_history() }}") }}
+
 -- Five-pillar quality score, REIT-aware.
 --
 -- This is the JavaScript scorer (lib/score.js) expressed as a data model: same

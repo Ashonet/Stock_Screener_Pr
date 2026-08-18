@@ -16,7 +16,9 @@
  *   node pipeline/build-universe.js --dry-run
  */
 
-import { writeFile } from 'node:fs/promises';
+import { writeFile, mkdir } from 'node:fs/promises';
+import { createWriteStream } from 'node:fs';
+import { createGzip } from 'node:zlib';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -24,6 +26,7 @@ import * as yahoo from '../lib/yahoo.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const UNIVERSE_PATH = join(ROOT, 'pipeline', 'universe.json');
+const RAW_DIR = join(ROOT, 'warehouse', 'raw');
 
 const SOURCE_URL =
   'https://raw.githubusercontent.com/datasets/s-and-p-500-companies/main/data/constituents.csv';
@@ -83,6 +86,41 @@ async function validate(symbols) {
   return { ok: ok.sort((a, b) => a.symbol.localeCompare(b.symbol)), failed };
 }
 
+/**
+ * Record who was in the index at this moment, append-only.
+ *
+ * Overwriting universe.json alone would bake survivorship bias into everything
+ * downstream: the file holds *today's* members, so six years of history for
+ * "the S&P 500" would silently exclude every company that was dropped — and
+ * companies get dropped disproportionately because they failed. Any backtest
+ * over that gives flattering, wrong answers.
+ *
+ * Each run therefore appends a full membership observation. dim_index_membership
+ * folds the observations into valid_from / valid_to intervals, so membership at
+ * any past date is reconstructable and a historical query can be honest about
+ * who was actually in the index at the time.
+ */
+async function recordMembership(symbols, observedAt) {
+  await mkdir(RAW_DIR, { recursive: true });
+  const runId = observedAt.replace(/[:.]/g, '-');
+  const path = join(RAW_DIR, `membership__${runId}.jsonl.gz`);
+
+  const gzip = createGzip({ level: 9 });
+  const file = createWriteStream(path);
+  gzip.pipe(file);
+  for (const symbol of symbols) {
+    gzip.write(JSON.stringify({ symbol, observed_at: observedAt, source: SOURCE_URL, _ingested_at: observedAt }) + '\n');
+  }
+  // Wait on the file, not the gzip: ending compression does not mean the bytes
+  // reached disk, and exiting early writes an empty member.
+  await new Promise((resolve, reject) => {
+    file.on('finish', resolve);
+    file.on('error', reject);
+    gzip.end();
+  });
+  return path;
+}
+
 async function main() {
   console.log(`Fetching constituents from ${SOURCE_URL}`);
   const constituents = await fetchConstituents();
@@ -95,23 +133,27 @@ async function main() {
   console.log(`  dropped:  ${failed.length}`);
   for (const f of failed) console.log(`    ${f.symbol.padEnd(8)} ${f.reason}`);
 
+  const observedAt = new Date().toISOString();
   const universe = {
     description:
       'S&P 500 constituents, fetched from the source below and validated against Yahoo Finance. ' +
       'Rebuild with: node pipeline/build-universe.js',
     source: SOURCE_URL,
-    generated_at: new Date().toISOString(),
+    generated_at: observedAt,
     resolved: ok.length,
     dropped: failed.map((f) => f.symbol),
     symbols: ok.map((s) => s.symbol),
   };
 
   if (dryRun) {
-    console.log('\n--dry-run: universe.json not written');
+    console.log('\n--dry-run: universe.json and membership not written');
     return;
   }
   await writeFile(UNIVERSE_PATH, JSON.stringify(universe, null, 2) + '\n', 'utf8');
   console.log(`\nWrote ${UNIVERSE_PATH} with ${ok.length} symbols`);
+
+  const membershipPath = await recordMembership(ok.map((s) => s.symbol), observedAt);
+  console.log(`Recorded membership observation -> ${membershipPath}`);
 }
 
 main().catch((err) => {

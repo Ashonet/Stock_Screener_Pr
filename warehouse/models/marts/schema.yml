@@ -104,3 +104,39 @@ models:
         tests: [{in_range: {min_value: 0, max_value: 100}}]
       - name: pillar_valuation
         tests: [{in_range: {min_value: 0, max_value: 100}}]
+
+  - name: dim_index_membership
+    description: >
+      Index membership as a slowly-changing dimension (Type 2). Exists so
+      historical queries can filter to who was actually in the index at the time,
+      rather than inheriting survivorship bias from today's constituent list.
+    tests:
+      - unique_combination:
+          columns: [symbol, valid_from]
+    columns:
+      - name: symbol
+        tests: [not_null]
+      - name: valid_from
+        tests: [not_null]
+      - name: is_current
+        tests: [not_null]
+
+  - name: fct_score_history
+    description: One row per symbol per scoring date, with the move since the previous observation.
+    tests:
+      - unique_combination:
+          columns: [symbol, score_date]
+    columns:
+      - name: symbol
+        tests: [not_null]
+      - name: score_date
+        tests: [not_null]
+      - name: overall_score
+        tests:
+          - in_range: {min_value: 0, max_value: 100}
+
+  - name: mart_score_movers
+    description: Securities whose score moved most since the previous observation. Empty until two runs exist.
+    columns:
+      - name: symbol
+        tests: [not_null]
