@@ -20,6 +20,7 @@ import { buildScore } from './lib/score.js';
 import { parseHoldings, buildValueSeries, priceHoldings } from './lib/portfolio.js';
 import { buildIncome } from './lib/income.js';
 import { buildComparison } from './lib/compare.js';
+import { buildScoreHistory } from './lib/scoreHistory.js';
 import { cached, stats as cacheStats } from './lib/cache.js';
 import * as warehouse from './lib/warehouse.js';
 
@@ -277,6 +278,40 @@ const routes = {
         ? buildScore({ summary, financials: annual, dividendPayments })
         : null;
 
+    /*
+     * Score as at each past period, with the return over it.
+     *
+     * Monthly closes rather than the chart's: the chart follows whatever range
+     * the reader picked, and a 1D chart cannot price a period end from three
+     * years ago. The long history is already fetched above for the dividend
+     * record, so this costs nothing extra; the warehouse covers it when the
+     * upstream is rate-limiting.
+     */
+    let closes = live.history?.points ?? [];
+    if (!closes.length && warehouse.isReady()) {
+      closes = await warehouse
+        .monthlyHistory([symbol], { years: 12 })
+        .then((m) => m.get(symbol) ?? [])
+        .catch(() => []);
+    }
+
+    // Quarterly statements are fetched only when the reader is looking at them;
+    // an annual view would otherwise pay for a request it never renders.
+    const quarterlyRows =
+      period === 'quarterly'
+        ? financials
+        : await cached(`fin:${symbol}:quarterly`, TTL.financials, () => yahoo.getFinancials(symbol, 'quarterly'))
+            .catch(() => (warehouse.isReady() ? warehouse.securityBundle(symbol, { period: 'quarterly' }).then((b) => b?.financials ?? []).catch(() => []) : []));
+
+    const historyInput = { summary, dividendPayments, closes };
+    const scoreHistory =
+      annual.length && closes.length
+        ? {
+            annual: buildScoreHistory({ ...historyInput, financials: annual, periodType: 'annual' }),
+            quarterly: buildScoreHistory({ ...historyInput, financials: quarterlyRows ?? [], periodType: 'quarterly' }),
+          }
+        : null;
+
     // Report what is stale rather than what failed: a reader cares that the
     // numbers are from Friday, not which endpoint returned 429.
     const servedFromWarehouse = [];
@@ -294,6 +329,7 @@ const routes = {
       financialsPeriod: period,
       dividends,
       score,
+      scoreHistory,
       degraded,
       servedFromWarehouse,
       warehouseAsOf: servedFromWarehouse.length ? (stored?.priceAsOf ?? stored?.asOf ?? null) : null,

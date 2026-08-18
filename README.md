@@ -186,7 +186,36 @@ and roughly halves the apparent figure: Realty Income reads 2.0× on EBIT and
 
 The SQL model reproduces the original JavaScript scorer pillar-for-pillar (O
 94/62/46/96/68, UNP 43/48/30/100/39), which is how the rounding bug above got
-caught. Thresholds are screening heuristics, not a validated model, and every
+caught.
+
+### Score history
+
+Under the live score, each past reporting period is graded and shown with the
+return earned over it, by fiscal year or by quarter.
+
+These are **recomputed, not recorded**. One score snapshot exists, from the
+first pipeline run, so a real recorded history will not exist for years. The
+question answered instead is *given the numbers this company reported for
+FY2023, how would it have graded?* Restatements since are therefore included,
+and it is not what the screener would have printed at the time. Three things
+keep it honest:
+
+- **Every period is scored the same way, including the latest.** The live score
+  uses Yahoo's own trailing P/E, dividend yield and return on equity; none are
+  available dated, so the series derives them from the statements and the price.
+  Rather than mix the two, the series computes its own latest point, so the rows
+  are comparable to each other.
+- **Quarters are graded on trailing twelve months.** The scorer reasons in years
+  throughout (three-year average payout, five-year CAGR), so a single quarter
+  would compare a quarter's revenue against a year's and call it growth. Flows
+  are summed across four quarters and balances taken at the close, because
+  summing a balance sheet would report four times the debt.
+- **Periods graded on thin history are marked.** The earliest row has the least
+  behind it: with one year of statements there is no revenue or EPS trend, so
+  its growth pillar rests on the dividend record alone and renormalises to a
+  weight it has not earned. Realty Income reads A in FY2022 and B+ in FY2025 for
+  partly that reason, and the marker says so rather than letting it read as
+  decline. Thresholds are screening heuristics, not a validated model, and every
 input is exposed so a reader can disagree with the grade.
 
 ---
@@ -228,7 +257,7 @@ the live-data dashboard, just without the screener.
 ### Tests and CI
 
 ```bash
-npm test          # 67 unit tests, no network, no database
+npm test          # 78 unit tests, no network, no database
 npm run warehouse # 50 dbt assertions against the committed raw layer
 npm run docs      # self-contained lineage site at warehouse/target/static_index.html
 ```

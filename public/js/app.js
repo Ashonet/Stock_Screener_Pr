@@ -71,6 +71,7 @@ const STORE = {
   symbol: 'sd:active',
   tab: 'sd:tab',
   walletTab: 'sd:walletTab',
+  historyPeriod: 'sd:historyPeriod',
   period: 'sd:period',
 };
 const REFRESH_MS = 30_000;
@@ -132,6 +133,7 @@ const state = {
   range: readStore(STORE.range, '1y'),
   tab: readStore(STORE.tab, 'stats'),
   walletTab: readStore(STORE.walletTab, 'overview'),
+  historyPeriod: readStore(STORE.historyPeriod, 'annual'),
   period: readStore(STORE.period, 'annual'),
   stock: null,
   quotes: new Map(),
@@ -1431,6 +1433,157 @@ function scoreMeter(score) {
   );
 }
 
+/* ----------------------------------------------------------- score history */
+
+/** Signed return with an arrow, so direction never rests on colour alone. */
+function returnCell(value) {
+  if (value == null) return el('span', { class: 'muted', text: DASH });
+  const dir = direction(value);
+  return el(
+    'span',
+    { class: `delta-${dir}` },
+    el('span', { class: 'delta-arrow', 'aria-hidden': 'true', text: ARROW[dir] }),
+    ' ',
+    `${value > 0 ? '+' : ''}${percent(value, { digits: 1 })}`,
+  );
+}
+
+/**
+ * How each past period would have graded, and what the shares did over it.
+ *
+ * The scores are recomputed from the statements rather than recorded at the
+ * time, which is stated on the block rather than left for the reader to assume
+ * otherwise. Periods graded on thin statement history are marked, because the
+ * earliest point in any series has the least behind it and would otherwise read
+ * as a real decline in quality rather than a change in how much was known.
+ */
+function scoreHistoryBlock(stock) {
+  const history = stock.scoreHistory;
+  if (!history) return null;
+
+  const quarterly = state.historyPeriod === 'quarterly';
+  const active = quarterly ? history.quarterly : history.annual;
+  const periods = active?.periods ?? [];
+
+  const toggle = el(
+    'div',
+    { class: 'segmented' },
+    ...[
+      ['annual', 'Years'],
+      ['quarterly', 'Quarters'],
+    ].map(([key, label]) =>
+      el('button', {
+        type: 'button',
+        text: label,
+        'aria-pressed': String(state.historyPeriod === key),
+        onclick: () => {
+          state.historyPeriod = key;
+          writeStore(STORE.historyPeriod, key);
+          renderScore(state.stock);
+        },
+      }),
+    ),
+  );
+
+  const head = el(
+    'div',
+    { class: 'card-head', style: { marginTop: '4px' } },
+    el('h4', { class: 'stats-title', style: { margin: 0 }, text: 'Score history' }),
+    toggle,
+  );
+
+  if (!periods.length) {
+    return el(
+      'div',
+      { class: 'score-history' },
+      head,
+      el('p', {
+        class: 'empty',
+        text: quarterly
+          ? 'Not enough quarterly statements to grade a trailing year. Yahoo keeps about five quarters, and a score needs four of them.'
+          : 'No past periods can be graded from the statements on file.',
+      }),
+    );
+  }
+
+  const thin = periods.some((row) => row.statementPeriods < 3);
+
+  const body = el(
+    'tbody',
+    {},
+    ...periods.map((row) =>
+      el(
+        'tr',
+        {},
+        el(
+          'th',
+          { scope: 'row' },
+          row.label,
+          row.statementPeriods < 3
+            ? el('abbr', {
+                class: 'thin-marker',
+                title: `Graded on ${row.statementPeriods} reporting period${row.statementPeriods === 1 ? '' : 's'} of statements, so its growth pillar rests on less than the later ones.`,
+                text: '*',
+              })
+            : null,
+        ),
+        el('td', {}, scoreMeter(row.score)),
+        el('td', { class: 'score-history-value', style: { color: scoreTone(row.score) }, text: String(row.score) }),
+        el('td', { text: row.grade ?? DASH }),
+        el('td', {}, returnCell(row.totalReturn)),
+      ),
+    ),
+  );
+
+  return el(
+    'div',
+    { class: 'score-history' },
+    head,
+    el(
+      'div',
+      { class: 'table-scroll' },
+      el(
+        'table',
+        { class: 'data score-history-table' },
+        el(
+          'thead',
+          {},
+          el(
+            'tr',
+            {},
+            ...['Period', '', 'Score', 'Grade', 'Total return'].map((label) =>
+              el('th', { scope: 'col', text: label }),
+            ),
+          ),
+        ),
+        body,
+      ),
+    ),
+    el('p', {
+      class: 'card-sub',
+      style: { marginTop: '10px', marginBottom: 0 },
+      text:
+        'Recomputed from the statements on file, not recorded at the time, so a later restatement is included and this is not what the screener would have printed then. ' +
+        'Return is over the reporting period itself, with dividends reinvested. ' +
+        (quarterly ? 'Quarters are graded on the trailing twelve months, since the scorer reasons in years throughout.' : ''),
+    }),
+    thin
+      ? el('p', {
+          class: 'card-sub',
+          style: { marginTop: '6px', marginBottom: 0 },
+          text: '* Graded on fewer than three reporting periods. Its growth pillar has less behind it than the later rows, so read it as indicative rather than comparable.',
+        })
+      : null,
+    active.unscored?.length
+      ? el('p', {
+          class: 'card-sub',
+          style: { marginTop: '6px', marginBottom: 0 },
+          text: `Not graded: ${active.unscored.map((u) => `${u.period} (${u.reason})`).join(', ')}.`,
+        })
+      : null,
+  );
+}
+
 function renderScore(stock) {
   const score = stock.score;
   const head = el(
@@ -1523,6 +1676,7 @@ function renderScore(stock) {
       ),
       pillars,
     ),
+    scoreHistoryBlock(stock),
     figures.length
       ? el(
           'div',

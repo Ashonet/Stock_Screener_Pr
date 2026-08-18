@@ -1928,3 +1928,33 @@ table.screener thead th:first-child {
 .compare-years {
   width: 82px;
 }
+
+/* ----------------------------------------------------------- score history */
+
+.score-history {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+.score-history .card-head {
+  align-items: center;
+}
+.score-history-table th[scope='row'] {
+  white-space: nowrap;
+}
+/* The meter column carries the shape; the number beside it carries the value.
+   Neither is load-bearing alone, which is the point. */
+.score-history-table td:nth-child(2) {
+  width: 84px;
+  min-width: 84px;
+}
+.score-history-value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+}
+.thin-marker {
+  margin-left: 3px;
+  color: var(--text-muted);
+  cursor: help;
+  text-decoration: none;
+}
