@@ -50,6 +50,14 @@
         <ul id="search-results" class="search-results" role="listbox" aria-label="Search results" hidden></ul>
       </div>
 
+      <button id="nav-screener" class="nav-screener" type="button" title="Browse and rank every tracked company">
+        <svg class="nav-icon" viewBox="0 0 20 20" aria-hidden="true">
+          <path d="M3 5h14M6 10h8M9 15h2" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
+        <span>Screener</span>
+        <span id="screener-count" class="pill"></span>
+      </button>
+
       <div class="topbar-actions">
         <span id="refresh-status" class="refresh-status" aria-live="polite"></span>
         <button id="theme-toggle" class="icon-button" type="button" aria-label="Switch to light theme">
@@ -72,18 +80,6 @@
 
     <main class="layout">
       <aside class="sidebar">
-        <section class="panel">
-          <button id="nav-screener" class="nav-item" type="button">
-            <span class="nav-label">
-              <svg class="nav-icon" viewBox="0 0 20 20" aria-hidden="true">
-                <path d="M3 5h14M6 10h8M9 15h2" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-              </svg>
-              Screener
-            </span>
-            <span id="screener-count" class="pill"></span>
-          </button>
-        </section>
-
         <section class="panel" aria-labelledby="watchlist-heading">
           <div class="panel-head">
             <h2 id="watchlist-heading" class="visually-hidden">Watchlists</h2>

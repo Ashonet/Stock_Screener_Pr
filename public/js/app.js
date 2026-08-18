@@ -816,6 +816,7 @@ async function loadWalletData() {
 function selectWallet(id) {
   store.activeWalletId = id;
   store.view = 'wallet';
+  clearSymbolFromUrl();
   state.editingHolding = null;
   state.walletData = null;
   saveWallets();
@@ -889,6 +890,7 @@ async function loadScreener() {
 function showScreenerView() {
   store.view = 'screener';
   saveView();
+  clearSymbolFromUrl();
   setVisibleView('screener');
   renderWatchlist();
   renderWalletList();
@@ -897,6 +899,14 @@ function showScreenerView() {
 }
 
 /* -------------------------------------------------------------------- detail */
+
+/** The URL names the open company; leaving one should stop it naming it. */
+function clearSymbolFromUrl() {
+  const url = new URL(location.href);
+  if (!url.searchParams.has('symbol')) return;
+  url.searchParams.delete('symbol');
+  history.replaceState(null, '', url);
+}
 
 function selectSymbol(symbol) {
   const wasWallet = store.view === 'wallet';
@@ -2099,12 +2109,20 @@ function init() {
 
   // The main view is loaded outside the guarded steps: if this cannot run there
   // is nothing to show, and the error belongs on screen rather than in a banner.
-  if (store.view === 'screener' && dom.screenerView) {
-    showScreenerView();
+  // The screener is the landing view: it is the one screen that says what this
+  // app is, and arriving on a single company assumes you already knew which one
+  // you wanted. A ?symbol= link still opens that company directly — and because
+  // selecting one writes the symbol into the URL, refreshing while reading a
+  // company keeps you there rather than bouncing back to the list.
+  if (linked && dom.detail) {
+    showStockView();
+    loadStock();
   } else if (store.view === 'wallet' && activeWallet()) {
     setVisibleView('wallet');
     renderWalletView();
     loadWalletData();
+  } else if (dom.screenerView) {
+    showScreenerView();
   } else {
     showStockView();
     loadStock();

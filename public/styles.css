@@ -1740,3 +1740,44 @@ table.screener thead th:first-child {
 .search input:focus ~ .search-kbd {
   display: none;
 }
+
+/* ------------------------------------------------------ screener nav ---- */
+
+.nav-screener {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--text-secondary);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.nav-screener:hover {
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+}
+/* Current section is marked by fill as well as colour, so it does not rely on
+   hue alone to say where you are. */
+.nav-screener[aria-current='true'] {
+  color: #fff;
+  background: var(--series-1);
+  border-color: transparent;
+}
+.nav-screener[aria-current='true'] .nav-icon,
+.nav-screener[aria-current='true'] .pill {
+  color: #fff;
+}
+.nav-screener[aria-current='true'] .pill {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+@media (max-width: 720px) {
+  .nav-screener span:not(.pill) {
+    display: none;
+  }
+}
