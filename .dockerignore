@@ -1,5 +1,13 @@
 .git
+.github
 node_modules
+.venv
+test
 *.md
 Dockerfile
 .dockerignore
+
+# Derived; stage 1 rebuilds it from warehouse/raw.
+warehouse/warehouse.duckdb
+warehouse/target
+warehouse/logs

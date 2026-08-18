@@ -282,9 +282,20 @@ twin, and hit targets are the band rather than the painted mark.
 
 ## Deploying
 
-Stateless, so `HOST=0.0.0.0 PORT=8080 node server.js` anywhere. A `Dockerfile` is
-included; `GET /api/health` reports uptime, cache and warehouse freshness without
-touching any upstream.
+Stateless, so `HOST=0.0.0.0 PORT=8080 node server.js` anywhere. `GET /api/health`
+reports uptime, cache and warehouse freshness without touching any upstream — use
+it as the platform health check path.
+
+The `Dockerfile` is two-stage. The warehouse is derived and not in git, but the
+app serves from it, so stage one installs dbt and builds it from the committed
+landing zone and stage two copies only the resulting file into a Node runtime.
+That keeps an 84MB binary out of the repository while still giving the deployed
+site a warehouse — and because it uses `dbt build` rather than `dbt run`, a
+failing data test stops the image being produced at all.
+
+Set `HOST=0.0.0.0` on any container platform. The default of `127.0.0.1` is
+correct on a laptop and unreachable from outside a container, which produces a
+deploy that builds cleanly and answers nothing.
 
 Caveats that actually bite:
 
