@@ -134,6 +134,31 @@ function renderHero(node, wallet, data, handlers) {
 
 /* -------------------------------------------------------------------- chart */
 
+/**
+ * What the line is and is not.
+ *
+ * Each holding joins on its purchase date, so the line steps when one is added
+ * and that step is money paid in rather than performance. Saying so is the
+ * difference between a value chart and a return chart, and only one of them is
+ * being drawn.
+ */
+function seriesNote(data) {
+  const start =
+    data.startReason === 'purchase'
+      ? `Starts ${shortDate(data.startedAt)}, your earliest purchase date.`
+      : `Starts ${shortDate(data.startedAt)}, the earliest date every holding has a price for.`;
+
+  const added = (data.contributions ?? []).length;
+  const steps = added
+    ? ` The line steps up on ${added === 1 ? 'the date a later holding was' : `${added} dates as later holdings were`} added, which is money paid in rather than a gain.`
+    : '';
+
+  // The remaining approximation, stated where it is now the only one left.
+  const counts = " Share counts are today's throughout, so topping a position up reads back through the whole period it was held.";
+
+  return start + steps + counts;
+}
+
 function renderChart(node, wallet, data, rangeBlurb, mountChart) {
   const points = data?.points ?? [];
   const code = data?.currency ?? 'USD';
@@ -177,12 +202,7 @@ function renderChart(node, wallet, data, rangeBlurb, mountChart) {
           ].filter(Boolean),
         ],
       }),
-    note:
-      data.startedAt && !intraday
-        ? data.startReason === 'purchase'
-          ? `Series starts ${shortDate(data.startedAt)}, your earliest purchase date. Share counts are held at today's throughout, so this values the basket you hold now rather than replaying what you bought when.`
-          : `Series starts ${shortDate(data.startedAt)}, the earliest date every holding has a price for.`
-        : null,
+    note: !intraday && data.startedAt ? seriesNote(data) : null,
     table: {
       columns: ['Date', 'Value'],
       rows: [...points].reverse().map((p) => [intraday ? dateTime(p.t) : shortDate(p.t), currency(p.c, code)]),

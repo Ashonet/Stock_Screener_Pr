@@ -175,6 +175,18 @@ describe('buildValueSeries start date', () => {
   const chartFrom = (startMs, closes) => ({ points: closes.map((c, i) => ({ t: startMs + i * DAY, c })) });
   const day0 = Date.UTC(2024, 0, 1);
 
+  test('a purchase date on a non-trading day still reports as a purchase start', () => {
+    // 6 Jan 2024 was a Saturday. Comparing the first point against the purchase
+    // date directly would call this a coverage start and print the wrong note.
+    const sat = Date.UTC(2024, 0, 1);
+    const entries = [
+      { holding: { symbol: 'A', shares: 1, boughtAt: '2024-01-06' }, chart: chartFrom(sat, [1, 2, 3, 4, 5, 6, 7, 8]) },
+    ];
+    const series = buildValueSeries(entries);
+    assert.equal(series.startReason, 'purchase');
+    assert.ok(series.startedAt > Date.UTC(2024, 0, 5));
+  });
+
   test('starts at the earliest purchase date when prices reach further back', () => {
     // Prices run from 1 Jan; the wallet was not bought until the 5th. Valuing
     // the basket across the first four days reports a return nobody earned.
@@ -218,10 +230,61 @@ describe('buildValueSeries start date', () => {
     assert.equal(series.firstPurchase, null);
   });
 
-  test('clipping can be turned off', () => {
+  test('purchase dates can be ignored', () => {
     const entries = [
       { holding: { symbol: 'A', shares: 1, boughtAt: '2024-01-05' }, chart: chartFrom(day0, [1, 2, 3, 4, 5, 6, 7]) },
     ];
-    assert.equal(buildValueSeries(entries, { fromFirstPurchase: false }).startedAt, day0);
+    assert.equal(buildValueSeries(entries, { fromPurchaseDates: false }).startedAt, day0);
+  });
+
+  test('a holding is not counted before the day it was bought', () => {
+    // The reported bug: a wallet whose cost was 8,500 opened at 11,387, because
+    // the two holdings bought in January were valued from June alongside the
+    // one that was.
+    const entries = [
+      { holding: { symbol: 'EARLY', shares: 100, boughtAt: '2024-01-01' }, chart: chartFrom(day0, [50, 50, 50, 50]) },
+      { holding: { symbol: 'LATE', shares: 100, boughtAt: '2024-01-03' }, chart: chartFrom(day0, [30, 30, 30, 30]) },
+    ];
+    const series = buildValueSeries(entries);
+
+    assert.equal(series.points[0].c, 5000, 'opens on EARLY alone');
+    assert.equal(series.points[1].c, 5000, 'still EARLY alone the next day');
+    assert.equal(series.points[2].c, 8000, 'LATE joins on its purchase date');
+    assert.equal(series.points[3].c, 8000);
+  });
+
+  test('the dates a holding joins are reported, since the step is not a return', () => {
+    const entries = [
+      { holding: { symbol: 'EARLY', shares: 1, boughtAt: '2024-01-01' }, chart: chartFrom(day0, [1, 1, 1, 1]) },
+      { holding: { symbol: 'LATE', shares: 1, boughtAt: '2024-01-03' }, chart: chartFrom(day0, [1, 1, 1, 1]) },
+    ];
+    const series = buildValueSeries(entries);
+
+    assert.deepEqual(series.contributions, [{ symbol: 'LATE', t: Date.UTC(2024, 0, 3) }]);
+  });
+
+  test('a holding with no purchase date counts throughout', () => {
+    // An unknown purchase date is not evidence of a late one.
+    const entries = [
+      { holding: { symbol: 'DATED', shares: 1, boughtAt: '2024-01-03' }, chart: chartFrom(day0, [10, 10, 10, 10]) },
+      { holding: { symbol: 'UNDATED', shares: 1, boughtAt: null }, chart: chartFrom(day0, [5, 5, 5, 5]) },
+    ];
+    const series = buildValueSeries(entries);
+
+    assert.equal(series.startedAt, day0, 'starts where the undated holding has prices');
+    assert.equal(series.points[0].c, 5, 'the undated holding alone');
+    assert.equal(series.points[2].c, 15, 'both once the dated one is bought');
+  });
+
+  test('a holding owned but not yet priced withholds the point rather than dropping out', () => {
+    // Dropping it would shrink the total and read as a loss.
+    const entries = [
+      { holding: { symbol: 'A', shares: 1, boughtAt: '2024-01-01' }, chart: chartFrom(day0, [10, 10, 10]) },
+      { holding: { symbol: 'B', shares: 1, boughtAt: '2024-01-01' }, chart: chartFrom(day0 + 2 * DAY, [7]) },
+    ];
+    const series = buildValueSeries(entries);
+
+    assert.equal(series.points.length, 1, 'only the day both are priced');
+    assert.equal(series.points[0].c, 17);
   });
 });

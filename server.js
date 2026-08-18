@@ -388,6 +388,7 @@ const routes = {
       startedAt: series.startedAt,
       startReason: series.startReason,
       firstPurchase: series.firstPurchase,
+      contributions: series.contributions,
       holdings: rows,
       totals,
       currency: currencies[0] ?? 'USD',

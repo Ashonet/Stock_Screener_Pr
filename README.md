@@ -263,7 +263,7 @@ the live-data dashboard, just without the screener.
 ### Tests and CI
 
 ```bash
-npm test          # 91 unit tests, no network, no database
+npm test          # 96 unit tests, no network, no database
 npm run warehouse # 50 dbt assertions against the committed raw layer
 npm run docs      # self-contained lineage site at warehouse/target/static_index.html
 ```
@@ -420,12 +420,11 @@ Caveats that actually bite:
 - FFO is estimated as net income + D&A. True NAREIT FFO also strips gains on
   property sales and adds back impairments, which Yahoo does not report, so a
   REIT that sold heavily in a year will score with an inflated FFO.
-- The wallet value chart holds share counts at what you hold *today*. It is a
-  basket valuation, not a transaction-ledger replay. It does start at your
-  earliest purchase date rather than at whatever the price history reaches
-  back to, so it never values a basket across years before any of it was
-  owned, but between that date and a later purchase it still counts shares
-  you had not bought yet.
+- The wallet value chart brings each holding in on its purchase date, so it
+  never counts a position before it was bought, but share counts are today's
+  throughout. Topping a position up therefore reads back through the whole
+  period it was held. It remains a value series rather than a return series:
+  the line steps up when a holding is added, and that step is money paid in.
 - These are undocumented endpoints. They are stable in practice but can change
   without notice; the tests are the tripwire.
 - For research and education. Not investment advice.
