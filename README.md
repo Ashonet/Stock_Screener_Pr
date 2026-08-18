@@ -256,8 +256,22 @@ work with zero setup.
 
 ## The dashboard
 
-Served from the marts, with the live Yahoo path retained for symbols outside the
-tracked universe.
+### The warehouse is also the fallback
+
+The screener reads the marts. The per-security view prefers live Yahoo — it has
+richer coverage and real-time prices — but **falls back to stored data when the
+session-gated endpoints are rate-limited**, which on a shared host is routine
+rather than exceptional.
+
+`securityBundle()` reshapes warehouse rows into Yahoo's own module layout, so
+`buildProfile` and `buildScore` consume it unchanged. That matters: a stored
+security is graded by exactly the same code as a live one, and the score comes
+out identical rather than merely similar. Each piece falls back independently, so
+a live statement set is still used even when the profile call failed.
+
+Stored data is labelled with its date rather than passed off as current, and a
+symbol outside the tracked universe still degrades honestly — there is nothing
+stored to serve, and saying so beats inventing it.
 
 **Screener** — all 82 tracked securities ranked by score, sortable on any column,
 filterable by sector and by scoring basis. REIT rows show P/FFO and operating

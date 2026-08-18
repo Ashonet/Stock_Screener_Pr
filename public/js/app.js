@@ -881,6 +881,21 @@ function renderHero(stock) {
 
   render(dom.hero, left, right);
 
+  // Stored data is labelled, never passed off as live. A reader deciding on
+  // these numbers should know whether they are today's.
+  if (stock.servedFromWarehouse?.length) {
+    const asOf = stock.warehouseAsOf ? ` as of ${isoDate(stock.warehouseAsOf)}` : '';
+    dom.hero.append(
+      el('div', {
+        class: 'banner',
+        style: { gridColumn: '1 / -1' },
+        text:
+          `Showing stored ${stock.servedFromWarehouse.join(' and ')}${asOf} — the live feed is ` +
+          `rate-limited right now. Prices are current.`,
+      }),
+    );
+  }
+
   if (stock.degraded?.length) {
     dom.hero.append(
       el('div', {

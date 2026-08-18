@@ -210,30 +210,66 @@ const routes = {
       cached(`history:${symbol}`, TTL.financials, () => yahoo.getLongHistory(symbol)),
     ]);
 
-    const summary = summaryRes.status === 'fulfilled' ? summaryRes.value : {};
-    const profile = buildProfile(symbol, summary, chart);
-    // Fall back to whatever the price chart happened to carry.
-    const history = historyRes.status === 'fulfilled' ? historyRes.value : { dividends: chart.dividends, points: [] };
-    const dividends = dividendsByYear(history.dividends);
+    const live = {
+      summary: summaryRes.status === 'fulfilled' ? summaryRes.value : null,
+      financials: financialsRes.status === 'fulfilled' ? financialsRes.value : null,
+      annual: annualRes.status === 'fulfilled' ? annualRes.value : null,
+      history: historyRes.status === 'fulfilled' ? historyRes.value : null,
+    };
 
-    const degraded = [];
-    if (summaryRes.status === 'rejected') degraded.push('fundamentals');
-    if (financialsRes.status === 'rejected') degraded.push('financials');
+    // Fall back to stored data when the session-gated endpoints are
+    // unavailable. On a laptop that is occasional; on a shared host, where the
+    // upstream rate-limits by IP, it is routine — and the difference between a
+    // page of dashes and a page of slightly stale numbers is the whole point of
+    // having a warehouse. Each piece falls back independently, so a live
+    // statement set is still used even if the profile call failed.
+    let stored = null;
+    const needsFallback = !live.summary || !live.financials || !live.annual;
+    if (needsFallback && warehouse.isReady()) {
+      stored = await warehouse.securityBundle(symbol, { period }).catch(() => null);
+      if (stored && period !== 'annual') {
+        stored.annual = await warehouse
+          .securityBundle(symbol, { period: 'annual' })
+          .then((b) => b?.financials ?? null)
+          .catch(() => null);
+      }
+    }
+
+    const summary = live.summary ?? stored?.summary ?? {};
+    const financials = live.financials ?? stored?.financials ?? [];
+    const annual = live.annual ?? (period === 'annual' ? stored?.financials : stored?.annual) ?? [];
+    const dividendPayments =
+      live.history?.dividends ?? stored?.dividendPayments ?? chart.dividends ?? [];
+
+    const profile = buildProfile(symbol, summary, chart);
+    const dividends = dividendsByYear(dividendPayments);
 
     // Scoring needs the statements; without them there is nothing to grade.
     const score =
-      summaryRes.status === 'fulfilled' && annualRes.status === 'fulfilled' && annualRes.value.length
-        ? buildScore({ summary, financials: annualRes.value, dividendPayments: history.dividends })
+      Object.keys(summary).length && annual.length
+        ? buildScore({ summary, financials: annual, dividendPayments })
         : null;
+
+    // Report what is stale rather than what failed: a reader cares that the
+    // numbers are from Friday, not which endpoint returned 429.
+    const servedFromWarehouse = [];
+    if (!live.summary && stored?.summary) servedFromWarehouse.push('fundamentals');
+    if (!live.financials && stored?.financials?.length) servedFromWarehouse.push('financials');
+
+    const degraded = [];
+    if (!live.summary && !stored?.summary) degraded.push('fundamentals');
+    if (!live.financials && !stored?.financials?.length) degraded.push('financials');
 
     return {
       ...profile,
       chart,
-      financials: financialsRes.status === 'fulfilled' ? financialsRes.value : [],
+      financials,
       financialsPeriod: period,
       dividends,
       score,
       degraded,
+      servedFromWarehouse,
+      warehouseAsOf: servedFromWarehouse.length ? (stored?.priceAsOf ?? stored?.asOf ?? null) : null,
     };
   },
 
