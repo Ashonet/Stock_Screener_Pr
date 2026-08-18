@@ -263,7 +263,7 @@ the live-data dashboard, just without the screener.
 ### Tests and CI
 
 ```bash
-npm test          # 96 unit tests, no network, no database
+npm test          # 109 unit tests, no network, no database
 npm run warehouse # 50 dbt assertions against the committed raw layer
 npm run docs      # self-contained lineage site at warehouse/target/static_index.html
 ```
@@ -356,6 +356,28 @@ will not survive extrapolation are marked rather than capped, because capping
 substitutes a different number without saying so. NVIDIA's dividend has grown
 77% a year from almost nothing, which compounds $2.80 into $49 over five years;
 the row carries a warning rather than a quietly adjusted figure.
+
+**Goal**: the income you want, and what the portfolio has to be worth to pay
+it. A portfolio drawn at `w` percent supports `value x w` of income, so the
+target needs `target / w` of capital, and the rate is a control rather than a
+constant because it is the assumption doing all the work: at 3% a $30,000
+income needs a million, at 4% it needs 750,000.
+
+The part worth having is the split. **Dividends are not income on top of the
+withdrawal, they are the part of it that arrives without selling.** A portfolio
+yielding 1.2% drawn at 3% has to sell the other 1.8% every year; one yielding
+3.3% sells nothing. Treating the yield as additional would tell someone they
+need half the portfolio they actually do, so the tab reports the gap between
+the rate and the yield at today's value and at the target, alongside the value
+at which dividends alone would cover it.
+
+Growth since the first purchase is shown but **not annualised where holdings
+were bought later**. The wallet's series starts with the first holding alone
+and others join on their own dates, so the change from then to now is capital
+added plus what it earned. Compounding that would print "42% a year" on a
+wallet that went from 3,550 to 16,089 by buying more, and without a per-lot
+ledger the two cannot be separated, so the rate is withheld rather than
+published with a caveat nobody reads.
 
 **Per-security view**: price chart (1D–MAX, crosshair, table view), then three
 tabs: key statistics as one dense card, financials (revenue/net income,

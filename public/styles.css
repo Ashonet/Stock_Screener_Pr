@@ -1991,3 +1991,49 @@ table.screener thead th:first-child {
   max-width: 68ch;
   line-height: 1.55;
 }
+
+/* ------------------------------------------------------------------- goal */
+
+.goal-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin: 4px 0 18px;
+}
+.goal-control {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.goal-field {
+  width: 150px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.goal-progress {
+  margin-top: 18px;
+}
+/* One bar, one colour, length carries the value. A proportion of a known whole
+   is the one thing a bar reads better than a number. */
+.goal-track {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--wash);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.goal-fill {
+  display: block;
+  height: 100%;
+  background: var(--series-1);
+  border-radius: 999px;
+}
+.goal-scale {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}

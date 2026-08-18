@@ -10,6 +10,7 @@
 
 import { el, render, clear } from './dom.js';
 import { areaChart, columnChart, cssVar } from './charts.js';
+import { buildGoal } from './goal.js';
 import {
   ARROW,
   DASH,
@@ -872,6 +873,305 @@ function renderForecast(node, chartNode, wallet, data, income, mountChart, handl
   );
 }
 
+/* ------------------------------------------------------------------- goal */
+
+/**
+ * How much capital the wanted income needs, and how much of it has to be sold.
+ *
+ * The withdrawal rate is a control rather than a constant because it is the
+ * assumption doing all the work: at 3% a 30,000 income needs a million, at 4%
+ * it needs 750,000. Fixing it silently would hide the single number the whole
+ * page rests on.
+ */
+function renderGoal(node, chartNode, wallet, data, income, mountChart, handlers, goalState) {
+  const code = data?.currency ?? 'USD';
+  const unit = currencySymbol(code);
+  const { target, rate } = goalState;
+
+  const field = (opts) =>
+    el('input', {
+      type: 'number',
+      class: 'field goal-field',
+      min: opts.min,
+      max: opts.max,
+      step: opts.step,
+      value: String(opts.value),
+      'aria-label': opts.label,
+      title: opts.title,
+      onchange: (event) => opts.commit(event.target.value),
+      onkeydown: (event) => {
+        if (event.key !== 'Enter') return;
+        event.preventDefault();
+        opts.commit(event.target.value);
+      },
+    });
+
+  const controls = el(
+    'div',
+    { class: 'goal-controls' },
+    el(
+      'label',
+      { class: 'goal-control' },
+      el('span', { class: 'income-stat-label', text: `Income wanted (${unit}/year)` }),
+      field({
+        value: target,
+        min: '0',
+        step: '500',
+        label: 'Annual income wanted',
+        title: 'The income you want the portfolio to pay each year',
+        commit: (raw) => handlers.onGoalTarget(Number(raw)),
+      }),
+    ),
+    el(
+      'label',
+      { class: 'goal-control' },
+      el('span', { class: 'income-stat-label', text: 'Withdrawal rate (%)' }),
+      field({
+        value: rate,
+        min: '0.5',
+        max: '10',
+        step: '0.1',
+        label: 'Annual withdrawal rate',
+        title: 'The share of the portfolio drawn each year. This is the assumption the whole page rests on.',
+        commit: (raw) => handlers.onGoalRate(Number(raw)),
+      }),
+    ),
+  );
+
+  const head = el(
+    'div',
+    { class: 'card-head' },
+    el('h3', { class: 'card-title', text: 'Income goal' }),
+    el('span', { class: 'card-sub', style: { marginBottom: 0 }, text: `drawn at ${rate}% a year` }),
+  );
+
+  const goal = buildGoal({
+    value: data?.totals?.value,
+    annualDividends: income?.projection?.totals?.currentAnnual ?? 0,
+    target,
+    withdrawalRate: rate,
+    startValue: data?.points?.[0]?.c ?? null,
+    startedAt: data?.startedAt ?? null,
+    dividendsReceived: income?.totals?.total ?? null,
+    contributions: (data?.contributions ?? []).length,
+  });
+
+  node.hidden = false;
+
+  if (!goal.ok) {
+    const why = {
+      'no-value': 'This wallet has no value yet, so there is nothing to measure a goal against.',
+      'no-target': 'Set the income you want and this works out what the portfolio has to be worth.',
+      'no-rate': 'The withdrawal rate has to be above zero.',
+    };
+    render(node, head, controls, el('p', { class: 'empty', text: why[goal.reason] ?? 'Not enough to work with yet.' }));
+    clear(chartNode);
+    chartNode.hidden = true;
+    return;
+  }
+
+  const stat = (label, value, hint) =>
+    el(
+      'div',
+      { class: 'income-stat' },
+      el('span', { class: 'income-stat-label', text: label }),
+      el('span', { class: 'income-stat-value', text: value }),
+      hint ? el('span', { class: 'income-stat-hint', text: hint }) : null,
+    );
+
+  const summary = el(
+    'div',
+    { class: 'income-summary' },
+    stat('Portfolio needed', currency(goal.requiredValue, code), `to draw ${currency(goal.target, code)} a year`),
+    stat('Portfolio now', currency(goal.value, code), `${percent(goal.progressPct, { digits: 1 })} of the way`),
+    stat('Still to go', currency(goal.shortfall, code)),
+    stat('Current yield', percent(goal.yieldPct, { digits: 2 }), `${currency(goal.annualDividends, code)} a year`),
+  );
+
+  // Progress reads as a proportion, so it gets a bar as well as a number.
+  const bar = el(
+    'div',
+    { class: 'goal-progress' },
+    el(
+      'div',
+      { class: 'goal-track', role: 'img', 'aria-label': `${Math.round(goal.progressPct)}% of the way to the goal` },
+      el('div', { class: 'goal-fill', style: { width: `${Math.max(0.5, goal.progressPct)}%` } }),
+    ),
+    el(
+      'div',
+      { class: 'goal-scale' },
+      el('span', { text: currency(0, code) }),
+      el('span', { text: currency(goal.requiredValue, code) }),
+    ),
+  );
+
+  render(node, head, controls, summary, bar);
+
+  /* ------------------------------------------- where the withdrawal comes from */
+
+  const splitRow = (label, s, portfolio) =>
+    el(
+      'tr',
+      {},
+      el('th', { scope: 'row', text: label }),
+      el('td', { text: currency(portfolio, code) }),
+      el('td', { text: currency(s.withdrawal, code) }),
+      el('td', { text: currency(s.fromDividends, code) }),
+      el('td', {}, s.fromSales > 0 ? currency(s.fromSales, code) : el('span', { class: 'muted', text: 'nothing' })),
+      el('td', { text: `${percent(s.saleRatePct, { digits: 2 })}` }),
+    );
+
+  const splitTable = el(
+    'table',
+    { class: 'data' },
+    el(
+      'thead',
+      {},
+      el(
+        'tr',
+        {},
+        ...['', 'Portfolio', `Drawn at ${rate}%`, 'From dividends', 'From selling', 'Sold per year'].map((label) =>
+          el('th', { scope: 'col', text: label }),
+        ),
+      ),
+    ),
+    el('tbody', {}, splitRow('Today', goal.today, goal.value), splitRow('At the goal', goal.atTarget, goal.requiredValue)),
+  );
+
+  const coverage =
+    goal.atTarget.fromSales > 0
+      ? `At today's yield, dividends cover ${percent(goal.atTarget.coveredPct, { digits: 0 })} of the withdrawal and the rest comes from selling. Dividends alone would cover it at ${currency(goal.valueForDividendsAlone, code)}.`
+      : `At today's yield the dividends cover the whole withdrawal, so nothing has to be sold.`;
+
+  node.append(
+    el(
+      'div',
+      { style: { marginTop: '20px' } },
+      el('h4', { class: 'stats-title', text: 'Where the income comes from' }),
+      el('div', { class: 'table-scroll' }, splitTable),
+      el('p', { class: 'card-sub', style: { marginTop: '10px', marginBottom: 0 }, text: coverage }),
+    ),
+  );
+
+  /* ------------------------------------------------- since the first purchase */
+
+  const since = goal.sinceStart;
+  if (since.startValue != null) {
+    const sinceTable = el(
+      'table',
+      { class: 'data' },
+      el(
+        'thead',
+        {},
+        el('tr', {}, ...['', 'At first purchase', 'Now', 'Needed'].map((label) => el('th', { scope: 'col', text: label }))),
+      ),
+      el(
+        'tbody',
+        {},
+        el(
+          'tr',
+          {},
+          el('th', { scope: 'row', text: 'Portfolio value' }),
+          el('td', { text: currency(since.startValue, code) }),
+          el('td', { text: currency(goal.value, code) }),
+          el('td', { text: currency(goal.requiredValue, code) }),
+        ),
+        el(
+          'tr',
+          {},
+          el('th', { scope: 'row', text: 'Dividends a year' }),
+          el('td', { class: 'muted', text: since.dividendsReceived == null ? DASH : `${currency(since.dividendsReceived, code)} received since` }),
+          el('td', { text: currency(goal.annualDividends, code) }),
+          el('td', { text: currency(goal.atTarget.fromDividends, code) }),
+        ),
+      ),
+    );
+
+    const change = since.grewBy == null ? '' : `${since.grewBy > 0 ? '+' : ''}${percent(since.grewBy, { digits: 1 })}`;
+    const span = since.years == null ? '' : ` Held ${since.years.toFixed(1)} years, ${change} in value.`;
+    // The change is only a return when nothing was paid in after the start.
+    // Where holdings joined later it is growth plus contributions, and calling
+    // that a rate would report performance the wallet never had.
+    const tail = since.withContributions
+      ? ` That includes ${since.contributions === 1 ? 'a holding' : `${since.contributions} holdings`} bought after the start, so it is money added as well as growth, and no annual rate is shown for it.`
+      : since.annualisedPct == null
+        ? ''
+        : ` That is ${since.annualisedPct > 0 ? '+' : ''}${percent(since.annualisedPct, { digits: 1 })} a year.`;
+    const held = span + tail;
+
+    node.append(
+      el(
+        'div',
+        { style: { marginTop: '20px' } },
+        el('h4', { class: 'stats-title', text: 'Since your first purchase' }),
+        el('div', { class: 'table-scroll' }, sinceTable),
+        el('p', {
+          class: 'card-sub',
+          style: { marginTop: '10px', marginBottom: 0 },
+          text: `The first column is the wallet on the day it began.${held}`,
+        }),
+      ),
+    );
+  }
+
+  node.append(
+    el(
+      'details',
+      { class: 'forecast-assumptions' },
+      el('summary', { text: 'What this assumes' }),
+      el('p', {
+        text:
+          `A portfolio drawn at ${rate}% a year supports ${rate}% of its value in income, so the target needs ${currency(goal.requiredValue, code)} of capital. ` +
+          'Dividends are not income on top of that withdrawal, they are the part of it that arrives without selling, and the gap between the yield and the rate is what has to be sold. ' +
+          "Today's yield is assumed to hold as the portfolio grows, which is the weakest part: a portfolio that grows mostly on price ends up yielding less and would need to sell more than this shows. " +
+          'Nothing here accounts for inflation, tax or a dividend being cut.',
+      }),
+    ),
+  );
+
+  /* ------------------------------------------------------------------ chart */
+
+  const points = data?.points ?? [];
+  if (points.length < 2) {
+    clear(chartNode);
+    chartNode.hidden = true;
+    return;
+  }
+
+  chartNode.hidden = false;
+  const colour = cssVar('--series-1');
+  mountChart(chartNode, {
+    title: 'Value against the goal',
+    subtitle: `since ${shortDate(data.startedAt)}, with the ${currency(goal.requiredValue, code)} needed marked`,
+    height: 320,
+    draw: (width, height) =>
+      areaChart(width, height, {
+        points,
+        color: colour,
+        ariaLabel: `${wallet.name} value against the goal`,
+        formatValue: (v) => `${unit}${compact(v)}`,
+        // The scale stretches to include the goal, which is the point: it shows
+        // the distance rather than filling the plot with the near ground.
+        referenceValue: goal.requiredValue,
+        referenceLabel: 'goal',
+        endLabel: currency(goal.value, code),
+        formatTooltip: (point) => [
+          shortDate(point.t),
+          [
+            { label: 'Portfolio value', value: currency(point.c, code), color: colour },
+            { label: 'Of the goal', value: percent((point.c / goal.requiredValue) * 100, { digits: 1 }) },
+          ],
+        ],
+      }),
+    table: {
+      columns: ['Date', 'Value', 'Of the goal'],
+      rows: [...points]
+        .reverse()
+        .map((p) => [shortDate(p.t), currency(p.c, code), percent((p.c / goal.requiredValue) * 100, { digits: 1 })]),
+    },
+  });
+}
+
 /* --------------------------------------------------------------------- api */
 
 /** The income panel's own empty state, so the tab is never blank. */
@@ -892,7 +1192,7 @@ function hide(node) {
   node.hidden = true;
 }
 
-export function renderWallet({ nodes, wallet, data, income, rangeBlurb, handlers, editing, mountChart, forecastYears }) {
+export function renderWallet({ nodes, wallet, data, income, rangeBlurb, handlers, editing, mountChart, forecastYears, goal }) {
   if (!wallet) {
     render(nodes.hero, el('p', { class: 'empty', text: 'Create a wallet from the sidebar to track a portfolio.' }));
     clear(nodes.chart);
@@ -901,6 +1201,8 @@ export function renderWallet({ nodes, wallet, data, income, rangeBlurb, handlers
     hide(nodes.incomeChart);
     hide(nodes.forecast);
     hide(nodes.forecastChart);
+    hide(nodes.goal);
+    hide(nodes.goalChart);
     return;
 
   }
@@ -913,6 +1215,8 @@ export function renderWallet({ nodes, wallet, data, income, rangeBlurb, handlers
     hide(nodes.incomeChart);
     renderIncomeEmpty(nodes.forecast, 'Add a dividend-paying holding to project its income forward.', 'Income forecast');
     hide(nodes.forecastChart);
+    renderIncomeEmpty(nodes.goal, 'Add a holding and this works out what the portfolio has to be worth.', 'Income goal');
+    hide(nodes.goalChart);
     renderHoldings(nodes.holdings, wallet, data, handlers, editing);
     return;
   }
@@ -921,4 +1225,5 @@ export function renderWallet({ nodes, wallet, data, income, rangeBlurb, handlers
   renderHoldings(nodes.holdings, wallet, data, handlers, editing);
   renderIncome(nodes.income, nodes.incomeChart, wallet, data, income, mountChart);
   renderForecast(nodes.forecast, nodes.forecastChart, wallet, data, income, mountChart, handlers, forecastYears);
+  renderGoal(nodes.goal, nodes.goalChart, wallet, data, income, mountChart, handlers, goal);
 }

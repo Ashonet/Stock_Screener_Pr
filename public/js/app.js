@@ -73,6 +73,8 @@ const STORE = {
   walletTab: 'sd:walletTab',
   historyPeriod: 'sd:historyPeriod',
   forecastYears: 'sd:forecastYears',
+  goalTarget: 'sd:goalTarget',
+  goalRate: 'sd:goalRate',
   period: 'sd:period',
 };
 const REFRESH_MS = 30_000;
@@ -92,6 +94,7 @@ const WALLET_TABS = [
   { id: 'overview', label: 'Value and holdings' },
   { id: 'income', label: 'Dividend income' },
   { id: 'forecast', label: 'Income forecast' },
+  { id: 'goal', label: 'Goal' },
 ];
 
 const TABS = [
@@ -137,6 +140,10 @@ const state = {
   walletTab: readStore(STORE.walletTab, 'overview'),
   historyPeriod: readStore(STORE.historyPeriod, 'annual'),
   forecastYears: readStore(STORE.forecastYears, 5),
+  // The withdrawal rate defaults to 3%, which is the convention the tab is
+  // built around, but it is state rather than a constant because it is the
+  // assumption the whole page rests on.
+  goal: { target: readStore(STORE.goalTarget, 30_000), rate: readStore(STORE.goalRate, 3) },
   period: readStore(STORE.period, 'annual'),
   stock: null,
   quotes: new Map(),
@@ -189,10 +196,13 @@ const dom = {
     overview: document.getElementById('wpanel-overview'),
     income: document.getElementById('wpanel-income'),
     forecast: document.getElementById('wpanel-forecast'),
+    goal: document.getElementById('wpanel-goal'),
   },
   walletIncomeChart: document.getElementById('wallet-income-chart'),
   walletForecast: document.getElementById('wallet-forecast'),
   walletForecastChart: document.getElementById('wallet-forecast-chart'),
+  walletGoal: document.getElementById('wallet-goal'),
+  walletGoalChart: document.getElementById('wallet-goal-chart'),
   compareView: document.getElementById('compare-view'),
   compareCard: document.getElementById('compare-card'),
   mapView: document.getElementById('map-view'),
@@ -771,6 +781,10 @@ function setupWallets() {
 
 const walletHandlers = {
   onForecastYears: (years) => setForecastYears(years),
+  // Both are pure repaints: the goal is worked out in the browser from the
+  // valuation and income already in hand, so changing either needs no request.
+  onGoalTarget: (value) => setGoal({ target: Math.max(0, Math.round(Number(value) || 0)) }),
+  onGoalRate: (value) => setGoal({ rate: Math.min(10, Math.max(0.1, Number(value) || 3)) }),
   onSelectSymbol: (symbol) => {
     addToList(symbol);
     renderWatchlist();
@@ -833,11 +847,14 @@ function renderWalletView() {
       incomeChart: dom.walletIncomeChart,
       forecast: dom.walletForecast,
       forecastChart: dom.walletForecastChart,
+      goal: dom.walletGoal,
+      goalChart: dom.walletGoalChart,
     },
     wallet: activeWallet(),
     data: state.walletData,
     income: state.walletIncome,
     forecastYears: state.forecastYears,
+    goal: state.goal,
     rangeBlurb: RANGES.find((r) => r.key === state.range)?.blurb ?? '',
     handlers: walletHandlers,
     editing: state.editingHolding,
@@ -882,6 +899,13 @@ async function loadWalletData() {
  * do not depend on how far forward anyone is looking, and reloading them would
  * make the value chart flicker for a change that cannot affect it.
  */
+function setGoal(patch) {
+  state.goal = { ...state.goal, ...patch };
+  writeStore(STORE.goalTarget, state.goal.target);
+  writeStore(STORE.goalRate, state.goal.rate);
+  renderWalletView();
+}
+
 function setForecastYears(years) {
   state.forecastYears = years;
   writeStore(STORE.forecastYears, years);
