@@ -20,7 +20,18 @@ select
     beta,
     current_price,
     target_mean_price,
+    target_low_price,
+    target_high_price,
+    target_median_price,
+    analyst_opinions,
     recommendation_key,
+    recommendation_mean,
+    current_ratio,
+    forward_pe,
+    peg_ratio,
+    ex_dividend_epoch,
+    short_percent_of_float,
+    quarterly_earnings_growth,
     return_on_equity_pct,
 
     -- Yahoo files every REIT under an industry beginning "REIT - ". This one

@@ -187,8 +187,21 @@ function securityRows(symbol, summary, chart) {
       beta: raw(stats.beta) ?? raw(detail.beta),
       current_price: raw(financial.currentPrice) ?? raw(price.regularMarketPrice),
       target_mean_price: raw(financial.targetMeanPrice),
+      // Captured because they cannot be derived from the statements, so the
+      // warehouse-backed view would otherwise show the analyst band as dashes.
+      target_low_price: raw(financial.targetLowPrice),
+      target_high_price: raw(financial.targetHighPrice),
+      target_median_price: raw(financial.targetMedianPrice),
+      analyst_opinions: raw(financial.numberOfAnalystOpinions),
       recommendation_key: financial.recommendationKey ?? null,
+      recommendation_mean: raw(financial.recommendationMean),
       return_on_equity: raw(financial.returnOnEquity),
+      current_ratio: raw(financial.currentRatio),
+      forward_pe: raw(detail.forwardPE),
+      peg_ratio: raw(stats.pegRatio),
+      ex_dividend_date: raw(detail.exDividendDate),
+      short_percent_of_float: raw(stats.shortPercentOfFloat),
+      quarterly_earnings_growth: raw(stats.earningsQuarterlyGrowth),
     },
   ];
 }
@@ -315,7 +328,13 @@ async function main() {
   }
 
   await mkdir(RAW_DIR, { recursive: true });
-  const state = full ? {} : await readJSON(STATE_PATH, {});
+  // Always load the existing watermarks, even for --full. Starting from {} and
+  // then writing the file back would erase the watermarks of every symbol not
+  // in this run: `--full --symbols JNJ` would silently reset the other 502 and
+  // trigger a complete re-download on the next incremental pass. The per-entity
+  // checks below already ignore watermarks when `full` is set, so a full run
+  // still refetches everything it touches.
+  const state = await readJSON(STATE_PATH, {});
 
   const ingestedAt = nowISO();
   const runId = ingestedAt.replace(/[:.]/g, '-');
