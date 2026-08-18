@@ -1052,18 +1052,12 @@ function renderGoal(node, chartNode, wallet, data, income, mountChart, handlers,
     el('tbody', {}, splitRow('Today', goal.today, goal.value), splitRow('At the goal', goal.atTarget, goal.requiredValue)),
   );
 
-  const coverage =
-    goal.atTarget.fromSales > 0
-      ? `At today's yield, dividends cover ${percent(goal.atTarget.coveredPct, { digits: 0 })} of the withdrawal and the rest comes from selling. Dividends alone would cover it at ${currency(goal.valueForDividendsAlone, code)}.`
-      : `At today's yield the dividends cover the whole withdrawal, so nothing has to be sold.`;
-
   node.append(
     el(
       'div',
       { style: { marginTop: '20px' } },
       el('h4', { class: 'stats-title', text: 'Where the income comes from' }),
       el('div', { class: 'table-scroll' }, splitTable),
-      el('p', { class: 'card-sub', style: { marginTop: '10px', marginBottom: 0 }, text: coverage }),
     ),
   );
 
@@ -1142,26 +1136,7 @@ function renderGoal(node, chartNode, wallet, data, income, mountChart, handlers,
       ),
     );
 
-    const cost = plan.identical
-      ? 'This wallet pays no dividend, so the two policies are the same policy.'
-      : `Spending the dividends rather than reinvesting them costs ${money(plan.extraPerMonth)} a month, or ${money(plan.extraPerYear)} a year, in extra contributions to arrive at the same place on the same date.`;
-
-    const provenance =
-      goalState.returnPct == null && twr.annualisedPct != null
-        ? `Price growth is this wallet's own, ${percent(twr.annualisedPct, { digits: 1 })} chain-linked across its purchases over ${twr.years.toFixed(1)} years, and the yield is ${percent(goal.yieldPct, { digits: 2 })}.`
-        : 'The rate is the one you set, with the yield taken off it for the cash case.';
-
-    return el(
-      'div',
-      {},
-      el('div', { class: 'table-scroll' }, table),
-      el('p', { class: 'card-sub', style: { marginTop: '10px', marginBottom: 0 }, text: cost }),
-      el('p', {
-        class: 'card-sub',
-        style: { marginTop: '6px', marginBottom: 0 },
-        text: `${provenance} The monthly figure is not the yearly one over twelve: paid through the year rather than at the end of it, it compounds for longer, so less is needed.`,
-      }),
-    );
+    return el('div', {}, el('div', { class: 'table-scroll' }, table));
   };
 
   node.append(
@@ -1207,29 +1182,12 @@ function renderGoal(node, chartNode, wallet, data, income, mountChart, handlers,
       ),
     );
 
-    const change = since.grewBy == null ? '' : `${since.grewBy > 0 ? '+' : ''}${percent(since.grewBy, { digits: 1 })}`;
-    const span = since.years == null ? '' : ` Held ${since.years.toFixed(1)} years, ${change} in value.`;
-    // The change is only a return when nothing was paid in after the start.
-    // Where holdings joined later it is growth plus contributions, and calling
-    // that a rate would report performance the wallet never had.
-    const tail = since.withContributions
-      ? ` That includes ${since.contributions === 1 ? 'a holding' : `${since.contributions} holdings`} bought after the start, so it is money added as well as growth, and no annual rate is shown for it.`
-      : since.annualisedPct == null
-        ? ''
-        : ` That is ${since.annualisedPct > 0 ? '+' : ''}${percent(since.annualisedPct, { digits: 1 })} a year.`;
-    const held = span + tail;
-
     node.append(
       el(
         'div',
         { style: { marginTop: '20px' } },
         el('h4', { class: 'stats-title', text: 'Since your first purchase' }),
         el('div', { class: 'table-scroll' }, sinceTable),
-        el('p', {
-          class: 'card-sub',
-          style: { marginTop: '10px', marginBottom: 0 },
-          text: `The first column is the wallet on the day it began.${held}`,
-        }),
       ),
     );
   }
