@@ -18,7 +18,7 @@ import { UpstreamError } from './lib/yahoo.js';
 import { buildProfile, dividendsByYear } from './lib/profile.js';
 import { buildScore } from './lib/score.js';
 import { parseHoldings, buildValueSeries, priceHoldings } from './lib/portfolio.js';
-import { buildIncome } from './lib/income.js';
+import { buildIncome, buildIncomeProjection } from './lib/income.js';
 import { buildComparison } from './lib/compare.js';
 import { buildScoreHistory } from './lib/scoreHistory.js';
 import { cached, stats as cacheStats } from './lib/cache.js';
@@ -437,8 +437,13 @@ const routes = {
     });
 
     const income = buildIncome(holdings, stored);
+    // The forecast reads the same dividend record the received-income table
+    // does, so the two can never disagree about what a holding pays.
+    const projection = buildIncomeProjection(holdings, stored, { years: 5 });
+
     return {
       ...income,
+      projection,
       unavailable,
       sources: {
         warehouse: symbols.filter((symbol) => !missing.includes(symbol)),

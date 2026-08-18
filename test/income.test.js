@@ -11,7 +11,7 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { buildIncome } from '../lib/income.js';
+import { buildIncome, buildIncomeProjection } from '../lib/income.js';
 import { parseHoldings, parseDate } from '../lib/portfolio.js';
 
 const dividends = (entries) => new Map(entries);
@@ -156,5 +156,121 @@ describe('purchase dates on the wire', () => {
     const [holding] = parseHoldings('AAPL:10:150:not-a-date');
     assert.equal(holding.boughtAt, null);
     assert.equal(holding.shares, 10);
+  });
+});
+
+describe('buildIncomeProjection', () => {
+  /** Quarterly payments growing at a fixed rate, `years` of them. */
+  const growing = (startPerShare, ratePct, years) => {
+    const out = [];
+    for (let y = 0; y < years; y++) {
+      const perShare = (startPerShare * (1 + ratePct / 100) ** y) / 4;
+      for (let q = 0; q < 4; q++) {
+        const month = String(q * 3 + 1).padStart(2, '0');
+        out.push({ exDate: `${2020 + y}-${month}-15`, perShare });
+      }
+    }
+    return out;
+  };
+
+  test('grows each holding at its own measured rate', () => {
+    const record = new Map([['KO', growing(2, 10, 6)]]);
+    const p = buildIncomeProjection([{ symbol: 'KO', shares: 100 }], record, { years: 5, asOf: '2025-12-31' });
+    const [row] = p.rows;
+
+    assert.ok(Math.abs(row.growthPct - 10) < 0.5, `measured ${row.growthPct}`);
+    // Five years of 10% compounding is about 1.61x.
+    assert.ok(Math.abs(row.projected.at(-1).amount / row.currentAnnual - 1.61) < 0.05);
+    assert.equal(row.projected.length, 5);
+  });
+
+  test('a holding with too little record is projected flat, not guessed at', () => {
+    const record = new Map([['NEW', [{ exDate: '2025-06-15', perShare: 1 }]]]);
+    const p = buildIncomeProjection([{ symbol: 'NEW', shares: 10 }], record, { years: 5, asOf: '2025-12-31' });
+    const [row] = p.rows;
+
+    assert.equal(row.growthPct, null);
+    assert.equal(row.projected.at(-1).amount, row.currentAnnual, 'flat, not zero and not invented');
+  });
+
+  test('a non-payer and a lapsed payer are named, not projected as zero', () => {
+    const record = new Map([
+      ['OLD', [{ exDate: '2019-01-15', perShare: 1 }]],
+      ['NONE', []],
+    ]);
+    const p = buildIncomeProjection(
+      [
+        { symbol: 'OLD', shares: 10 },
+        { symbol: 'NONE', shares: 10 },
+        { symbol: 'MISSING', shares: 10 },
+      ],
+      record,
+      { asOf: '2025-12-31' },
+    );
+
+    assert.equal(p.rows.length, 0);
+    assert.deepEqual(
+      p.excluded.map((e) => e.reason).sort(),
+      ['no-dividend-record', 'no-dividend-record', 'nothing-paid-in-the-last-year'],
+    );
+  });
+
+  test('blended growth is weighted by income, so a tiny holding cannot dominate', () => {
+    // A large slow payer and a tiny fast one. A simple mean of the two rates
+    // would report ~40%; the blend must sit near the payer that provides the
+    // income.
+    const record = new Map([
+      ['BIG', growing(4, 5, 6)],
+      ['TINY', growing(0.01, 75, 6)],
+    ]);
+    const p = buildIncomeProjection(
+      [
+        { symbol: 'BIG', shares: 1000 },
+        { symbol: 'TINY', shares: 1 },
+      ],
+      record,
+      { asOf: '2025-12-31' },
+    );
+
+    assert.ok(p.totals.blendedGrowth < 6, `blended ${p.totals.blendedGrowth} should stay near BIG's rate`);
+  });
+
+  test('an unsustainable rate is flagged rather than capped', () => {
+    const record = new Map([['FAST', growing(0.05, 77, 6)]]);
+    const p = buildIncomeProjection([{ symbol: 'FAST', shares: 10 }], record, { asOf: '2025-12-31' });
+
+    assert.equal(p.rows[0].fastGrowth, true);
+    // Kept as measured: capping would substitute a different number without
+    // saying so.
+    assert.ok(p.rows[0].growthPct > 70);
+  });
+
+  test('portfolio totals add up across holdings and years', () => {
+    const record = new Map([
+      ['A', growing(2, 10, 6)],
+      ['B', growing(1, 0, 6)],
+    ]);
+    const p = buildIncomeProjection(
+      [
+        { symbol: 'A', shares: 100 },
+        { symbol: 'B', shares: 100 },
+      ],
+      record,
+      { years: 3, asOf: '2025-12-31' },
+    );
+
+    assert.equal(p.byYear.length, 3);
+    for (let i = 0; i < 3; i++) {
+      const expected = p.rows.reduce((sum, r) => sum + r.projected[i].amount, 0);
+      assert.ok(Math.abs(p.byYear[i].amount - expected) < 1e-9);
+    }
+    assert.ok(p.totals.currentAnnual > 0);
+  });
+
+  test('an empty wallet projects nothing rather than throwing', () => {
+    const p = buildIncomeProjection([], new Map(), { asOf: '2025-12-31' });
+    assert.deepEqual(p.rows, []);
+    assert.equal(p.totals.currentAnnual, 0);
+    assert.equal(p.totals.blendedGrowth, null);
   });
 });

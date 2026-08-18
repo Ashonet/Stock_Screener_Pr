@@ -63,11 +63,33 @@ describe('trailingTwelveMonths', () => {
     assert.equal(ttm.date, '2025-12-31', 'dated at the end of the window');
   });
 
-  test('refuses to build a year from fewer than four quarters', () => {
-    // Three quarters summed as a year understates every flow by a quarter and
-    // reads as a sudden collapse in revenue.
-    assert.equal(trailingTwelveMonths([quarter('2025-06-30'), quarter('2025-09-30'), quarter('2025-12-31')]), null);
-    assert.equal(trailingTwelveMonths([]), null);
+  test('annualises a partial window instead of leaving it ungraded', () => {
+    // Yahoo keeps about five quarters, so the earliest quarter-ends never have
+    // four behind them. Summing three as if they were a year would understate
+    // every flow by a quarter and read as a collapse in revenue, so the average
+    // quarter is scaled back up to a year instead.
+    const three = trailingTwelveMonths([
+      quarter('2025-06-30', { revenue: 100 }),
+      quarter('2025-09-30', { revenue: 100 }),
+      quarter('2025-12-31', { revenue: 100 }),
+    ]);
+    assert.equal(three.totalRevenue, 400, '300 over three quarters is 400 a year');
+    assert.equal(three.quartersUsed, 3);
+
+    const one = trailingTwelveMonths([quarter('2025-12-31', { revenue: 130 })]);
+    assert.equal(one.totalRevenue, 520);
+    assert.equal(one.quartersUsed, 1);
+
+    assert.equal(trailingTwelveMonths([]), null, 'nothing to annualise from');
+  });
+
+  test('balances are never scaled up with the flows', () => {
+    // Debt is a position, not a rate. Scaling one quarter's 600 to 2400 would
+    // quadruple every leverage ratio downstream.
+    const one = trailingTwelveMonths([quarter('2025-12-31', { netIncome: 10, debt: 600 })]);
+    assert.equal(one.totalDebt, 600);
+    assert.equal(one.stockholdersEquity, 2000);
+    assert.equal(one.netIncome, 40, 'the flow is annualised');
   });
 
   test('a flow missing from any one quarter is not partially summed', () => {
@@ -137,14 +159,20 @@ describe('buildScoreHistory', () => {
     assert.ok(h.unscored.every((u) => u.reason === 'no price history at this date'));
   });
 
-  test('quarters are graded on a trailing year, so four quarters yield one grade', () => {
+  test('every quarter-end is graded, annualised from what is behind it', () => {
     const quarters = ['2025-03-31', '2025-06-30', '2025-09-30', '2025-12-31'].map((d) => quarter(d));
     const h = buildScoreHistory({ financials: quarters, closes: priceHistory, periodType: 'quarterly' });
 
-    // Only the fourth quarter-end has a complete year behind it.
-    assert.equal(h.periods.length, 1);
-    assert.equal(h.periods[0].label, 'Q4 2025');
-    assert.equal(h.unscored.length, 3);
+    assert.equal(h.periods.length, 4);
+    assert.deepEqual(
+      h.periods.map((p) => p.label),
+      ['Q4 2025', 'Q3 2025', 'Q2 2025', 'Q1 2025'],
+    );
+    // Newest first, so the counts run 4, 3, 2, 1 back through the year.
+    assert.deepEqual(
+      h.periods.map((p) => p.quartersUsed),
+      [4, 3, 2, 1],
+    );
   });
 
   test('a quarterly grade uses the trailing year, not the single quarter', () => {

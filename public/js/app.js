@@ -90,6 +90,7 @@ const REFRESH_MS = 30_000;
 const WALLET_TABS = [
   { id: 'overview', label: 'Value and holdings' },
   { id: 'income', label: 'Dividend income' },
+  { id: 'forecast', label: 'Income forecast' },
 ];
 
 const TABS = [
@@ -185,8 +186,11 @@ const dom = {
   walletPanels: {
     overview: document.getElementById('wpanel-overview'),
     income: document.getElementById('wpanel-income'),
+    forecast: document.getElementById('wpanel-forecast'),
   },
   walletIncomeChart: document.getElementById('wallet-income-chart'),
+  walletForecast: document.getElementById('wallet-forecast'),
+  walletForecastChart: document.getElementById('wallet-forecast-chart'),
   compareView: document.getElementById('compare-view'),
   compareCard: document.getElementById('compare-card'),
   mapView: document.getElementById('map-view'),
@@ -824,6 +828,8 @@ function renderWalletView() {
       holdings: dom.walletHoldings,
       income: dom.walletIncome,
       incomeChart: dom.walletIncomeChart,
+      forecast: dom.walletForecast,
+      forecastChart: dom.walletForecastChart,
     },
     wallet: activeWallet(),
     data: state.walletData,
@@ -1506,7 +1512,17 @@ function scoreHistoryBlock(stock) {
     );
   }
 
-  const thin = periods.some((row) => row.statementPeriods < 3);
+  // Two separate kinds of thinness, and a row can carry either. Annual rows
+  // are thin when few reporting periods sit behind the grade; quarterly rows
+  // are thin when the trailing year was annualised from fewer than four
+  // quarters, which imports whatever seasonality the missing ones would have
+  // offset.
+  const isThin = (row) => row.statementPeriods < 3 || (row.quartersUsed != null && row.quartersUsed < 4);
+  const thinReason = (row) =>
+    row.quartersUsed != null && row.quartersUsed < 4
+      ? `Annualised from ${row.quartersUsed} quarter${row.quartersUsed === 1 ? '' : 's'} rather than a full four, so any seasonality in the missing quarters is scaled up with it.`
+      : `Graded on ${row.statementPeriods} reporting period${row.statementPeriods === 1 ? '' : 's'} of statements, so its growth pillar rests on less than the later ones.`;
+  const thin = periods.some(isThin);
 
   const body = el(
     'tbody',
@@ -1519,13 +1535,7 @@ function scoreHistoryBlock(stock) {
           'th',
           { scope: 'row' },
           row.label,
-          row.statementPeriods < 3
-            ? el('abbr', {
-                class: 'thin-marker',
-                title: `Graded on ${row.statementPeriods} reporting period${row.statementPeriods === 1 ? '' : 's'} of statements, so its growth pillar rests on less than the later ones.`,
-                text: '*',
-              })
-            : null,
+          isThin(row) ? el('abbr', { class: 'thin-marker', title: thinReason(row), text: '*' }) : null,
         ),
         el('td', {}, scoreMeter(row.score)),
         el('td', { class: 'score-history-value', style: { color: scoreTone(row.score) }, text: String(row.score) }),
@@ -1571,7 +1581,9 @@ function scoreHistoryBlock(stock) {
       ? el('p', {
           class: 'card-sub',
           style: { marginTop: '6px', marginBottom: 0 },
-          text: '* Graded on fewer than three reporting periods. Its growth pillar has less behind it than the later rows, so read it as indicative rather than comparable.',
+          text: quarterly
+            ? '* Annualised from fewer than four quarters. The average quarter is scaled up to a year, so a seasonal business reads high or low depending on which quarters are missing. Hover a row for its count.'
+            : '* Graded on fewer than three reporting periods. Its growth pillar has less behind it than the later rows, so read it as indicative rather than comparable.',
         })
       : null,
     active.unscored?.length

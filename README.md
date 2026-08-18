@@ -209,7 +209,13 @@ keep it honest:
   throughout (three-year average payout, five-year CAGR), so a single quarter
   would compare a quarter's revenue against a year's and call it growth. Flows
   are summed across four quarters and balances taken at the close, because
-  summing a balance sheet would report four times the debt.
+  summing a balance sheet would report four times the debt. Where four quarters
+  are not available, and Yahoo keeps only about five so the earliest never have
+  four behind them, the average quarter is scaled back up to a year rather than
+  leaving the period blank. That is what makes a partial window usable and also
+  what makes it approximate: annualising one quarter assumes the other three
+  look like it, which is wrong for any seasonal business. The count behind each
+  row is shown.
 - **Periods graded on thin history are marked.** The earliest row has the least
   behind it: with one year of statements there is no revenue or EPS trend, so
   its growth pillar rests on the dividend record alone and renormalises to a
@@ -257,7 +263,7 @@ the live-data dashboard, just without the screener.
 ### Tests and CI
 
 ```bash
-npm test          # 78 unit tests, no network, no database
+npm test          # 86 unit tests, no network, no database
 npm run warehouse # 50 dbt assertions against the committed raw layer
 npm run docs      # self-contained lineage site at warehouse/target/static_index.html
 ```
@@ -335,6 +341,21 @@ numbers honest rather than approximately right:
   to have been held forever. The share count is today's applied back to the
   purchase date, which overstates a position that was topped up; the card says
   so instead of presenting the total as settled fact.
+
+**Income forecast**: each holding's trailing twelve months of dividends grown
+forward at its own five-year dividend CAGR, taken from the same
+`trailingYearTotals` and `cagr` the quality score uses so a holding cannot
+report one growth rate in the score panel and a different one in the forecast.
+The portfolio rate is blended by income paid rather than averaged across
+holdings, so a tiny position cannot outvote the one that provides the income.
+
+It is arithmetic on one assumption, and the assumption is the weak part: a
+five-year CAGR describes the years a company chose to raise in, so it cannot
+see a cut, and a cut is when an income forecast would matter most. Rates that
+will not survive extrapolation are marked rather than capped, because capping
+substitutes a different number without saying so. NVIDIA's dividend has grown
+77% a year from almost nothing, which compounds $2.80 into $49 over five years;
+the row carries a warning rather than a quietly adjusted figure.
 
 **Per-security view**: price chart (1D–MAX, crosshair, table view), then three
 tabs: key statistics as one dense card, financials (revenue/net income,

@@ -608,15 +608,189 @@ function renderIncome(node, chartNode, wallet, data, income, mountChart) {
   );
 }
 
+/* --------------------------------------------------------------- forecast */
+
+const FORECAST_EXCLUSION_COPY = {
+  'no-dividend-record': 'does not pay a dividend',
+  'nothing-paid-in-the-last-year': 'has paid nothing in the last year',
+};
+
+/**
+ * Projected income, each holding grown at its own five-year dividend CAGR.
+ *
+ * The caveats are not a footnote here, they are the feature. A five-year growth
+ * rate describes the years a company chose to raise in; it cannot see a cut,
+ * and a cut is exactly when an income forecast would matter. So the card leads
+ * with what the projection assumes rather than burying it under the total.
+ */
+function renderForecast(node, chartNode, wallet, data, income, mountChart) {
+  const code = data?.currency ?? 'USD';
+  const unit = currencySymbol(code);
+
+  const head = (extra) =>
+    el(
+      'div',
+      { class: 'card-head' },
+      el('h3', { class: 'card-title', text: 'Income forecast' }),
+      extra ? el('span', { class: 'card-sub', style: { marginBottom: 0 }, text: extra }) : null,
+    );
+
+  const projection = income?.projection;
+  if (!projection) {
+    render(node, head(), el('p', { class: 'empty', text: 'Working out what this wallet is on track to pay.' }));
+    clear(chartNode);
+    chartNode.hidden = true;
+    return;
+  }
+
+  const { rows = [], byYear = [], totals = {}, excluded = [], years = 5 } = projection;
+  node.hidden = false;
+
+  const notes = excluded.length
+    ? el(
+        'p',
+        { class: 'card-sub', style: { marginBottom: 0 } },
+        'Not projected: ',
+        ...excluded.flatMap((entry, i) => [
+          i ? ', ' : '',
+          el('strong', { text: entry.symbol }),
+          ` (${FORECAST_EXCLUSION_COPY[entry.reason] ?? entry.reason})`,
+        ]),
+      )
+    : null;
+
+  if (!rows.length) {
+    render(
+      node,
+      head(),
+      el('p', { class: 'empty', text: 'Nothing in this wallet has paid a dividend in the last year, so there is nothing to grow forward.' }),
+      notes,
+    );
+    clear(chartNode);
+    chartNode.hidden = true;
+    return;
+  }
+
+  const stat = (label, value, hint) =>
+    el(
+      'div',
+      { class: 'income-stat' },
+      el('span', { class: 'income-stat-label', text: label }),
+      el('span', { class: 'income-stat-value', text: value }),
+      hint ? el('span', { class: 'income-stat-hint', text: hint }) : null,
+    );
+
+  const growthText = totals.blendedGrowth == null ? DASH : `${totals.blendedGrowth > 0 ? '+' : ''}${percent(totals.blendedGrowth, { digits: 1 })}`;
+
+  const summary = el(
+    'div',
+    { class: 'income-summary' },
+    stat('Paying now', currency(totals.currentAnnual, code), 'last twelve months'),
+    stat(`In ${years} years`, currency(totals.finalYear, code), 'if growth continues'),
+    stat('Blended growth', growthText, 'weighted by income paid'),
+    stat(
+      'On a measured rate',
+      totals.ratedShare == null ? DASH : percent(totals.ratedShare, { digits: 0 }),
+      'of projected income',
+    ),
+  );
+
+  render(node, head(`${rows.length} paying holding${rows.length === 1 ? '' : 's'}`), summary, notes);
+
+  /* -------------------------------------------------------------- chart */
+
+  chartNode.hidden = false;
+  const colour = cssVar('--series-1');
+  const categories = [{ label: 'Now' }, ...byYear.map((y) => ({ label: `+${y.year}y` }))];
+  const values = [totals.currentAnnual, ...byYear.map((y) => y.amount)];
+
+  mountChart(chartNode, {
+    title: 'Projected annual income',
+    subtitle: `today's holdings, each grown at its own five-year dividend CAGR`,
+    height: 300,
+    draw: (width, height) =>
+      columnChart(width, height, {
+        categories,
+        series: [{ key: 'income', name: 'Projected annual income', color: colour, values }],
+        formatValue: (v) => `${unit}${compact(v)}`,
+        ariaLabel: `Projected annual dividend income for ${wallet.name}`,
+      }),
+    note:
+      'A five-year CAGR describes the years a company chose to raise in. It cannot see a cut, and a cut is when this would matter most. ' +
+      'Share counts are held at today, nothing is reinvested, and tax is ignored. Read it as "if nothing changes".',
+    table: {
+      columns: ['Year', 'Projected income'],
+      rows: categories.map((c, i) => [c.label, currency(values[i], code)]),
+    },
+  });
+
+  /* ------------------------------------------------------- per holding */
+
+  const table = el(
+    'table',
+    { class: 'data' },
+    el(
+      'thead',
+      {},
+      el(
+        'tr',
+        {},
+        ...['Symbol', 'Shares', 'Per share (TTM)', 'Paying now', 'Growth', `In ${years}y`].map((label) =>
+          el('th', { scope: 'col', text: label }),
+        ),
+      ),
+    ),
+    el(
+      'tbody',
+      {},
+      ...rows.map((row) =>
+        el(
+          'tr',
+          {},
+          el('th', { scope: 'row', text: row.symbol }),
+          el('td', { text: ratio(row.shares, { digits: row.shares % 1 === 0 ? 0 : 4 }) }),
+          el('td', { text: currency(row.perShareTrailing, code, { digits: 4 }) }),
+          el('td', { text: currency(row.currentAnnual, code) }),
+          el(
+            'td',
+            {},
+            row.growthPct == null
+              ? el('abbr', {
+                  class: 'muted',
+                  title: `Under two years of dividend record, so this holding is projected flat rather than at a guessed rate.`,
+                  text: 'flat',
+                })
+              : el(
+                  'abbr',
+                  {
+                    class: row.fastGrowth ? 'thin-marker-host' : null,
+                    title: row.fastGrowth
+                      ? `Measured over ${row.yearsOfGrowth} years, but a rate this high comes off a young or very small dividend and will not hold for five. Shown as measured rather than capped, but do not plan on it.`
+                      : `Measured over ${row.yearsOfGrowth} year${row.yearsOfGrowth === 1 ? '' : 's'} of rolling dividend totals.`,
+                  },
+                  `${row.growthPct > 0 ? '+' : ''}${percent(row.growthPct, { digits: 1 })}${row.fastGrowth ? ' !' : ''}`,
+                ),
+          ),
+          el('td', { text: currency(row.projected.at(-1).amount, code) }),
+        ),
+      ),
+    ),
+  );
+
+  node.append(
+    el('div', { style: { marginTop: '20px' } }, el('h4', { class: 'stats-title', text: 'By holding' }), el('div', { class: 'table-scroll' }, table)),
+  );
+}
+
 /* --------------------------------------------------------------------- api */
 
 /** The income panel's own empty state, so the tab is never blank. */
-function renderIncomeEmpty(node, message) {
+function renderIncomeEmpty(node, message, title = 'Dividend income') {
   if (!node) return;
   node.hidden = false;
   render(
     node,
-    el('div', { class: 'card-head' }, el('h3', { class: 'card-title', text: 'Dividend income' })),
+    el('div', { class: 'card-head' }, el('h3', { class: 'card-title', text: title })),
     el('p', { class: 'empty', text: message }),
   );
 }
@@ -635,6 +809,8 @@ export function renderWallet({ nodes, wallet, data, income, rangeBlurb, handlers
     clear(nodes.holdings);
     hide(nodes.income);
     hide(nodes.incomeChart);
+    hide(nodes.forecast);
+    hide(nodes.forecastChart);
     return;
 
   }
@@ -645,6 +821,8 @@ export function renderWallet({ nodes, wallet, data, income, rangeBlurb, handlers
     clear(nodes.chart);
     renderIncomeEmpty(nodes.income, 'Add a holding with a purchase date and its dividends are counted here.');
     hide(nodes.incomeChart);
+    renderIncomeEmpty(nodes.forecast, 'Add a dividend-paying holding to project its income forward.', 'Income forecast');
+    hide(nodes.forecastChart);
     renderHoldings(nodes.holdings, wallet, data, handlers, editing);
     return;
   }
@@ -652,4 +830,5 @@ export function renderWallet({ nodes, wallet, data, income, rangeBlurb, handlers
   renderChart(nodes.chart, wallet, data, rangeBlurb, mountChart);
   renderHoldings(nodes.holdings, wallet, data, handlers, editing);
   renderIncome(nodes.income, nodes.incomeChart, wallet, data, income, mountChart);
+  renderForecast(nodes.forecast, nodes.forecastChart, wallet, data, income, mountChart);
 }
