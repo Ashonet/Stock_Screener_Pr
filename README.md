@@ -63,6 +63,8 @@ plausible, which is what made them dangerous.
 | `assert_grade_matches_score` | The letter grade was derived from the unrounded score while the card displayed the rounded one, so they disagreed at every boundary: 72.6 printed as "73" and graded as B, where the published ladder says 73 is a B+. |
 | `assert_reit_affo_proxy_still_needed` | Records why AFFO is approximated by operating cash flow, and fails if the reason stops holding. |
 | `assert_prices_are_fresh` | A pipeline that silently stops is worse than one that fails, because the dashboard keeps serving stale prices as current. |
+| `assert_missed_splits_are_corrected` | Yahoo published Monster's 2:1 split of 11 August 2026 in its own events feed and left `adjclose` stepping down with the raw close instead of correcting for it. The stored series carried a permanent 50% cliff and every return across it was halved: MNST read **-29%** over the year against **+47.7%** actual. The anomaly mart found it within minutes of being built. |
+| `assert_knowledge_intervals_do_not_overlap` | Guards the bitemporal derivation, because an overlap would let an "as of" query return two different values for the same figure on the same date. |
 
 Three of those tests were themselves wrong on first contact with the full
 universe, which is the honest part of the story:
@@ -92,7 +94,38 @@ universe, which is the honest part of the story:
   screener that is not comparable is worthless. But the claim in the code and
   docs was wrong, and is now corrected.
 
-Running `dbt build` gives **48 pass, 2 warn** across 505 securities. The warnings
+### Three things this found that nothing else would have
+
+**A split the upstream never applied.** `mart_price_anomalies` flags days that
+sit far outside a symbol's own trailing volatility, and the first run put
+Monster Beverage's 11 August 2026 close beside its previous one: 90.36 to 45.53,
+volume doubled, adjusted close stepping down with the raw price rather than
+correcting for it.
+
+The first diagnosis was wrong. It looked like the incremental extract's
+seven-day overlap being too short to catch a split, which rewrites every prior
+bar upstream. Re-fetching the entire history changed nothing, because Yahoo
+reports the 2:1 in its events feed *and* leaves `adjclose` unadjusted across it.
+The upstream number is simply wrong. So splits are now captured as their own
+entity, `int_split_corrections` works out which ones the upstream ignored, and
+`fct_prices` applies the ratio itself. MNST went from -29% to +47.7% over the
+year, and 1,501 bars were restated.
+
+**A test that flagged a bad quarter as a corporate action.** The first version
+looked for the shape of a split, a one-day move landing on a share ratio. It
+caught The Trade Desk falling 33% on results, which is close enough to three for
+two to match and is no such thing. Shape is not proof, and this project has
+made that mistake before with dividend contiguity. The shape test is now a
+warning that can reach symbols whose split events were never captured, and the
+error-severity test reasons from the published event instead.
+
+**A correction that broke what it was fixing.** The detector's first cut asked
+whether the raw and adjusted closes moved together, which is true of every
+*correctly* handled split, because Yahoo adjusts the raw close too. It flagged
+Monster's 2023 split as missed and doubled three years of prior prices. What
+marks a missed split is the raw close stepping by the ratio itself.
+
+Running `dbt build` gives **72 pass, 3 warn** across 505 securities. The warnings
 are 8 companies above 200% FCF payout (real, heavy capex cycles) and 25
 periods missing EBITDA (healthcare and utilities where Yahoo does not model it). A warning that stays on deliberately is more useful than one
 tuned until it disappears.
@@ -122,6 +155,38 @@ where date '2026-03-01' between valid_from and coalesce(valid_to, date '9999-12-
 `assert_membership_spells_do_not_overlap` guards the derivation, because
 gaps-and-islands logic is exactly the sort that quietly produces overlapping
 spells and double-counts members.
+
+## Point in time: what was true against what we knew
+
+The warehouse is otherwise unitemporal. It stores what is true for a period and
+replaces it silently when the upstream restates, which is right for a screener
+and wrong for anything historical: a grade computed for FY2023 from statements
+as they read today is not the grade anyone could have seen in 2023. The score
+history documents that caveat; `fct_financial_knowledge` is what would let it be
+removed.
+
+Two time axes. `period_end` is when a figure was true of, `known_from` and
+`known_to` are when we held that version of it, so a question with a date in it
+has an answer:
+
+```sql
+select value from fct_financial_knowledge
+where symbol = 'AAPL' and metric = 'totalRevenue' and period_end = '2024-09-30'
+  and date '2025-03-01' >= known_from
+  and (known_to is null or date '2025-03-01' < known_to)
+```
+
+A new interval opens only when the value changes. The extract re-fetches
+statements on a staleness window, so an unchanged figure is observed dozens of
+times, and opening an interval per observation would turn a table of
+restatements into a table of pipeline runs.
+
+`mart_restatements` reads the versions and reports what moved after first
+publication. It holds **nothing today**, because the pipeline is days old and
+the upstream has not revised anything yet. Like the membership history, it
+accumulates from here and cannot recover what was reported before it existed.
+That the raw layer already held every version and only the staging step discarded
+them is what made this possible at all.
 
 The history is thin today. It starts accumulating from the first run, and no
 amount of cleverness can recover membership from before the pipeline existed.
@@ -158,6 +223,8 @@ survives `--full-refresh`.
 | `fct_dividends` | symbol × pay date | Infers payment cadence from the **median gap over recent payments**. Agree Realty moved from quarterly to monthly in 2021; a median across its full record infers 11 payments a year, which is neither. |
 | `int_dividend_windows` | symbol × window | Trailing totals bucketed by payment count, not calendar year. The model that fixes the monthly-payer bug. |
 | `mart_quality_score` | symbol | The scoring model. Serving contract for the dashboard and screener. |
+| `fct_financial_knowledge` | symbol × period × metric × version | Bitemporal. What each figure was, and the window during which we believed it. |
+| `mart_price_anomalies` | symbol × date | Days beyond eight sigma of the symbol's own trailing volatility. Monitoring rather than assertion: the fifty tests encode rules someone thought of in advance, and this covers the value that breaks no rule and is still wrong. |
 
 ### The scoring model, and why REITs branch
 

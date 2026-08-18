@@ -234,20 +234,73 @@ function financialRows(symbol, periodType, rows) {
   return out;
 }
 
+/**
+ * Whether a re-fetched bar disagrees with the close we already stored for it.
+ *
+ * Returns the ratio when the scale has moved and null otherwise. The tolerance
+ * is loose enough to ignore a revised close, which moves by fractions of a
+ * percent, and tight enough to catch a split, which moves it by a factor. Both
+ * arrive through the same overlap window and only one of them means the whole
+ * history is now wrong.
+ */
+function splitRatio(bars, previous) {
+  if (!previous?.date || !(previous.close > 0)) return null;
+  const match = bars.find((bar) => dayKey(bar.t) === previous.date);
+  if (!match || !(match.close > 0)) return null;
+
+  const ratio = match.close / previous.close;
+  // A 2% band around 1 covers ordinary restatement noise. Anything outside it
+  // on a bar that has already settled is a change of scale.
+  return Math.abs(ratio - 1) > 0.02 ? ratio : null;
+}
+
 /* ------------------------------------------------------------------- driver */
 
 async function extractSymbol(symbol, state, writer, { full }) {
   const priceWatermark = state.prices?.[symbol] ?? null;
-  const since =
-    full || !priceWatermark
-      ? Date.now() - BACKFILL_YEARS * 365.25 * DAY_MS
-      : Date.parse(priceWatermark) - BACKFILL_OVERLAP_DAYS * DAY_MS;
+  const coldStart = full || !priceWatermark;
+  const since = coldStart
+    ? Date.now() - BACKFILL_YEARS * 365.25 * DAY_MS
+    : Date.parse(priceWatermark) - BACKFILL_OVERLAP_DAYS * DAY_MS;
 
-  const result = { symbol, prices: 0, financials: 0, dividends: 0, security: 0, errors: [] };
+  const result = { symbol, prices: 0, financials: 0, dividends: 0, security: 0, errors: [], resplit: false };
 
   // Prices: the only entity fetched on every run.
   try {
-    const bars = await yahoo.getDailyBars(symbol, since);
+    let bars = await yahoo.getDailyBars(symbol, since);
+
+    /*
+     * A split rewrites the whole history, not the overlap.
+     *
+     * The overlap window exists so a revised close lands and corrects in place,
+     * and for that a week is plenty. A share split is different in kind: the
+     * upstream restates *every* prior bar at once, and an incremental run that
+     * only ever re-reads the last week leaves the older bars on the old scale
+     * for good. Monster Beverage split two for one and the stored series kept a
+     * permanent 50% cliff, which halved every return measured across it.
+     *
+     * So the overlap is used for what it is good at, detecting that something
+     * changed, and the response is escalated to match. If a bar we already
+     * hold comes back on a different scale, the symbol's whole history is
+     * re-fetched rather than patched.
+     */
+    if (!coldStart && bars.length) {
+      const ratio = splitRatio(bars, state.closes?.[symbol]);
+      if (ratio) {
+        console.log(`  ${symbol}: prices restated by ${ratio.toFixed(4)}x, re-fetching the full history`);
+        bars = await yahoo.getDailyBars(symbol, Date.now() - BACKFILL_YEARS * 365.25 * DAY_MS);
+        result.resplit = true;
+      }
+    }
+
+    if (bars.length) {
+      // Remember one recent close per symbol, which is all the detector above
+      // needs to notice the scale moving under it on the next run.
+      const latest = bars.at(-1);
+      state.closes = state.closes ?? {};
+      state.closes[symbol] = { date: dayKey(latest.t), close: latest.close };
+    }
+
     if (bars.length) {
       await writer.write(
         'price',
@@ -263,6 +316,21 @@ async function extractSymbol(symbol, state, writer, { full }) {
         })),
       );
       result.prices = bars.length;
+
+      // Split events land in their own entity. The warehouse needs them to
+      // repair an adjusted close the upstream did not adjust.
+      if (bars.splits?.length) {
+        await writer.write(
+          'split',
+          bars.splits.map((split) => ({
+            symbol,
+            split_date: dayKey(split.t),
+            numerator: split.numerator,
+            denominator: split.denominator,
+          })),
+        );
+        result.splits = bars.splits.length;
+      }
       state.prices = state.prices ?? {};
       state.prices[symbol] = dayKey(bars.at(-1).t);
     }
