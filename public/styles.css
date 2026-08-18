@@ -1636,3 +1636,55 @@ table.screener thead th:first-child {
 .pill:empty {
   display: none;
 }
+
+/* ------------------------------------------------- add-ticker & watch toggle */
+
+.ticker-suggestions {
+  flex-basis: 100%;
+  margin-top: 6px;
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-1);
+}
+.ticker-suggestions li + li {
+  border-top: 1px solid var(--border);
+}
+.ticker-suggestions button {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 10px;
+  background: none;
+  border: 0;
+  text-align: left;
+}
+.ticker-suggestions button:hover {
+  background: var(--wash);
+}
+
+/* Saved state is carried by the tick and the wording, not by colour alone. */
+.watch-toggle {
+  padding: 3px 10px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--series-1);
+  background: none;
+  border: 1px solid color-mix(in srgb, var(--series-1) 45%, transparent);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.watch-toggle:hover {
+  background: color-mix(in srgb, var(--series-1) 12%, transparent);
+}
+.watch-toggle.saved {
+  color: var(--text-secondary);
+  border-color: var(--border-strong);
+}
+.watch-toggle.saved:hover {
+  color: var(--down-text);
+  border-color: color-mix(in srgb, var(--down-text) 45%, transparent);
+  background: none;
+}

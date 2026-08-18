@@ -126,15 +126,19 @@ const state = {
 };
 
 const symbols = () => activeList()?.symbols ?? [];
-if (!state.active || !symbols().includes(state.active)) state.active = symbols()[0] ?? null;
+// The open company need not be in a list: you can look at something without
+// keeping it, and that choice should survive a reload.
+if (!state.active || !SYMBOL_PATTERN.test(state.active)) state.active = symbols()[0] ?? null;
 if (!RANGES.some((r) => r.key === state.range)) state.range = '1y';
 if (!PERIODS.some((p) => p.key === state.period)) state.period = 'annual';
 
 // ?symbol=TSLA opens straight onto a ticker, so a view is linkable.
 const linked = new URLSearchParams(location.search).get('symbol');
 if (linked && SYMBOL_PATTERN.test(linked)) {
+  // Opens the company without saving it. A shared link should not silently
+  // edit the recipient's watchlist — the hero carries an explicit control for
+  // keeping it.
   state.active = linked.toUpperCase();
-  addToList(state.active);
   store.view = 'stock';
 }
 
@@ -364,13 +368,35 @@ async function loadSparklines() {
   renderWatchlist();
 }
 
-function addSymbol(symbol) {
-  const upper = symbol.toUpperCase();
+/**
+ * Open a company without committing it to a list.
+ *
+ * Searching used to add whatever you looked at, so glancing at a ticker left it
+ * in your watchlist and the list filled up with things you had merely checked.
+ * Looking and keeping are different intentions and now have different actions.
+ */
+function viewSymbol(symbol) {
+  selectSymbol(symbol.toUpperCase());
+  loadWatchlistQuotes();
+}
+
+/** Keep a symbol in the current watchlist. */
+function addTickerToList(symbol) {
+  const upper = symbol.trim().toUpperCase();
+  if (!SYMBOL_PATTERN.test(upper)) return false;
   addToList(upper);
-  selectSymbol(upper);
   renderWatchlist();
   loadWatchlistQuotes();
   loadSparklines();
+  if (state.stock?.quote?.symbol === upper) renderHero(state.stock);
+  return true;
+}
+
+function removeTickerFromList(symbol) {
+  removeFromList(symbol);
+  state.sparks.delete(symbol);
+  renderWatchlist();
+  if (state.stock?.quote?.symbol === symbol) renderHero(state.stock);
 }
 
 function removeSymbol(symbol) {
@@ -426,8 +452,9 @@ function setupLists() {
     store.activeListId = dom.listPicker.value;
     saveLists();
     dom.listForm.hidden = true;
-    // Keep a selection that exists in the newly chosen list.
-    if (!symbols().includes(state.active)) {
+    // Switching lists changes what the sidebar shows, not what you are reading.
+    // Only fall back when nothing is open at all.
+    if (!state.active) {
       state.active = symbols()[0] ?? null;
       writeStore(STORE.symbol, state.active);
       if (state.active) loadStock();
@@ -438,17 +465,10 @@ function setupLists() {
     loadSparklines();
   });
 
-  dom.listNew.addEventListener('click', () => {
-    nameForm(dom.listForm, {
-      label: 'List name',
-      confirmText: 'Create',
-      onSubmit: (name) => {
-        createList(name);
-        renderListPicker();
-        renderWatchlist();
-      },
-    });
-  });
+  // The + adds a ticker to the list you are looking at. It used to create a
+  // whole new list, which is a much rarer thing to want and read as "add" to
+  // everyone who tried it.
+  dom.listNew.addEventListener('click', () => tickerForm(dom.listForm));
 
   dom.listEdit.addEventListener('click', () => {
     const list = activeList();
@@ -461,7 +481,24 @@ function setupLists() {
         renderListPicker();
       },
       // The last list is never deletable — the sidebar always has one.
-      extra:
+      extra: [
+        el('button', {
+          class: 'link-button',
+          type: 'button',
+          text: 'New list',
+          onclick: () => {
+            dom.listForm.hidden = true;
+            nameForm(dom.listForm, {
+              label: 'List name',
+              confirmText: 'Create',
+              onSubmit: (name) => {
+                createList(name);
+                renderListPicker();
+                renderWatchlist();
+              },
+            });
+          },
+        }),
         store.lists.length > 1
           ? el('button', {
               class: 'link-button danger',
@@ -482,8 +519,104 @@ function setupLists() {
               },
             })
           : null,
+      ],
     });
   });
+}
+
+/**
+ * Add a ticker by typing it, with suggestions.
+ *
+ * Free text alone would accept anything and fail later with an unhelpful
+ * "no data"; the suggestions come from the same lookup the top search uses, so
+ * a typo is visible before it is saved.
+ */
+function tickerForm(node) {
+  const input = el('input', {
+    type: 'text',
+    class: 'field',
+    placeholder: 'Add ticker, e.g. TSLA',
+    'aria-label': 'Ticker to add',
+    autocomplete: 'off',
+    spellcheck: 'false',
+  });
+  const suggestions = el('ul', { class: 'ticker-suggestions', hidden: true });
+  const error = el('p', { class: 'form-error', hidden: true });
+
+  const close = () => {
+    node.hidden = true;
+  };
+
+  const commit = (symbol) => {
+    if (addTickerToList(symbol)) close();
+    else {
+      error.textContent = `"${symbol}" is not a valid ticker.`;
+      error.hidden = false;
+    }
+  };
+
+  const lookup = debounce(async (query) => {
+    if (query.length < 1) {
+      suggestions.hidden = true;
+      return;
+    }
+    try {
+      const results = (await api.searchSymbols(query)).slice(0, 6);
+      if (!results.length) {
+        suggestions.hidden = true;
+        return;
+      }
+      render(
+        suggestions,
+        ...results.map((r) =>
+          el(
+            'li',
+            {},
+            el('button', {
+              type: 'button',
+              // mousedown, not click: blur would hide the list first.
+              onmousedown: (event) => {
+                event.preventDefault();
+                commit(r.symbol);
+              },
+              onclick: () => commit(r.symbol),
+            },
+            el('span', { class: 'result-symbol', text: r.symbol }),
+            el('span', { class: 'result-name', text: r.name }),
+            ),
+          ),
+        ),
+      );
+      suggestions.hidden = false;
+    } catch {
+      suggestions.hidden = true;
+    }
+  }, 200);
+
+  input.addEventListener('input', () => {
+    error.hidden = true;
+    lookup(input.value.trim());
+  });
+
+  render(
+    node,
+    el(
+      'form',
+      {
+        onsubmit: (event) => {
+          event.preventDefault();
+          commit(input.value);
+        },
+      },
+      input,
+      el('button', { class: 'primary-button', type: 'submit', text: 'Add' }),
+      el('button', { class: 'link-button', type: 'button', text: 'Cancel', onclick: close }),
+      error,
+      suggestions,
+    ),
+  );
+  node.hidden = false;
+  input.focus();
 }
 
 /* ------------------------------------------------------------------ wallets */
@@ -832,6 +965,18 @@ function renderHero(stock) {
     .filter(Boolean)
     .join(' · ');
 
+  // Searching no longer saves what you look at, so keeping a company has to be
+  // an explicit act — and the control has to say which list it would go into.
+  const listName = activeList()?.name ?? 'watchlist';
+  const saved = symbols().includes(quote.symbol);
+  const watchToggle = el('button', {
+    class: saved ? 'watch-toggle saved' : 'watch-toggle',
+    type: 'button',
+    text: saved ? `✓ In ${listName}` : `＋ Add to ${listName}`,
+    title: saved ? `Remove ${quote.symbol} from ${listName}` : `Add ${quote.symbol} to ${listName}`,
+    onclick: () => (saved ? removeTickerFromList(quote.symbol) : addTickerToList(quote.symbol)),
+  });
+
   const left = el(
     'div',
     {},
@@ -841,6 +986,7 @@ function renderHero(stock) {
       el('span', { class: 'hero-symbol', text: quote.symbol }),
       el('span', { class: 'hero-name', text: quote.name }),
       ...tags.map((t) => el('span', { class: 'tag', text: t })),
+      watchToggle,
     ),
     el('div', { class: 'hero-price', text: quote.price == null ? DASH : currency(quote.price, code) }),
     el(
@@ -1740,7 +1886,7 @@ function renderSearchResults() {
             'aria-selected': String(index === activeResult),
             onmousedown: (event) => {
               event.preventDefault(); // keep focus so blur does not race the click
-              addSymbol(result.symbol);
+              viewSymbol(result.symbol);
               dom.search.value = '';
               closeSearch();
             },
@@ -1783,7 +1929,7 @@ function setupSearch() {
       const chosen = searchResults[activeResult] ?? searchResults[0];
       const symbol = chosen?.symbol ?? dom.search.value.trim().toUpperCase();
       if (symbol) {
-        addSymbol(symbol);
+        viewSymbol(symbol);
         dom.search.value = '';
         closeSearch();
       }
