@@ -610,6 +610,17 @@ function renderIncome(node, chartNode, wallet, data, income, mountChart) {
 
 /* --------------------------------------------------------------------- api */
 
+/** The income panel's own empty state, so the tab is never blank. */
+function renderIncomeEmpty(node, message) {
+  if (!node) return;
+  node.hidden = false;
+  render(
+    node,
+    el('div', { class: 'card-head' }, el('h3', { class: 'card-title', text: 'Dividend income' })),
+    el('p', { class: 'empty', text: message }),
+  );
+}
+
 /** Empty *and* out of the layout: a cleared card still paints its own border. */
 function hide(node) {
   if (!node) return;
@@ -625,13 +636,14 @@ export function renderWallet({ nodes, wallet, data, income, rangeBlurb, handlers
     hide(nodes.income);
     hide(nodes.incomeChart);
     return;
+
   }
 
   renderHero(nodes.hero, wallet, data, handlers);
 
   if (!wallet.holdings.length) {
     clear(nodes.chart);
-    hide(nodes.income);
+    renderIncomeEmpty(nodes.income, 'Add a holding with a purchase date and its dividends are counted here.');
     hide(nodes.incomeChart);
     renderHoldings(nodes.holdings, wallet, data, handlers, editing);
     return;

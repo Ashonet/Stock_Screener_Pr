@@ -65,7 +65,14 @@ const PERIODS = [
   { key: 'quarterly', label: 'Quarterly' },
 ];
 
-const STORE = { theme: 'sd:theme', range: 'sd:range', symbol: 'sd:active', tab: 'sd:tab', period: 'sd:period' };
+const STORE = {
+  theme: 'sd:theme',
+  range: 'sd:range',
+  symbol: 'sd:active',
+  tab: 'sd:tab',
+  walletTab: 'sd:walletTab',
+  period: 'sd:period',
+};
 const REFRESH_MS = 30_000;
 
 /**
@@ -74,6 +81,16 @@ const REFRESH_MS = 30_000;
  * hidden panel measures zero, so anything drawn while the tab was closed would
  * otherwise come back at its minimum width.
  */
+/**
+ * The wallet's two sections. Same `repaint` reason as the company tabs: the
+ * income chart sizes itself from its container, and a container inside a
+ * hidden panel measures zero.
+ */
+const WALLET_TABS = [
+  { id: 'overview', label: 'Value and holdings' },
+  { id: 'income', label: 'Dividend income' },
+];
+
 const TABS = [
   { id: 'stats', label: 'Key stats' },
   {
@@ -114,6 +131,7 @@ const state = {
   active: readStore(STORE.symbol, null),
   range: readStore(STORE.range, '1y'),
   tab: readStore(STORE.tab, 'stats'),
+  walletTab: readStore(STORE.walletTab, 'overview'),
   period: readStore(STORE.period, 'annual'),
   stock: null,
   quotes: new Map(),
@@ -162,6 +180,10 @@ const dom = {
   navMap: document.getElementById('nav-map'),
   navCompare: document.getElementById('nav-compare'),
   walletIncome: document.getElementById('wallet-income'),
+  walletPanels: {
+    overview: document.getElementById('wpanel-overview'),
+    income: document.getElementById('wpanel-income'),
+  },
   walletIncomeChart: document.getElementById('wallet-income-chart'),
   compareView: document.getElementById('compare-view'),
   compareCard: document.getElementById('compare-card'),
@@ -2028,6 +2050,48 @@ function showTab(id) {
   target.repaint?.();
 }
 
+function showWalletTab(id) {
+  const target = WALLET_TABS.find((t) => t.id === id) ?? WALLET_TABS[0];
+  state.walletTab = target.id;
+  writeStore(STORE.walletTab, target.id);
+
+  for (const tab of WALLET_TABS) {
+    const selected = tab === target;
+    const button = document.getElementById(`wtab-${tab.id}`);
+    if (!button) continue;
+    button.setAttribute('aria-selected', String(selected));
+    // Roving tabindex: the tablist is one tab stop, arrows move within it.
+    button.tabIndex = selected ? 0 : -1;
+    const panel = dom.walletPanels?.[tab.id];
+    if (panel) panel.hidden = !selected;
+  }
+
+  // Re-render on the way in so whichever chart was hidden gets measured against
+  // a container that now has a width.
+  renderWalletView();
+}
+
+function setupWalletTabs() {
+  WALLET_TABS.forEach((tab, index) => {
+    const button = document.getElementById(`wtab-${tab.id}`);
+    if (!button) throw new Error(`#wtab-${tab.id} is missing from the page`);
+    button.addEventListener('click', () => showWalletTab(tab.id));
+    button.addEventListener('keydown', (event) => {
+      let next = null;
+      if (event.key === 'ArrowRight') next = (index + 1) % WALLET_TABS.length;
+      else if (event.key === 'ArrowLeft') next = (index - 1 + WALLET_TABS.length) % WALLET_TABS.length;
+      else if (event.key === 'Home') next = 0;
+      else if (event.key === 'End') next = WALLET_TABS.length - 1;
+      if (next == null) return;
+      event.preventDefault();
+      showWalletTab(WALLET_TABS[next].id);
+      document.getElementById(`wtab-${WALLET_TABS[next].id}`)?.focus();
+    });
+  });
+
+  showWalletTab(state.walletTab);
+}
+
 function setupTabs() {
   TABS.forEach((tab, index) => {
     const button = document.getElementById(`tab-${tab.id}`);
@@ -2241,6 +2305,7 @@ function init() {
   step('watchlist controls', setupLists);
   step('wallet controls', setupWallets);
   step('tabs', setupTabs);
+  step('wallet tabs', setupWalletTabs);
   step('map nav', () => {
     if (!dom.navMap) throw new Error('#nav-map is missing from the page');
     dom.navMap.addEventListener('click', showMapView);

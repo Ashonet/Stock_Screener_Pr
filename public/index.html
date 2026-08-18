@@ -179,17 +179,31 @@
       <section id="wallet-view" class="detail" aria-live="polite" hidden>
         <div id="wallet-hero" class="hero-card wallet-hero"></div>
 
-        <div class="filter-row">
-          <div class="filter-group" role="group" aria-label="Wallet history range">
-            <span class="filter-label">Range</span>
-            <div class="segmented" id="wallet-range-picker"></div>
-          </div>
+        <div class="tabs" role="tablist" aria-label="Wallet sections">
+          <button id="wtab-overview" class="tab" type="button" role="tab" aria-controls="wpanel-overview" aria-selected="true">
+            Value and holdings
+          </button>
+          <button id="wtab-income" class="tab" type="button" role="tab" aria-controls="wpanel-income" aria-selected="false" tabindex="-1">
+            Dividend income
+          </button>
         </div>
 
-        <div id="wallet-chart-card" class="card card-chart"></div>
-        <div id="wallet-holdings" class="card"></div>
-        <div id="wallet-income" class="card"></div>
-        <div id="wallet-income-chart" class="card card-chart"></div>
+        <div id="wpanel-overview" class="tab-panel" role="tabpanel" aria-labelledby="wtab-overview">
+          <div class="filter-row">
+            <div class="filter-group" role="group" aria-label="Wallet history range">
+              <span class="filter-label">Range</span>
+              <div class="segmented" id="wallet-range-picker"></div>
+            </div>
+          </div>
+
+          <div id="wallet-chart-card" class="card card-chart"></div>
+          <div id="wallet-holdings" class="card"></div>
+        </div>
+
+        <div id="wpanel-income" class="tab-panel" role="tabpanel" aria-labelledby="wtab-income" hidden>
+          <div id="wallet-income" class="card"></div>
+          <div id="wallet-income-chart" class="card card-chart"></div>
+        </div>
       </section>
 
       <section id="screener-view" class="detail" aria-live="polite" hidden>
