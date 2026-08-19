@@ -22,6 +22,7 @@ import { buildIncome, buildIncomeProjection } from './lib/income.js';
 import { buildComparison } from './lib/compare.js';
 import { buildScoreHistory } from './lib/scoreHistory.js';
 import { gradePortfolios, gradesAsOf, GRADE_ORDER } from './lib/gradeStudy.js';
+import { buildPortfolioScoreHistory } from './lib/portfolioScore.js';
 import { cached, stats as cacheStats } from './lib/cache.js';
 import * as warehouse from './lib/warehouse.js';
 
@@ -88,6 +89,40 @@ function symbolList(raw, max = 60) {
 /** `2024-01-31` plus n days, as an ISO date. */
 function addDays(isoDate, days) {
   return new Date(Date.parse(`${isoDate}T00:00:00Z`) + days * 86_400_000).toISOString().slice(0, 10);
+}
+
+/**
+ * Every tracked company, graded at each of its past year ends.
+ *
+ * Shared by the grade study and by a wallet's score history, and cached for six
+ * hours because it only changes when the pipeline lands new statements. Grading
+ * five hundred companies across every reporting period they have takes about
+ * 800ms, which is fine once and not fine per request.
+ */
+function gradeTimelines() {
+  return cached('grades:timelines', 6 * 60 * 60_000, async () => {
+    const { securities, financials, dividends } = await warehouse.scoringInputs();
+    const closes = await warehouse.monthlyHistory(
+      securities.map((s) => s.symbol),
+      { years: 25 },
+    );
+
+    const out = new Map();
+    for (const security of securities) {
+      const rows = financials.get(security.symbol);
+      if (!rows?.length) continue;
+      const history = buildScoreHistory({
+        summary: { summaryProfile: { industry: security.industry } },
+        financials: rows,
+        dividendPayments: dividends.get(security.symbol) ?? [],
+        closes: closes.get(security.symbol) ?? [],
+        periodType: 'annual',
+      });
+      // Oldest first, so "the latest period that had closed" is a scan.
+      if (history.periods.length) out.set(security.symbol, [...history.periods].reverse());
+    }
+    return out;
+  });
 }
 
 /* ------------------------------------------------------------------- routes */
@@ -536,31 +571,7 @@ const routes = {
     const basis = url.searchParams.get('basis') === 'now' ? 'now' : 'then';
     const windows = [1, 3, 5, 10, 20];
 
-    // Grade timelines: every company, graded at each of its past year ends by
-    // the same scorer the rest of the app uses.
-    const timelines = await cached('grades:timelines', 6 * 60 * 60_000, async () => {
-      const { securities, financials, dividends } = await warehouse.scoringInputs();
-      const closes = await warehouse.monthlyHistory(
-        securities.map((s) => s.symbol),
-        { years: 25 },
-      );
-
-      const out = new Map();
-      for (const security of securities) {
-        const rows = financials.get(security.symbol);
-        if (!rows?.length) continue;
-        const history = buildScoreHistory({
-          summary: { summaryProfile: { industry: security.industry } },
-          financials: rows,
-          dividendPayments: dividends.get(security.symbol) ?? [],
-          closes: closes.get(security.symbol) ?? [],
-          periodType: 'annual',
-        });
-        // Oldest first, so "the latest period that had closed" is a scan.
-        if (history.periods.length) out.set(security.symbol, [...history.periods].reverse());
-      }
-      return out;
-    });
+    const timelines = await gradeTimelines();
 
     const current = await cached('grades:current', 60 * 60_000, async () => {
       const rows = await warehouse.screener();
@@ -610,6 +621,33 @@ const routes = {
       graded: timelines.size,
       asOf: today.toISOString().slice(0, 10),
     };
+  },
+
+  /**
+   * A wallet's quality score over time, weighted by what it held.
+   *
+   * Three things move the line and the model keeps them apart: a company
+   * reporting a new year, a holding's weight drifting with its price, and a
+   * holding joining on the day it was bought. The last is what makes it a
+   * portfolio's score rather than a watchlist average.
+   */
+  async '/api/portfolio/score-history'(url) {
+    const holdings = parseHoldings(url.searchParams.get('holdings'));
+    if (!holdings.length) throw new UpstreamError('At least one holding is required', 400);
+    if (!warehouse.isReady()) {
+      throw new UpstreamError('The warehouse has not been built yet, run the pipeline first.', 503);
+    }
+
+    const symbols = holdings.map((h) => h.symbol);
+    const [timelines, prices] = await Promise.all([
+      gradeTimelines(),
+      warehouse.monthlyHistory(symbols, { years: 25 }),
+    ]);
+
+    // Only this wallet's symbols, so the response carries no more than it needs.
+    const walletTimelines = new Map(symbols.filter((symbol) => timelines.has(symbol)).map((symbol) => [symbol, timelines.get(symbol)]));
+
+    return buildPortfolioScoreHistory({ holdings, timelines: walletTimelines, prices });
   },
 
   async '/api/market'() {

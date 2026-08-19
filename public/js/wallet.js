@@ -40,9 +40,18 @@ function delta(value, text) {
   );
 }
 
+/** Score colour, matching the company view's ladder. */
+function scoreTone(score) {
+  if (!Number.isFinite(score)) return 'var(--text-muted)';
+  if (score >= 75) return 'var(--up)';
+  if (score >= 60) return 'var(--series-1)';
+  if (score >= 45) return 'var(--series-2)';
+  return 'var(--down)';
+}
+
 /* --------------------------------------------------------------------- hero */
 
-function renderHero(node, wallet, data, handlers) {
+function renderHero(node, wallet, data, handlers, score) {
   const code = data?.currency ?? 'USD';
   const totals = data?.totals ?? {};
 
@@ -85,6 +94,22 @@ function renderHero(node, wallet, data, handlers) {
   );
 
   const facts = [
+    // Weighted by position value, not averaged across holdings: the score is
+    // what the money is invested in, so a 200 dollar position should not
+    // outvote a 60,000 dollar one.
+    [
+      'Avg score',
+      score?.current
+        ? el(
+            'span',
+            {},
+            el('span', { style: { color: scoreTone(score.current.score) }, text: Math.round(score.current.score) }),
+            score.current.coverage < 99.5
+              ? el('span', { class: 'muted', text: ` · ${Math.round(score.current.coverage)}% rated` })
+              : null,
+          )
+        : null,
+    ],
     ['Total cost', totals.costTotal == null ? null : currency(totals.costTotal, code)],
     [
       'Total gain',
@@ -1252,6 +1277,179 @@ function renderGoal(node, chartNode, wallet, data, income, mountChart, handlers,
   });
 }
 
+/* --------------------------------------------------------- quality over time */
+
+/**
+ * The wallet's weighted quality score, and how it got there.
+ *
+ * Three things move this line and the model keeps them apart: a company
+ * reporting a new year, a holding's weight drifting with its price, and a
+ * holding joining on the day it was bought. The last is what makes it the
+ * portfolio's score rather than a watchlist average, and it is why the line
+ * steps when a purchase lands.
+ */
+function renderScoreTab(node, chartNode, wallet, data, score, mountChart) {
+  const code = data?.currency ?? 'USD';
+
+  const head = (extra) =>
+    el(
+      'div',
+      { class: 'card-head' },
+      el('h3', { class: 'card-title', text: 'Quality over time' }),
+      extra ? el('span', { class: 'card-sub', style: { marginBottom: 0 }, text: extra }) : null,
+    );
+
+  if (!score) {
+    render(node, head(), el('p', { class: 'empty', text: 'Working out what this wallet has held.' }));
+    clear(chartNode);
+    chartNode.hidden = true;
+    return;
+  }
+
+  node.hidden = false;
+  const { points = [], holdings = [], current = null, excluded = [] } = score;
+
+  const notes = excluded.length
+    ? el(
+        'p',
+        { class: 'card-sub', style: { marginBottom: 0 } },
+        'Not scored: ',
+        ...excluded.flatMap((entry, i) => [i ? ', ' : '', el('strong', { text: entry.symbol }), ` (${entry.reason})`]),
+        '. Only companies in the tracked universe carry a grade, and an ungraded holding is left out of the score rather than counted as zero.',
+      )
+    : null;
+
+  if (!current || points.length < 2) {
+    render(
+      node,
+      head(),
+      el('p', {
+        class: 'empty',
+        text: 'Nothing in this wallet has a grade yet, so there is no portfolio score to plot.',
+      }),
+      notes,
+    );
+    clear(chartNode);
+    chartNode.hidden = true;
+    return;
+  }
+
+  const first = points[0].c;
+  const last = points.at(-1).c;
+  const move = last - first;
+
+  const stat = (label, value, hint) =>
+    el(
+      'div',
+      { class: 'income-stat' },
+      el('span', { class: 'income-stat-label', text: label }),
+      el('span', { class: 'income-stat-value', text: value }),
+      hint ? el('span', { class: 'income-stat-hint', text: hint }) : null,
+    );
+
+  render(
+    node,
+    head(`since ${shortDate(points[0].t)}`),
+    el(
+      'div',
+      { class: 'income-summary' },
+      stat('Score now', String(Math.round(current.score)), 'weighted by position value'),
+      stat('At the start', String(Math.round(first)), shortDate(points[0].t)),
+      stat('Change', `${move > 0 ? '+' : ''}${move.toFixed(1)}`, 'points'),
+      stat('Rated', `${Math.round(current.coverage)}%`, `${current.gradedHoldings} of ${wallet.holdings.length} holdings`),
+    ),
+    notes,
+  );
+
+  /* -------------------------------------------------------------- chart */
+
+  const colour = cssVar('--series-1');
+  chartNode.hidden = false;
+  mountChart(chartNode, {
+    title: 'Weighted quality score',
+    subtitle: 'each holding counted from the day it was bought, weighted by what it was worth',
+    height: 300,
+    draw: (width, height) =>
+      areaChart(width, height, {
+        points,
+        color: colour,
+        ariaLabel: `${wallet.name} weighted quality score over time`,
+        formatValue: (v) => v.toFixed(0),
+        endLabel: String(Math.round(last)),
+        formatTooltip: (point) => [
+          shortDate(point.t),
+          [
+            { label: 'Portfolio score', value: point.c.toFixed(1), color: colour },
+            point.coverage != null && point.coverage < 99.5
+              ? { label: 'Of value rated', value: `${Math.round(point.coverage)}%` }
+              : null,
+          ].filter(Boolean),
+        ],
+      }),
+    table: {
+      columns: ['Date', 'Score', 'Rated'],
+      rows: [...points].reverse().map((p) => [shortDate(p.t), p.c.toFixed(1), `${Math.round(p.coverage ?? 100)}%`]),
+    },
+  });
+
+  /* -------------------------------------------------------- composition */
+
+  const table = el(
+    'table',
+    { class: 'data' },
+    el(
+      'thead',
+      {},
+      el('tr', {}, ...['Symbol', 'Score', 'Grade', 'Value', 'Weight', 'Graded on'].map((label) => el('th', { scope: 'col', text: label }))),
+    ),
+    el(
+      'tbody',
+      {},
+      ...holdings.map((row) =>
+        el(
+          'tr',
+          {},
+          el('th', { scope: 'row', text: row.symbol }),
+          el('td', { style: { color: scoreTone(row.score) }, text: String(row.score) }),
+          el('td', { text: row.grade ?? DASH }),
+          el('td', { text: currency(row.value, code) }),
+          el(
+            'td',
+            {},
+            el(
+              'div',
+              { class: 'weight-cell' },
+              el('span', { text: percent(row.weight, { digits: 1 }) }),
+              el('span', { class: 'weight-track', 'aria-hidden': 'true' }, el('span', { class: 'weight-fill', style: { width: `${row.weight}%` } })),
+            ),
+          ),
+          el('td', { text: isoDate(row.asOf) }),
+        ),
+      ),
+    ),
+  );
+
+  node.append(
+    el(
+      'div',
+      { style: { marginTop: '20px' } },
+      el('h4', { class: 'stats-title', text: 'What makes up the score' }),
+      el('div', { class: 'table-scroll' }, table),
+      el(
+        'details',
+        { class: 'forecast-assumptions' },
+        el('summary', { text: 'How this is worked out' }),
+        el('p', {
+          text:
+            'Each holding carries the grade of the last financial year that had closed at the time, so no grade is applied before the statements behind it existed. ' +
+            'Those grades are recomputed from the statements on file rather than recorded at the time, which means a later restatement is included in them. ' +
+            'The weighting is by position value at each point, so the line moves when a company reports, when prices shift the weights, and when a purchase adds a holding.',
+        }),
+      ),
+    ),
+  );
+}
+
 /* --------------------------------------------------------------------- api */
 
 /** The income panel's own empty state, so the tab is never blank. */
@@ -1272,7 +1470,7 @@ function hide(node) {
   node.hidden = true;
 }
 
-export function renderWallet({ nodes, wallet, data, income, rangeBlurb, handlers, editing, mountChart, forecastYears, goal }) {
+export function renderWallet({ nodes, wallet, data, income, score, rangeBlurb, handlers, editing, mountChart, forecastYears, goal }) {
   if (!wallet) {
     render(nodes.hero, el('p', { class: 'empty', text: 'Create a wallet from the sidebar to track a portfolio.' }));
     clear(nodes.chart);
@@ -1283,11 +1481,13 @@ export function renderWallet({ nodes, wallet, data, income, rangeBlurb, handlers
     hide(nodes.forecastChart);
     hide(nodes.goal);
     hide(nodes.goalChart);
+    hide(nodes.score);
+    hide(nodes.scoreChart);
     return;
 
   }
 
-  renderHero(nodes.hero, wallet, data, handlers);
+  renderHero(nodes.hero, wallet, data, handlers, score);
 
   if (!wallet.holdings.length) {
     clear(nodes.chart);
@@ -1297,6 +1497,8 @@ export function renderWallet({ nodes, wallet, data, income, rangeBlurb, handlers
     hide(nodes.forecastChart);
     renderIncomeEmpty(nodes.goal, 'Add a holding and this works out what the portfolio has to be worth.', 'Income goal');
     hide(nodes.goalChart);
+    renderIncomeEmpty(nodes.score, 'Add a holding and its quality grade is tracked here.', 'Quality over time');
+    hide(nodes.scoreChart);
     renderHoldings(nodes.holdings, wallet, data, handlers, editing);
     return;
   }
@@ -1306,4 +1508,5 @@ export function renderWallet({ nodes, wallet, data, income, rangeBlurb, handlers
   renderIncome(nodes.income, nodes.incomeChart, wallet, data, income, mountChart);
   renderForecast(nodes.forecast, nodes.forecastChart, wallet, data, income, mountChart, handlers, forecastYears);
   renderGoal(nodes.goal, nodes.goalChart, wallet, data, income, mountChart, handlers, goal);
+  renderScoreTab(nodes.score, nodes.scoreChart, wallet, data, score, mountChart);
 }

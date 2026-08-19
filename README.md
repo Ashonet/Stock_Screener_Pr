@@ -362,7 +362,7 @@ the live-data dashboard, just without the screener.
 ### Tests and CI
 
 ```bash
-npm test          # 135 unit tests, no network, no database
+npm test          # 142 unit tests, no network, no database
 npm run warehouse # 50 dbt assertions against the committed raw layer
 npm run docs      # self-contained lineage site at warehouse/target/static_index.html
 ```
@@ -455,6 +455,21 @@ will not survive extrapolation are marked rather than capped, because capping
 substitutes a different number without saying so. NVIDIA's dividend has grown
 77% a year from almost nothing, which compounds $2.80 into $49 over five years;
 the row carries a warning rather than a quietly adjusted figure.
+
+**Quality over time**: the wallet's weighted quality score, and the holdings
+behind it. Three separate things move that line and the model keeps them apart:
+a company reporting a new year, a holding's weight drifting with its price, and
+a holding joining on the day it was bought. The last is what makes it a
+portfolio's score rather than a watchlist's average, since a wallet that held
+one C-graded company and later bought three A-graded ones did not have a good
+portfolio for that first year.
+
+Weighted by position value throughout, because the score is what the money is
+invested in and a $200 position should not outvote a $60,000 one. A holding
+outside the scored universe is left out of the score rather than counted as
+zero, and the share of value that carried a grade is reported beside it, since a
+score resting on a third of the portfolio is a different claim from one resting
+on all of it. The same weighted figure appears next to the wallet's value.
 
 **Goal**: the income you want, and what the portfolio has to be worth to pay
 it. A portfolio drawn at `w` percent supports `value x w` of income, so the

@@ -97,6 +97,7 @@ const WALLET_TABS = [
   { id: 'income', label: 'Dividend income' },
   { id: 'forecast', label: 'Income forecast' },
   { id: 'goal', label: 'Goal' },
+  { id: 'score', label: 'Quality over time' },
 ];
 
 const TABS = [
@@ -159,6 +160,7 @@ const state = {
   sparks: new Map(),
   walletData: null,
   walletIncome: null,
+  walletScore: null,
   screenerData: null,
   screener: { sortKey: 'overall_score', sortDir: 'desc', basis: 'all', sector: 'all' },
   mapData: null,
@@ -208,12 +210,15 @@ const dom = {
     income: document.getElementById('wpanel-income'),
     forecast: document.getElementById('wpanel-forecast'),
     goal: document.getElementById('wpanel-goal'),
+    score: document.getElementById('wpanel-score'),
   },
   walletIncomeChart: document.getElementById('wallet-income-chart'),
   walletForecast: document.getElementById('wallet-forecast'),
   walletForecastChart: document.getElementById('wallet-forecast-chart'),
   walletGoal: document.getElementById('wallet-goal'),
   walletGoalChart: document.getElementById('wallet-goal-chart'),
+  walletScore: document.getElementById('wallet-score'),
+  walletScoreChart: document.getElementById('wallet-score-chart'),
   compareView: document.getElementById('compare-view'),
   compareCard: document.getElementById('compare-card'),
   mapView: document.getElementById('map-view'),
@@ -877,10 +882,13 @@ function renderWalletView() {
       forecastChart: dom.walletForecastChart,
       goal: dom.walletGoal,
       goalChart: dom.walletGoalChart,
+      score: dom.walletScore,
+      scoreChart: dom.walletScoreChart,
     },
     wallet: activeWallet(),
     data: state.walletData,
     income: state.walletIncome,
+    score: state.walletScore,
     forecastYears: state.forecastYears,
     goal: state.goal,
     rangeBlurb: RANGES.find((r) => r.key === state.range)?.blurb ?? '',
@@ -895,6 +903,7 @@ async function loadWalletData() {
   if (!wallet || !wallet.holdings.length) {
     state.walletData = null;
     state.walletIncome = null;
+    state.walletScore = null;
     renderWalletView();
     return;
   }
@@ -905,6 +914,7 @@ async function loadWalletData() {
   // history and slower than the valuation, so letting it land on its own keeps
   // the value chart from waiting on it.
   loadWalletIncome(wallet, token);
+  loadWalletScore(wallet, token);
   try {
     const data = await api.fetchPortfolio(holdingsParam(wallet), state.range);
     if (token !== state.walletToken) return;
@@ -944,6 +954,28 @@ function setForecastYears(years) {
   if (wallet?.holdings.length) loadWalletIncome(wallet, state.walletToken);
 }
 
+/**
+ * The wallet's weighted quality score, loaded on its own.
+ *
+ * Separate from the valuation for the same reason income is: it grades every
+ * company at every past year end, which is slower than pricing a basket, and
+ * making the value chart wait on it would be a poor trade.
+ */
+async function loadWalletScore(wallet, token) {
+  state.walletScore = null;
+  try {
+    const score = await api.fetchPortfolioScore(holdingsParam(wallet));
+    if (token !== state.walletToken) return;
+    state.walletScore = score;
+  } catch {
+    // A failed score must not blank the wallet, so an empty record renders as
+    // "nothing graded yet" and leaves the valuation above it untouched.
+    if (token !== state.walletToken) return;
+    state.walletScore = { points: [], holdings: [], current: null, excluded: [] };
+  }
+  renderWalletView();
+}
+
 async function loadWalletIncome(wallet, token) {
   state.walletIncome = null;
   try {
@@ -967,6 +999,7 @@ function selectWallet(id) {
   state.editingHolding = null;
   state.walletData = null;
   state.walletIncome = null;
+  state.walletScore = null;
   saveWallets();
   saveView();
   setVisibleView('wallet');
