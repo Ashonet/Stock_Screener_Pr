@@ -9,7 +9,7 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { buildProfile } from '../lib/profile.js';
+import { buildProfile, quoteFromChart } from '../lib/profile.js';
 
 /** A chart as getChart() returns it. */
 function chart({ range, interval, points, previousClose }) {
@@ -89,5 +89,47 @@ describe('buildProfile day change when the summary is unavailable', () => {
   test('a chart with a single bar cannot invent a previous close', () => {
     const { quote } = buildProfile('NVDA', {}, chart({ range: '1y', interval: '1d', previousClose: 1, points: bars([225]) }));
     assert.equal(quote.previousClose, null);
+  });
+});
+
+describe('quoteFromChart, the wallet fallback', () => {
+  test('a MAX chart yields no day change rather than a five-figure one', () => {
+    // The reported bug: the holdings table read "+541,057.30%" for Microsoft on
+    // the MAX range, because the fallback compared today's price against the
+    // close before the whole range, which for MSFT is the 1980s.
+    const quote = quoteFromChart(
+      chart({ range: 'max', interval: '1mo', previousClose: 0.089, points: bars([0.1, 120, 481.63]) }),
+    );
+
+    assert.equal(quote.previousClose, null);
+    assert.equal(quote.change, null);
+    assert.equal(quote.changePercent, null);
+  });
+
+  test('a daily chart uses yesterday, so the day change is a day', () => {
+    const quote = quoteFromChart(
+      chart({ range: '1y', interval: '1d', previousClose: 150, points: bars([220, 226, 225]) }),
+    );
+
+    assert.equal(quote.previousClose, 226);
+    assert.equal(quote.change, -1);
+    assert.ok(Math.abs(quote.changePercent + 0.442) < 0.01);
+  });
+
+  test('an intraday chart uses the real previous close', () => {
+    const quote = quoteFromChart(chart({ range: '1d', interval: '5m', previousClose: 226, points: bars([225]) }));
+    assert.equal(quote.previousClose, 226);
+    assert.equal(quote.change, -1);
+  });
+
+  test('the symbol and currency are carried through for the table', () => {
+    const quote = quoteFromChart(chart({ range: '1d', interval: '5m', previousClose: 100, points: bars([101]) }));
+    assert.equal(quote.symbol, 'NVDA');
+    assert.equal(quote.currency, 'USD');
+    assert.equal(quote.price, 101);
+  });
+
+  test('no chart yields no quote', () => {
+    assert.equal(quoteFromChart(null), null);
   });
 });

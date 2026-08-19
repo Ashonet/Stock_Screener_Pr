@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url';
 
 import * as yahoo from './lib/yahoo.js';
 import { UpstreamError } from './lib/yahoo.js';
-import { buildProfile, dividendsByYear } from './lib/profile.js';
+import { buildProfile, dividendsByYear, quoteFromChart } from './lib/profile.js';
 import { buildScore } from './lib/score.js';
 import { parseHoldings, buildValueSeries, priceHoldings } from './lib/portfolio.js';
 import { buildIncome, buildIncomeProjection } from './lib/income.js';
@@ -405,20 +405,7 @@ const routes = {
     const series = buildValueSeries(entries);
     // Quotes are the crumb-gated endpoint; if it is unavailable, fall back to
     // the last close from each chart so the wallet still totals up.
-    const fallbackQuotes = entries
-      .filter((e) => e.chart)
-      .map((e) => ({
-        symbol: e.chart.symbol,
-        name: e.chart.name,
-        currency: e.chart.currency,
-        price: e.chart.price,
-        previousClose: e.chart.previousClose,
-        change: e.chart.price != null && e.chart.previousClose != null ? e.chart.price - e.chart.previousClose : null,
-        changePercent:
-          e.chart.price != null && e.chart.previousClose
-            ? ((e.chart.price - e.chart.previousClose) / e.chart.previousClose) * 100
-            : null,
-      }));
+    const fallbackQuotes = entries.map((e) => quoteFromChart(e.chart)).filter(Boolean);
 
     const { rows, totals } = priceHoldings(holdings, quotes.length ? quotes : fallbackQuotes);
     const currencies = [...new Set(rows.map((r) => r.currency).filter(Boolean))];

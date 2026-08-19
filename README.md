@@ -97,6 +97,7 @@ plausible, which is what made them dangerous.
 | `assert_prices_are_fresh` | A pipeline that silently stops is worse than one that fails, because the dashboard keeps serving stale prices as current. |
 | `assert_missed_splits_are_corrected` | Yahoo published Monster's 2:1 split of 11 August 2026 in its own events feed and left `adjclose` stepping down with the raw close instead of correcting for it. The stored series carried a permanent 50% cliff and every return across it was halved: MNST read **-29%** over the year against **+47.7%** actual. The anomaly mart found it within minutes of being built. |
 | `assert_knowledge_intervals_do_not_overlap` | Guards the bitemporal derivation, because an overlap would let an "as of" query return two different values for the same figure on the same date. |
+| *(unit)* `quoteFromChart` | The same "+511,286% today" bug, found a second time in a second place. The wallet built its own fallback quote from `chart.previousClose`, which is the close before the **whole range**, so on MAX the holdings table read **+541,057%** for Microsoft: today against 1986. The fix already existed for the company view but lived in a private function the wallet could not reach, so it had been written twice and only fixed once. |
 
 Three of those tests were themselves wrong on first contact with the full
 universe, which is the honest part of the story:
