@@ -16,6 +16,7 @@ import {
   ARROW,
   DASH,
   compact,
+  compactCurrency,
   currency,
   currencySymbol,
   dateTime,
