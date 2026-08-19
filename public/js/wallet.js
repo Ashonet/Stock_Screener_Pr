@@ -9,7 +9,8 @@
  */
 
 import { el, render, clear } from './dom.js';
-import { areaChart, columnChart, cssVar } from './charts.js';
+import { areaChart, columnChart, donutChart, cssVar } from './charts.js';
+import { sliceLayout, groupByFacet } from './pie.js';
 import { buildGoal, timeWeightedReturn, buildContributionPlan } from './goal.js';
 import {
   ARROW,
@@ -1450,6 +1451,134 @@ function renderScoreTab(node, chartNode, wallet, data, score, mountChart) {
   );
 }
 
+/* -------------------------------------------------------------- breakdown */
+
+/**
+ * What the wallet is actually made of, on whichever facet is asked for.
+ *
+ * Concentration is the thing worth seeing here and it is easy to miss in a
+ * holdings table sorted by value: three positions can look like a diversified
+ * portfolio and turn out to be one sector. The donut answers "how much of this
+ * is one thing" at a glance, which is the one question a pie chart is good at.
+ */
+const MIX_FACETS = [
+  ['symbol', 'Holding'],
+  ['sector', 'Sector'],
+  ['industry', 'Industry'],
+  ['grade', 'Quality grade'],
+  ['basis', 'Type'],
+  ['country', 'Country'],
+];
+
+/** Categorical slots, capped at what stays distinguishable. */
+const MIX_COLOURS = ['--series-1', '--series-2', '--series-3', '--series-4', '--series-5', '--series-6'];
+
+function renderMix(node, wallet, data, facets, state, handlers, mountChart) {
+  const code = data?.currency ?? 'USD';
+  const rows = data?.holdings ?? [];
+
+  const picker = el(
+    'div',
+    { class: 'segmented' },
+    ...MIX_FACETS.map(([key, label]) =>
+      el('button', {
+        type: 'button',
+        text: label,
+        'aria-pressed': String(state.facet === key),
+        onclick: () => key !== state.facet && handlers.onMixFacet(key),
+      }),
+    ),
+  );
+
+  const head = el(
+    'div',
+    { class: 'card-head' },
+    el('h3', { class: 'card-title', text: 'Breakdown' }),
+    el('span', { class: 'card-sub', style: { marginBottom: 0 }, text: `${rows.length} holdings` }),
+  );
+
+  if (!rows.length || !rows.some((row) => row.value > 0)) {
+    render(node, head, picker, el('p', { class: 'empty', text: 'Nothing priced in this wallet yet.' }));
+    return;
+  }
+
+  // Facets other than the ticker need the reference data. Until it lands the
+  // picker still works, it just has one option that can answer.
+  const facetOf = (row) => {
+    if (state.facet === 'symbol') return row.symbol;
+    const fact = facets?.facets?.[row.symbol];
+    if (!fact) return null;
+    if (state.facet === 'basis') return fact.isReit ? 'REIT' : 'Operating company';
+    return fact[state.facet] ?? null;
+  };
+
+  const enriched = rows
+    .filter((row) => Number.isFinite(row.value) && row.value > 0)
+    .map((row) => ({ symbol: row.symbol, value: row.value, facet: facetOf(row) }));
+
+  const groups = groupByFacet(enriched, 'facet', { maxSlices: MIX_COLOURS.length });
+  const { slices, total } = sliceLayout(groups);
+  const coloured = slices.map((slice, i) => ({ ...slice, color: cssVar(MIX_COLOURS[i % MIX_COLOURS.length]) }));
+
+  const unresolved = enriched.filter((row) => row.facet == null).length;
+  const facetLabel = MIX_FACETS.find(([key]) => key === state.facet)?.[1] ?? state.facet;
+
+  render(
+    node,
+    head,
+    picker,
+    facets && !facets.available && state.facet !== 'symbol'
+      ? el('p', {
+          class: 'banner-inline',
+          text: 'The warehouse has not been built, so only the per-holding split is available.',
+        })
+      : null,
+  );
+
+  mountChart(node.appendChild(el('div', {})), {
+    title: `By ${facetLabel.toLowerCase()}`,
+    subtitle:
+      `${currency(total, code)} across ${coloured.length} ${coloured.length === 1 ? 'slice' : 'slices'}` +
+      (coloured[0] ? ` · largest is ${coloured[0].label} at ${percent(coloured[0].share, { digits: 1 })}` : ''),
+    height: 340,
+    legend: coloured.map((slice) => ({ name: `${slice.label} · ${percent(slice.share, { digits: 1 })}`, color: slice.color })),
+    draw: (width, height) =>
+      donutChart(width, height, {
+        slices: coloured,
+        total,
+        formatValue: (v) => currency(v, code),
+        centreValue: compactCurrency(total, code),
+        centreLabel: 'total',
+        ariaLabel: `Wallet split by ${facetLabel.toLowerCase()}`,
+      }),
+    note:
+      unresolved > 0
+        ? `${unresolved} holding${unresolved === 1 ? '' : 's'} could not be classified and ${unresolved === 1 ? 'is' : 'are'} grouped as Unclassified. Only companies in the tracked universe carry reference data.`
+        : null,
+    table: {
+      columns: [facetLabel, 'Value', 'Share', 'Holdings'],
+      rows: coloured.map((slice) => [
+        slice.folded ? `${slice.label} (${slice.folded} more)` : slice.label,
+        currency(slice.value, code),
+        percent(slice.share, { digits: 1 }),
+        slice.members.map((m) => m.symbol).join(', '),
+      ]),
+    },
+  });
+
+  // A folded tail is only honest if the reader can see what went into it.
+  const folded = coloured.find((slice) => slice.folded);
+  if (folded) {
+    node.append(
+      el('p', {
+        class: 'card-sub',
+        style: { marginTop: '12px', marginBottom: 0 },
+        text: `"Other" holds ${folded.foldedLabels.join(', ')}. The palette carries six colours that stay distinguishable from one another, so the tail is folded rather than drawn in shades nobody can match to a legend.`,
+      }),
+    );
+  }
+}
+
 /* --------------------------------------------------------------------- api */
 
 /** The income panel's own empty state, so the tab is never blank. */
@@ -1470,7 +1599,7 @@ function hide(node) {
   node.hidden = true;
 }
 
-export function renderWallet({ nodes, wallet, data, income, score, rangeBlurb, handlers, editing, mountChart, forecastYears, goal }) {
+export function renderWallet({ nodes, wallet, data, income, score, facets, mix, rangeBlurb, handlers, editing, mountChart, forecastYears, goal }) {
   if (!wallet) {
     render(nodes.hero, el('p', { class: 'empty', text: 'Create a wallet from the sidebar to track a portfolio.' }));
     clear(nodes.chart);
@@ -1483,6 +1612,7 @@ export function renderWallet({ nodes, wallet, data, income, score, rangeBlurb, h
     hide(nodes.goalChart);
     hide(nodes.score);
     hide(nodes.scoreChart);
+    hide(nodes.mix);
     return;
 
   }
@@ -1499,6 +1629,7 @@ export function renderWallet({ nodes, wallet, data, income, score, rangeBlurb, h
     hide(nodes.goalChart);
     renderIncomeEmpty(nodes.score, 'Add a holding and its quality grade is tracked here.', 'Quality over time');
     hide(nodes.scoreChart);
+    renderIncomeEmpty(nodes.mix, 'Add a holding to see what this wallet is made of.', 'Breakdown');
     renderHoldings(nodes.holdings, wallet, data, handlers, editing);
     return;
   }
@@ -1509,4 +1640,5 @@ export function renderWallet({ nodes, wallet, data, income, score, rangeBlurb, h
   renderForecast(nodes.forecast, nodes.forecastChart, wallet, data, income, mountChart, handlers, forecastYears);
   renderGoal(nodes.goal, nodes.goalChart, wallet, data, income, mountChart, handlers, goal);
   renderScoreTab(nodes.score, nodes.scoreChart, wallet, data, score, mountChart);
+  renderMix(nodes.mix, wallet, data, facets, mix, handlers, mountChart);
 }

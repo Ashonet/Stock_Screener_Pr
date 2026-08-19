@@ -2088,3 +2088,34 @@ table.screener thead th:first-child {
   line-height: 1.5;
   color: var(--text-secondary);
 }
+
+/* ------------------------------------------------------------------ donut */
+
+.donut-label {
+  fill: #fff;
+  font-size: 11px;
+  font-weight: 650;
+  font-family: var(--font);
+  pointer-events: none;
+  /* The ring colours vary, so the label needs its own contrast rather than
+     relying on whichever slice it happens to sit on. */
+  paint-order: stroke;
+  stroke: rgba(0, 0, 0, 0.35);
+  stroke-width: 2px;
+}
+.donut-centre-value {
+  fill: var(--text-primary);
+  font-size: 20px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font);
+}
+.donut-centre-label {
+  fill: var(--text-muted);
+  font-size: 12px;
+  font-family: var(--font);
+}
+.donut-chart path:focus-visible {
+  outline: 2px solid var(--series-1);
+  outline-offset: 2px;
+}

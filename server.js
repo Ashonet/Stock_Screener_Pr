@@ -650,6 +650,34 @@ const routes = {
     return buildPortfolioScoreHistory({ holdings, timelines: walletTimelines, prices });
   },
 
+  /**
+   * Reference facts for a wallet's holdings, so the breakdown can group on
+   * something other than the ticker.
+   *
+   * Values are not returned here: the client already has them from
+   * /api/portfolio, and pricing the same basket twice invites the two to
+   * disagree over which minute they were priced in.
+   */
+  async '/api/portfolio/facets'(url) {
+    const symbols = String(url.searchParams.get('symbols') ?? '')
+      .split(',')
+      .map((s) => s.trim().toUpperCase())
+      .filter((s) => /^[A-Z0-9.^=-]{1,20}$/.test(s))
+      .slice(0, 60);
+
+    if (!symbols.length) throw new UpstreamError('At least one symbol is required', 400);
+    if (!warehouse.isReady()) return { facets: {}, available: false };
+
+    const facets = await warehouse.securityFacets(symbols);
+    return {
+      available: true,
+      facets: Object.fromEntries(facets),
+      // Named rather than left as silent gaps: a holding outside the tracked
+      // universe has no sector here, and the breakdown says so.
+      unknown: symbols.filter((symbol) => !facets.has(symbol)),
+    };
+  },
+
   async '/api/market'() {
     const symbols = MARKET_INDICES.map((i) => i.symbol);
     const quotes = await cached(`quotes:${symbols.join(',')}`, TTL.quotes, async () => {

@@ -98,6 +98,7 @@ const WALLET_TABS = [
   { id: 'forecast', label: 'Income forecast' },
   { id: 'goal', label: 'Goal' },
   { id: 'score', label: 'Quality over time' },
+  { id: 'mix', label: 'Breakdown' },
 ];
 
 const TABS = [
@@ -161,6 +162,8 @@ const state = {
   walletData: null,
   walletIncome: null,
   walletScore: null,
+  walletFacets: null,
+  mix: { facet: 'sector' },
   screenerData: null,
   screener: { sortKey: 'overall_score', sortDir: 'desc', basis: 'all', sector: 'all' },
   mapData: null,
@@ -211,6 +214,7 @@ const dom = {
     forecast: document.getElementById('wpanel-forecast'),
     goal: document.getElementById('wpanel-goal'),
     score: document.getElementById('wpanel-score'),
+    mix: document.getElementById('wpanel-mix'),
   },
   walletIncomeChart: document.getElementById('wallet-income-chart'),
   walletForecast: document.getElementById('wallet-forecast'),
@@ -219,6 +223,7 @@ const dom = {
   walletGoalChart: document.getElementById('wallet-goal-chart'),
   walletScore: document.getElementById('wallet-score'),
   walletScoreChart: document.getElementById('wallet-score-chart'),
+  walletMix: document.getElementById('wallet-mix'),
   compareView: document.getElementById('compare-view'),
   compareCard: document.getElementById('compare-card'),
   mapView: document.getElementById('map-view'),
@@ -818,6 +823,11 @@ const walletHandlers = {
   onGoalTarget: (value) => setGoal({ target: Math.max(0, Math.round(Number(value) || 0)) }),
   onGoalRate: (value) => setGoal({ rate: Math.min(10, Math.max(0.1, Number(value) || 3)) }),
   onGoalYears: (value) => setGoal({ years: Math.min(50, Math.max(1, Math.round(Number(value) || 20))) }),
+  // A repaint of data already loaded: every facet comes back in one response.
+  onMixFacet: (facet) => {
+    state.mix = { ...state.mix, facet };
+    renderWalletView();
+  },
   onSelectSymbol: (symbol) => {
     addToList(symbol);
     renderWatchlist();
@@ -884,11 +894,14 @@ function renderWalletView() {
       goalChart: dom.walletGoalChart,
       score: dom.walletScore,
       scoreChart: dom.walletScoreChart,
+      mix: dom.walletMix,
     },
     wallet: activeWallet(),
     data: state.walletData,
     income: state.walletIncome,
     score: state.walletScore,
+    facets: state.walletFacets,
+    mix: state.mix,
     forecastYears: state.forecastYears,
     goal: state.goal,
     rangeBlurb: RANGES.find((r) => r.key === state.range)?.blurb ?? '',
@@ -904,6 +917,7 @@ async function loadWalletData() {
     state.walletData = null;
     state.walletIncome = null;
     state.walletScore = null;
+    state.walletFacets = null;
     renderWalletView();
     return;
   }
@@ -915,6 +929,7 @@ async function loadWalletData() {
   // the value chart from waiting on it.
   loadWalletIncome(wallet, token);
   loadWalletScore(wallet, token);
+  loadWalletFacets(wallet, token);
   try {
     const data = await api.fetchPortfolio(holdingsParam(wallet), state.range);
     if (token !== state.walletToken) return;
@@ -961,6 +976,28 @@ function setForecastYears(years) {
  * company at every past year end, which is slower than pricing a basket, and
  * making the value chart wait on it would be a poor trade.
  */
+/**
+ * Sector, industry and grade for the breakdown.
+ *
+ * Reference data only, no prices: the wallet already has those, and pricing the
+ * same basket twice invites the two to disagree over which minute they were
+ * priced in.
+ */
+async function loadWalletFacets(wallet, token) {
+  state.walletFacets = null;
+  try {
+    const facets = await api.fetchFacets(wallet.holdings.map((h) => h.symbol).join(','));
+    if (token !== state.walletToken) return;
+    state.walletFacets = facets;
+  } catch {
+    if (token !== state.walletToken) return;
+    // The per-holding split still works without it, so an empty record is a
+    // degraded breakdown rather than a broken one.
+    state.walletFacets = { available: false, facets: {}, unknown: [] };
+  }
+  renderWalletView();
+}
+
 async function loadWalletScore(wallet, token) {
   state.walletScore = null;
   try {
@@ -1000,6 +1037,7 @@ function selectWallet(id) {
   state.walletData = null;
   state.walletIncome = null;
   state.walletScore = null;
+  state.walletFacets = null;
   saveWallets();
   saveView();
   setVisibleView('wallet');

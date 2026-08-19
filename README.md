@@ -362,7 +362,7 @@ the live-data dashboard, just without the screener.
 ### Tests and CI
 
 ```bash
-npm test          # 142 unit tests, no network, no database
+npm test          # 155 unit tests, no network, no database
 npm run warehouse # 50 dbt assertions against the committed raw layer
 npm run docs      # self-contained lineage site at warehouse/target/static_index.html
 ```
@@ -455,6 +455,19 @@ will not survive extrapolation are marked rather than capped, because capping
 substitutes a different number without saying so. NVIDIA's dividend has grown
 77% a year from almost nothing, which compounds $2.80 into $49 over five years;
 the row carries a warning rather than a quietly adjusted figure.
+
+**Breakdown**: what the wallet is made of, as a donut over holding, sector,
+industry, quality grade, type (REIT against operating company) or country.
+Concentration is the thing worth seeing and it hides well in a holdings table:
+three positions can look diversified and turn out to be one sector.
+
+The palette is capped at six slices because that is how many categorical
+colours stay distinguishable from each other and from the background in both
+themes, and a portfolio can hold forty industries. The tail folds into one
+labelled slice, and the names inside it are printed rather than left to trust.
+Every slice carries its share on the ring, so the reading never depends on
+matching a colour back to a legend, and the table twin holds the exact values,
+because people compare angles badly.
 
 **Quality over time**: the wallet's weighted quality score, and the holdings
 behind it. Three separate things move that line and the model keeps them apart:

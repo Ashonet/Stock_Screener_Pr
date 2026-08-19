@@ -13,6 +13,7 @@
  */
 
 import { el, svg, render, debounce } from './dom.js';
+import { arcPath, pointOnCircle } from './pie.js';
 import { axisDate } from './format.js';
 
 /* ------------------------------------------------------------------ tooltip */
@@ -634,3 +635,97 @@ export function columnChart(width, height, opts) {
 }
 
 export { cssVar };
+
+/* ------------------------------------------------------------ donut chart */
+
+/**
+ * Value split as a ring.
+ *
+ * Colour is the encoding here, which it is not allowed to be anywhere else in
+ * this app. That is defensible for a categorical split with no ordering and no
+ * direction to carry, and it is why the palette is capped at six: past that,
+ * "distinct" colours stop being distinguishable, especially for a colourblind
+ * reader. The caller folds the tail before it gets here.
+ *
+ * Every slice is labelled with its share on the ring, so the reading never
+ * depends on matching a colour back to the legend, and the table twin holds the
+ * exact values. People compare angles badly; the chart is for the shape of the
+ * split and the table is for the numbers.
+ */
+export function donutChart(width, height, opts) {
+  const { slices, total, formatValue, centreLabel, centreValue, ariaLabel } = opts;
+
+  const node = svg('svg', { viewBox: `0 0 ${width} ${height}`, width, height, role: 'img', 'aria-label': ariaLabel });
+  if (!slices.length) {
+    node.append(
+      svg('text', { x: width / 2, y: height / 2, class: 'axis-text', 'text-anchor': 'middle' }, 'Nothing to show'),
+    );
+    return node;
+  }
+
+  const cx = width / 2;
+  const cy = height / 2;
+  const outer = Math.max(20, Math.min(width, height) / 2 - 26);
+  const inner = outer * 0.58;
+
+  for (const slice of slices) {
+    const path = svg('path', {
+      d: arcPath(cx, cy, outer, inner, slice.startAngle, slice.endAngle),
+      fill: slice.color,
+      // The 2px gap between slices is the surface showing through, never a
+      // stroke: a stroke would sit half outside the arc and shrink it.
+      stroke: 'var(--surface-0)',
+      'stroke-width': '2',
+      tabindex: '0',
+      role: 'listitem',
+      'aria-label': `${slice.label}: ${formatValue(slice.value)}, ${slice.share.toFixed(1)}%`,
+    });
+
+    const show = (clientX, clientY) => {
+      const box = node.getBoundingClientRect();
+      const scale = box.width / width || 1;
+      const at = pointOnCircle(cx, cy, (outer + inner) / 2, slice.midAngle);
+      showTooltip(
+        clientX ?? box.left + at.x * scale,
+        clientY ?? box.top + at.y * scale,
+        tooltipBody(slice.label, [
+          { label: 'Value', value: formatValue(slice.value), color: slice.color },
+          { label: 'Share', value: `${slice.share.toFixed(1)}%` },
+        ]),
+      );
+    };
+
+    path.addEventListener('pointermove', (e) => show(e.clientX, e.clientY));
+    path.addEventListener('pointerleave', hideTooltip);
+    path.addEventListener('focus', () => show());
+    path.addEventListener('blur', hideTooltip);
+    node.append(path);
+
+    // Only where it fits. A label on a 2% slice overlaps its neighbours and
+    // makes both unreadable, and the table twin has it either way.
+    if (slice.share >= 7) {
+      const at = pointOnCircle(cx, cy, (outer + inner) / 2, slice.midAngle);
+      node.append(
+        svg(
+          'text',
+          {
+            x: at.x,
+            y: at.y + 4,
+            class: 'donut-label',
+            'text-anchor': 'middle',
+          },
+          `${Math.round(slice.share)}%`,
+        ),
+      );
+    }
+  }
+
+  if (centreValue) {
+    node.append(
+      svg('text', { x: cx, y: cy - 4, class: 'donut-centre-value', 'text-anchor': 'middle' }, centreValue),
+      svg('text', { x: cx, y: cy + 16, class: 'donut-centre-label', 'text-anchor': 'middle' }, centreLabel ?? ''),
+    );
+  }
+
+  return node;
+}
