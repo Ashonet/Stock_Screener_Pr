@@ -429,8 +429,14 @@ button {
 /* The wallet summary is a full-width card, so it reads across rather than stacking. */
 /* Three columns: identity and value, then the trend, then the actions and
    facts. The middle one takes whatever is left, which is what stops a wide
-   card from being mostly empty between the total and the rail. */
-.wallet-hero {
+   card from being mostly empty between the total and the rail.
+   
+   Qualified with .hero-card on purpose. The element carries both classes, both
+   rules are one class deep, and `.hero-card { display: flex }` is defined four
+   hundred lines further down, so on equal specificity it won on order alone and
+   the wallet hero has been a flex column since it was written. Two classes beat
+   one wherever they sit in the file. */
+.hero-card.wallet-hero {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 20px 32px;
@@ -442,21 +448,22 @@ button {
 /* Below three columns the trend goes under the value rather than being
    squeezed; a 90px sparkline says nothing. */
 @media (max-width: 1100px) {
-  .wallet-hero {
+  .hero-card.wallet-hero {
     grid-template-columns: minmax(0, 1fr) auto;
   }
-  .hero-trend {
+  .wallet-hero .hero-trend {
     grid-column: 1 / -1;
     flex-direction: row;
     align-items: center;
-    gap: 28px;
+    flex-wrap: wrap;
+    gap: 12px 28px;
   }
 }
 @media (max-width: 720px) {
-  .wallet-hero {
+  .hero-card.wallet-hero {
     grid-template-columns: minmax(0, 1fr);
   }
-  .hero-trend {
+  .wallet-hero .hero-trend {
     flex-direction: column;
     align-items: stretch;
   }
@@ -867,6 +874,16 @@ button {
 @media (max-width: 720px) {
   .hero-card {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+/* The block above is the company hero's. The wallet hero has its own column
+   rules further up and must not inherit these, or it goes back to two columns
+   between 1100 and 1240 and the trend is squeezed into the gap it was added to
+   fill. */
+@media (max-width: 1240px) {
+  .hero-card.wallet-hero {
+    order: 0;
+    padding: 20px 22px 22px;
   }
 }
 .hero-id {
