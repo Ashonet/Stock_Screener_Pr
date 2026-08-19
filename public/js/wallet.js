@@ -9,7 +9,7 @@
  */
 
 import { el, render, clear } from './dom.js';
-import { areaChart, columnChart, donutChart, cssVar } from './charts.js';
+import { areaChart, columnChart, donutChart, sparkline, cssVar } from './charts.js';
 import { sliceLayout, groupByFacet } from './pie.js';
 import { buildGoal, timeWeightedReturn, buildContributionPlan } from './goal.js';
 import {
@@ -53,7 +53,95 @@ function scoreTone(score) {
 
 /* --------------------------------------------------------------------- hero */
 
-function renderHero(node, wallet, data, handlers, score) {
+/**
+ * The middle of the hero: what the wallet has been doing, and what moved today.
+ *
+ * The card is a wide two-column grid, so on any normal screen there was a lot
+ * of empty between the value and the facts. Filling it with decoration would be
+ * worse than leaving it blank, so this is the two things a reader actually
+ * looks for next after the total: the shape of the line, and which holding is
+ * responsible for today.
+ */
+function heroTrend(data, income, rangeBlurb) {
+  const code = data?.currency ?? 'USD';
+  const points = data?.points ?? [];
+  const rows = (data?.holdings ?? []).filter((row) => Number.isFinite(row.changePercent));
+
+  const parts = [];
+
+  if (points.length >= 2) {
+    const first = points[0].c;
+    const last = points.at(-1).c;
+    const change = first ? ((last - first) / first) * 100 : null;
+    const dir = direction(change);
+    const colour = dir === 'down' ? cssVar('--down') : dir === 'up' ? cssVar('--up') : cssVar('--series-1');
+
+    parts.push(
+      el(
+        'div',
+        { class: 'hero-trend-chart' },
+        // No axes and no interaction: this is the shape, and the chart on the
+        // tab below is the one you read values off.
+        sparkline(
+          points.map((point) => point.c),
+          { width: 220, height: 52, color: colour },
+        ),
+        el(
+          'div',
+          { class: 'hero-trend-caption' },
+          el('span', { class: 'fact-label', text: rangeBlurb || 'this range' }),
+          change == null ? null : delta(change, signedPercent(change)),
+        ),
+      ),
+    );
+  }
+
+  // Best and worst today. On a two-holding wallet these are the whole story,
+  // and on a twenty-holding one they are the only two rows worth surfacing
+  // before the reader opens the table.
+  if (rows.length >= 2) {
+    const sorted = [...rows].sort((a, b) => b.changePercent - a.changePercent);
+    const movers = [
+      ['Best today', sorted[0]],
+      ['Worst today', sorted.at(-1)],
+    ];
+    parts.push(
+      el(
+        'div',
+        { class: 'hero-movers' },
+        ...movers.map(([label, row]) =>
+          el(
+            'div',
+            { class: 'hero-mover' },
+            el('span', { class: 'fact-label', text: label }),
+            el('span', { class: 'hero-mover-symbol', text: row.symbol }),
+            delta(row.changePercent, signedPercent(row.changePercent)),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Forward income, where the wallet has any. The yield is on today's value
+  // rather than on cost, since that is what the money is earning now.
+  const annual = income?.projection?.totals?.currentAnnual ?? null;
+  const value = data?.totals?.value ?? null;
+  if (annual > 0) {
+    parts.push(
+      el(
+        'div',
+        { class: 'hero-mover' },
+        el('span', { class: 'fact-label', text: 'Income a year' }),
+        el('span', { class: 'hero-mover-symbol', text: currency(annual, code) }),
+        value > 0 ? el('span', { class: 'muted', text: `${percent((annual / value) * 100, { digits: 2 })} yield` }) : null,
+      ),
+    );
+  }
+
+  return parts.length ? el('div', { class: 'hero-trend' }, ...parts) : null;
+}
+
+function renderHero(node, wallet, data, handlers, score, income, rangeBlurb) {
   const code = data?.currency ?? 'USD';
   const totals = data?.totals ?? {};
 
@@ -150,7 +238,7 @@ function renderHero(node, wallet, data, handlers, score) {
       : null,
   );
 
-  render(node, left, right);
+  render(node, left, heroTrend(data, income, rangeBlurb), right);
 
   const warnings = [];
   if (data?.unpriced?.length) warnings.push(`No price data for ${data.unpriced.join(', ')}, excluded from the totals.`);
@@ -1618,7 +1706,7 @@ export function renderWallet({ nodes, wallet, data, income, score, facets, mix, 
 
   }
 
-  renderHero(nodes.hero, wallet, data, handlers, score);
+  renderHero(nodes.hero, wallet, data, handlers, score, income, rangeBlurb);
 
   if (!wallet.holdings.length) {
     clear(nodes.chart);

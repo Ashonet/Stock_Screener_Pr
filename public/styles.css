@@ -427,19 +427,79 @@ button {
 /* ------------------------------------------------------------- wallet view ---- */
 
 /* The wallet summary is a full-width card, so it reads across rather than stacking. */
+/* Three columns: identity and value, then the trend, then the actions and
+   facts. The middle one takes whatever is left, which is what stops a wide
+   card from being mostly empty between the total and the rail. */
 .wallet-hero {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 20px 32px;
   align-items: start;
 }
 .wallet-hero .hero-side {
   min-width: 240px;
 }
+/* Below three columns the trend goes under the value rather than being
+   squeezed; a 90px sparkline says nothing. */
+@media (max-width: 1100px) {
+  .wallet-hero {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .hero-trend {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+    gap: 28px;
+  }
+}
 @media (max-width: 720px) {
   .wallet-hero {
     grid-template-columns: minmax(0, 1fr);
   }
+  .hero-trend {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.hero-trend {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 4px;
+}
+.hero-trend-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.hero-trend-caption {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 12px;
+}
+.hero-movers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 24px;
+}
+.hero-mover {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.hero-mover-symbol {
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+/* The hero sparkline is wider than a watchlist row's, so it gets its own size
+   rather than inheriting the 64px one. */
+.hero-trend .wl-spark {
+  width: 220px;
+  height: 52px;
 }
 
 .wallet-actions {

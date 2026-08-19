@@ -219,6 +219,20 @@ describe('the wallet view runs', () => {
     assert.ok(panes.holdings.children.length > 0, 'holdings table');
   });
 
+  test('the hero carries its trend column, not just the value and the rail', () => {
+    // The middle column is the whole reason the hero is a three-column grid.
+    // If heroTrend returns null the layout silently collapses back to the
+    // mostly-empty card it replaced, and nothing else would notice.
+    const panes = draw();
+    assert.equal(panes.hero.children.length, 3, 'identity, trend, side');
+  });
+
+  test('the trend column is dropped rather than drawn empty', () => {
+    // One point is not a line, and a sparkline of nothing is worse than a gap.
+    const panes = draw({ data: { ...portfolio, points: [], holdings: [] }, income: null });
+    assert.equal(panes.hero.children.length, 2, 'falls back to two columns');
+  });
+
   test('every breakdown facet renders', () => {
     for (const facet of ['symbol', 'sector', 'industry', 'grade', 'basis', 'country']) {
       const panes = draw({ mix: { facet } });
