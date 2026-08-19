@@ -14,6 +14,10 @@ const KEYS = {
   // Pre-multi-list keys, migrated on first load and then left alone.
   legacyList: 'sd:watchlist',
   legacySymbol: 'sd:active',
+  // Set when the demo wallet is deleted, so it is not put back on the next
+  // load. Absence of the wallet is not enough to go on: that is also what a
+  // first visit looks like.
+  demoRemoved: 'sd:demoRemoved',
 };
 
 const DEFAULT_SYMBOLS = ['AAPL', 'MSFT', 'NVDA', 'GOOGL', 'AMZN', 'JNJ', 'KO', 'O'];
@@ -38,8 +42,10 @@ const DEFAULT_SYMBOLS = ['AAPL', 'MSFT', 'NVDA', 'GOOGL', 'AMZN', 'JNJ', 'KO', '
  * something to show. Every one is in the scored universe, which the wide tier
  * is not, so nothing here is missing a grade.
  *
- * It is seeded only on a genuine first run. Deleting it writes an empty list,
- * and an empty list is a decision rather than an absence, so it stays deleted.
+ * It is added whenever it is absent and has not been deleted, rather than only
+ * on a first run. Seeding only on a first run meant anyone who had already used
+ * the app never saw it, which is most of the people who would want it. Removing
+ * it records that, so it stays removed.
  */
 const DEMO_WALLET = {
   id: 'demo',
@@ -165,13 +171,16 @@ export function loadStore() {
   }
   if (!store.lists.length) store.lists = [normaliseList({ name: 'My watchlist', symbols: DEFAULT_SYMBOLS })];
 
-  // `null` means the key was never written, which is a first visit. An empty
-  // array means the user removed every wallet, which is a decision, so the demo
-  // is not put back.
   const storedWallets = read(KEYS.wallets, null);
-  store.wallets = Array.isArray(storedWallets)
-    ? storedWallets.map(normaliseWallet).filter(Boolean)
-    : [normaliseWallet(DEMO_WALLET)];
+  store.wallets = (Array.isArray(storedWallets) ? storedWallets : []).map(normaliseWallet).filter(Boolean);
+
+  // Added alongside whatever is already there, not instead of it. Someone with
+  // their own wallets still gets the worked example, and it goes last so their
+  // own stay at the top of the list.
+  const removed = read(KEYS.demoRemoved, false) === true;
+  if (!removed && !store.wallets.some((wallet) => wallet.id === DEMO_WALLET.id)) {
+    store.wallets.push(normaliseWallet(DEMO_WALLET));
+  }
 
   const activeList = read(KEYS.activeList, null);
   store.activeListId = store.lists.some((l) => l.id === activeList) ? activeList : store.lists[0].id;
@@ -269,6 +278,8 @@ export function renameWallet(id, name) {
 }
 
 export function deleteWallet(id) {
+  // Deleting the demo is remembered, or it reappears on the next load.
+  if (id === DEMO_WALLET.id) write(KEYS.demoRemoved, true);
   store.wallets = store.wallets.filter((w) => w.id !== id);
   if (store.activeWalletId === id) store.activeWalletId = store.wallets[0]?.id ?? null;
   if (!store.activeWalletId) store.view = 'stock';

@@ -424,15 +424,16 @@ column, filterable by sector and by scoring basis. REIT rows show P/FFO and oper
 companies show P/E in the same column, since that is the comparable measure for
 each.
 
-A **demo portfolio** is seeded on a first visit, because every tab in the
+A **demo portfolio** appears alongside your own wallets, because every tab in the
 wallet view needs holdings to say anything and half of them need purchase dates
 as well. Ten companies across seven sectors, grades from A+ to D, two REITs,
 and yields from 0.7% to 6.8%, bought on staggered dates so the value series
 steps and the score line moves for reasons other than price. The cost bases are
 the actual closes on those dates, so it is up about half overall with JPM and
 CAT carrying it while VICI and PG are down: a demo where everything wins
-teaches the reader to distrust the rest of the page. Deleting it keeps it
-deleted, since an empty list is a decision rather than an absence.
+teaches the reader to distrust the rest of the page. Deleting it is recorded
+and keeps it deleted, since absence and deletion look identical in storage and
+mean opposite things.
 
 **Watchlists**: as many named lists as you like. **Wallets**: portfolios with
 share counts, optional cost basis and optional purchase date, showing value over

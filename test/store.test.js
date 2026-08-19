@@ -1,10 +1,11 @@
 /**
- * Tests for what the browser store does on a first visit.
+ * Tests for how the browser store handles the demo wallet.
  *
- * The demo wallet has one rule that is easy to get subtly wrong: it is seeded
- * when the key was never written, and *not* when the user has deleted
- * everything. Those two states both look empty and mean opposite things, and
- * confusing them produces a wallet that comes back from the dead every reload.
+ * One rule, easy to get subtly wrong: the demo is added whenever it is absent
+ * and has not been deleted. "Absent" and "deleted" look identical in storage
+ * and mean opposite things, so the deletion is recorded separately. Read the
+ * first as the second and nobody ever sees the example; read the second as the
+ * first and it returns from the dead on every reload.
  */
 
 import { test, describe, beforeEach } from 'node:test';
@@ -76,21 +77,45 @@ describe('the demo wallet', () => {
     assert.ok(new Set(dates).size >= 8, 'purchases are spread over time');
   });
 
-  test('deleting every wallet keeps them deleted', async () => {
-    // The regression this guards: an empty list read as "nothing here yet"
-    // rather than as "the user removed them", so the demo returns on reload.
-    const storage = new MemoryStorage({ [KEY]: JSON.stringify([]) });
-    const { store } = await loadWith(storage);
-
-    assert.deepEqual(store.wallets, []);
-  });
-
-  test('a saved wallet is loaded instead of the demo', async () => {
+  test('someone who already has wallets gets it too, alongside their own', async () => {
+    // Seeding only on a first run meant everyone who had already used the app
+    // never saw the example, which is most of the people who would want it.
     const mine = [{ id: 'w1', name: 'Mine', holdings: [{ symbol: 'AAPL', shares: 5, cost: 100, boughtAt: '2024-01-02' }] }];
     const { store } = await loadWith(new MemoryStorage({ [KEY]: JSON.stringify(mine) }));
 
-    assert.equal(store.wallets.length, 1);
-    assert.equal(store.wallets[0].name, 'Mine');
+    assert.equal(store.wallets.length, 2);
+    assert.equal(store.wallets[0].name, 'Mine', 'their own stays first');
+    assert.equal(store.wallets[1].id, 'demo');
+  });
+
+  test('deleting the demo keeps it deleted', async () => {
+    // The regression this guards: absence read as "not seeded yet" rather than
+    // as "removed", so it returns on every reload and cannot be got rid of.
+    const storage = new MemoryStorage();
+    const first = await loadWith(storage);
+    first.deleteWallet('demo');
+
+    const again = await loadWith(storage);
+    assert.ok(!again.store.wallets.some((w) => w.id === 'demo'));
+  });
+
+  test('deleting a different wallet does not remove the demo', async () => {
+    const mine = [{ id: 'w1', name: 'Mine', holdings: [{ symbol: 'AAPL', shares: 5, cost: 100, boughtAt: '2024-01-02' }] }];
+    const storage = new MemoryStorage({ [KEY]: JSON.stringify(mine) });
+    const first = await loadWith(storage);
+    first.deleteWallet('w1');
+
+    const again = await loadWith(storage);
+    assert.ok(again.store.wallets.some((w) => w.id === 'demo'));
+  });
+
+  test('it is not duplicated when it is already saved', async () => {
+    const storage = new MemoryStorage();
+    const first = await loadWith(storage);
+    first.saveWallets();
+
+    const again = await loadWith(storage);
+    assert.equal(again.store.wallets.filter((w) => w.id === 'demo').length, 1);
   });
 
   test('the demo survives a round trip through storage unchanged', async () => {
