@@ -405,7 +405,18 @@ const routes = {
     const series = buildValueSeries(entries);
     // Quotes are the crumb-gated endpoint; if it is unavailable, fall back to
     // the last close from each chart so the wallet still totals up.
-    const fallbackQuotes = entries.map((e) => quoteFromChart(e.chart)).filter(Boolean);
+    // Daily closes from the warehouse, so a missing live quote does not also
+    // cost the day change. Only consulted when the quote call failed.
+    const storedCloses = !quotes.length && warehouse.isReady()
+      ? await warehouse
+          .latestPrices(symbols)
+          .then((rows) => new Map(rows.map((row) => [row.symbol, row])))
+          .catch(() => new Map())
+      : new Map();
+
+    const fallbackQuotes = entries
+      .map((e) => quoteFromChart(e.chart, storedCloses.get(e.holding.symbol)))
+      .filter(Boolean);
 
     const { rows, totals } = priceHoldings(holdings, quotes.length ? quotes : fallbackQuotes);
     const currencies = [...new Set(rows.map((r) => r.currency).filter(Boolean))];
