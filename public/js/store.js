@@ -18,6 +18,46 @@ const KEYS = {
 
 const DEFAULT_SYMBOLS = ['AAPL', 'MSFT', 'NVDA', 'GOOGL', 'AMZN', 'JNJ', 'KO', 'O'];
 
+/**
+ * A worked example, so a first visit lands on something rather than on a form.
+ *
+ * Every tab in the wallet view needs holdings to say anything at all, and half
+ * of them need purchase dates as well: income counts from the date you bought,
+ * the score line steps when a holding joins, and the goal plan measures a
+ * return from the series. An empty wallet demonstrates none of it.
+ *
+ * The numbers are real. Cost bases are the actual close on the date given, so
+ * the gains and losses are what those positions did rather than a flattering
+ * invention: it is up about half overall, carried by JPM and CAT, while VICI
+ * and PG are down. A demo where everything wins teaches the reader to distrust
+ * the rest of the page.
+ *
+ * Chosen for spread rather than for taste. Eight sectors, grades from A+ to D,
+ * two REITs against eight operating companies, and yields from 0.7% to 6.8%,
+ * so the breakdown, the score history and the income forecast each have
+ * something to show. Every one is in the scored universe, which the wide tier
+ * is not, so nothing here is missing a grade.
+ *
+ * It is seeded only on a genuine first run. Deleting it writes an empty list,
+ * and an empty list is a decision rather than an absence, so it stays deleted.
+ */
+const DEMO_WALLET = {
+  id: 'demo',
+  name: 'Demo portfolio',
+  holdings: [
+    { symbol: 'MSFT', shares: 28, cost: 287.15, boughtAt: '2022-03-15' },
+    { symbol: 'JNJ', shares: 35, cost: 172.55, boughtAt: '2022-06-10' },
+    { symbol: 'O', shares: 111, cost: 63.09, boughtAt: '2022-09-20' },
+    { symbol: 'KO', shares: 81, cost: 61.68, boughtAt: '2023-01-17' },
+    { symbol: 'PG', shares: 39, cost: 153.71, boughtAt: '2023-05-09' },
+    { symbol: 'XOM', shares: 38, cost: 117.49, boughtAt: '2023-09-12' },
+    { symbol: 'JPM', shares: 42, cost: 167.99, boughtAt: '2024-01-16' },
+    { symbol: 'CAT', shares: 14, cost: 359.07, boughtAt: '2024-05-21' },
+    { symbol: 'VICI', shares: 124, cost: 32.32, boughtAt: '2024-10-08' },
+    { symbol: 'ABBV', shares: 18, cost: 191.83, boughtAt: '2025-02-11' },
+  ],
+};
+
 function read(key, fallback) {
   try {
     const raw = localStorage.getItem(key);
@@ -125,7 +165,13 @@ export function loadStore() {
   }
   if (!store.lists.length) store.lists = [normaliseList({ name: 'My watchlist', symbols: DEFAULT_SYMBOLS })];
 
-  store.wallets = (read(KEYS.wallets, []) ?? []).map(normaliseWallet).filter(Boolean);
+  // `null` means the key was never written, which is a first visit. An empty
+  // array means the user removed every wallet, which is a decision, so the demo
+  // is not put back.
+  const storedWallets = read(KEYS.wallets, null);
+  store.wallets = Array.isArray(storedWallets)
+    ? storedWallets.map(normaliseWallet).filter(Boolean)
+    : [normaliseWallet(DEMO_WALLET)];
 
   const activeList = read(KEYS.activeList, null);
   store.activeListId = store.lists.some((l) => l.id === activeList) ? activeList : store.lists[0].id;
