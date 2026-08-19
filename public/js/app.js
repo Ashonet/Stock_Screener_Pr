@@ -823,6 +823,10 @@ const walletHandlers = {
   onGoalTarget: (value) => setGoal({ target: Math.max(0, Math.round(Number(value) || 0)) }),
   onGoalRate: (value) => setGoal({ rate: Math.min(10, Math.max(0.1, Number(value) || 3)) }),
   onGoalYears: (value) => setGoal({ years: Math.min(50, Math.max(1, Math.round(Number(value) || 20))) }),
+  // Null is meaningful here: it means "stop overriding and use the wallet's own
+  // measured rate", which is the only way back once a number has been typed.
+  onGoalReturn: (value) =>
+    setGoal({ returnPct: value == null || !Number.isFinite(value) ? null : Math.min(40, Math.max(-20, value)) }),
   // A repaint of data already loaded: every facet comes back in one response.
   onMixFacet: (facet) => {
     state.mix = { ...state.mix, facet };

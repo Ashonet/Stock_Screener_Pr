@@ -991,6 +991,16 @@ function renderForecast(node, chartNode, wallet, data, income, mountChart, handl
 /* ------------------------------------------------------------------- goal */
 
 /**
+ * The growth rate used when a wallet is too young to have measured one.
+ *
+ * A round long-run figure for a broad equity portfolio. It is not a forecast,
+ * not derived from anything in this app, and not the user's own experience; it
+ * exists so a new wallet gets a working plan instead of a blank tab, and the
+ * card says exactly that beside it.
+ */
+const DEFAULT_RETURN = 7;
+
+/**
  * How much capital the wanted income needs, and how much of it has to be sold.
  *
  * The withdrawal rate is a control rather than a constant because it is the
@@ -1020,6 +1030,53 @@ function renderGoal(node, chartNode, wallet, data, income, mountChart, handlers,
         opts.commit(event.target.value);
       },
     });
+
+  const goal = buildGoal({
+    value: data?.totals?.value,
+    annualDividends: income?.projection?.totals?.currentAnnual ?? 0,
+    target,
+    withdrawalRate: rate,
+    startValue: data?.points?.[0]?.c ?? null,
+    startedAt: data?.startedAt ?? null,
+    dividendsReceived: income?.totals?.total ?? null,
+    contributions: (data?.contributions ?? []).length,
+  });
+
+  // The wallet's own return, chain-linked so the money paid in when a holding
+  // joined is not counted as growth. Price only, since the value series is
+  // built from closes, which is exactly what the reinvestment comparison needs:
+  // one case adds the yield back, the other does not.
+  const twr = timeWeightedReturn(data?.points ?? [], (data?.contributions ?? []).map((c) => c.t));
+  const measuredReturn = twr.annualisedPct == null ? null : twr.annualisedPct + goal.yieldPct;
+
+  /*
+   * The rate the plan runs on, in order of preference.
+   *
+   * A wallet under a year old has no annualised rate, and refusing to
+   * annualise a partial year is right: scaling six months of a bull run to a
+   * lifetime is how people talk themselves into contributing too little. But
+   * refusing to plan at all was worse. A new wallet is exactly the case where
+   * someone wants to know what it takes to get there, and the tab went blank
+   * on them with an explanation of why it would not help.
+   *
+   * So the rate falls back to an assumption, and the assumption is a control.
+   * DEFAULT_RETURN is a round long-run figure for a broad equity portfolio and
+   * nothing more: it is not measured, not a forecast, and not this wallet's.
+   * The card says so and invites a better number.
+   */
+  const effectiveReturn = goalState.returnPct ?? measuredReturn ?? DEFAULT_RETURN;
+  const returnSource = goalState.returnPct != null ? 'set' : measuredReturn != null ? 'measured' : 'assumed';
+  // An override is read as a total return, so the no-reinvestment case takes
+  // the yield back off it.
+  const priceReturn = effectiveReturn - goal.yieldPct;
+
+  const plan = buildContributionPlan({
+    value: goal.value,
+    requiredValue: goal.requiredValue,
+    years: goalState.years,
+    priceReturnPct: priceReturn,
+    yieldPct: goal.yieldPct,
+  });
 
   const controls = el(
     'div',
@@ -1065,6 +1122,36 @@ function renderGoal(node, chartNode, wallet, data, income, mountChart, handlers,
         commit: (raw) => handlers.onGoalYears(Number(raw)),
       }),
     ),
+    el(
+      'label',
+      { class: 'goal-control' },
+      el(
+        'span',
+        { class: 'income-stat-label' },
+        'Growth a year (%)',
+        el('span', {
+          class: 'muted',
+          text:
+            returnSource === 'measured'
+              ? ' · this wallet'
+              : returnSource === 'set'
+                ? ' · yours'
+                : ' · assumed',
+        }),
+      ),
+      field({
+        value: Number(effectiveReturn.toFixed(2)),
+        min: '-20',
+        max: '40',
+        step: '0.5',
+        label: 'Expected total return a year',
+        title:
+          'Total return including dividends. Clear the box to go back to this wallet\u2019s own measured rate, where there is one.',
+        // An empty box is not zero growth, it is "stop overriding": the only
+        // way back to the measured rate once a number has been typed.
+        commit: (raw) => handlers.onGoalReturn(String(raw).trim() === '' ? null : Number(raw)),
+      }),
+    ),
   );
 
   const head = el(
@@ -1073,17 +1160,6 @@ function renderGoal(node, chartNode, wallet, data, income, mountChart, handlers,
     el('h3', { class: 'card-title', text: 'Income goal' }),
     el('span', { class: 'card-sub', style: { marginBottom: 0 }, text: `drawn at ${rate}% a year` }),
   );
-
-  const goal = buildGoal({
-    value: data?.totals?.value,
-    annualDividends: income?.projection?.totals?.currentAnnual ?? 0,
-    target,
-    withdrawalRate: rate,
-    startValue: data?.points?.[0]?.c ?? null,
-    startedAt: data?.startedAt ?? null,
-    dividendsReceived: income?.totals?.total ?? null,
-    contributions: (data?.contributions ?? []).length,
-  });
 
   node.hidden = false;
 
@@ -1178,35 +1254,9 @@ function renderGoal(node, chartNode, wallet, data, income, mountChart, handlers,
 
   /* ------------------------------------------------- what it takes to get there */
 
-  // The wallet's own return, chain-linked so the money paid in when a holding
-  // joined is not counted as growth. Price only, since the value series is
-  // built from closes, which is exactly what the reinvestment comparison needs:
-  // one case adds the yield back, the other does not.
-  const twr = timeWeightedReturn(data?.points ?? [], (data?.contributions ?? []).map((c) => c.t));
-  // An override is read as a total return, so the no-reinvestment case takes
-  // the yield back off it.
-  const priceReturn = goalState.returnPct != null ? goalState.returnPct - goal.yieldPct : twr.annualisedPct;
-
-  const plan =
-    priceReturn == null
-      ? null
-      : buildContributionPlan({
-          value: goal.value,
-          requiredValue: goal.requiredValue,
-          years: goalState.years,
-          priceReturnPct: priceReturn,
-          yieldPct: goal.yieldPct,
-        });
-
   const planBody = () => {
     if (!plan) {
-      return el('p', {
-        class: 'empty',
-        text:
-          twr.years == null
-            ? 'Not enough price history in this wallet to measure a return, so there is nothing to project a plan from yet.'
-            : `Held ${twr.years.toFixed(1)} years so far. A year of history is needed before a rate can be annualised, so there is nothing to project a plan from yet.`,
-      });
+      return el('p', { class: 'empty', text: 'Not enough to project a plan from yet.' });
     }
 
     const money = (v) => currency(v, code);
@@ -1317,7 +1367,12 @@ function renderGoal(node, chartNode, wallet, data, income, mountChart, handlers,
           `A portfolio drawn at ${rate}% a year supports ${rate}% of its value in income, so the target needs ${currency(goal.requiredValue, code)} of capital. ` +
           'Dividends are not income on top of that withdrawal, they are the part of it that arrives without selling, and the gap between the yield and the rate is what has to be sold. ' +
           "Today's yield is assumed to hold as the portfolio grows, which is the weakest part: a portfolio that grows mostly on price ends up yielding less and would need to sell more than this shows. " +
-          'The contribution plan assumes the wallet keeps earning what it has earned so far, measured over a period short enough that it may not mean much, and that every payment is made on time and never missed. ' +
+          (returnSource === 'measured'
+            ? `The plan runs on ${percent(effectiveReturn, { digits: 1 })} a year, which is this wallet's own: ${percent(twr.annualisedPct, { digits: 1 })} of price growth chain-linked across its purchases over ${twr.years.toFixed(1)} years, plus ${percent(goal.yieldPct, { digits: 2 })} of yield. It assumes the wallet keeps earning that, measured over a period short enough that it may not mean much. `
+            : returnSource === 'set'
+              ? `The plan runs on ${percent(effectiveReturn, { digits: 1 })} a year, which is the rate you set. `
+              : `This wallet is ${twr.years == null ? 'too new' : `only ${twr.years.toFixed(1)} years old`}, and a year is needed before a rate can be annualised: scaling a part year up is how a good run becomes a plan. So ${percent(DEFAULT_RETURN, { digits: 0 })} a year is assumed instead, a round long-run figure for a broad equity portfolio rather than a measurement or a forecast. Set your own in the box above. `) +
+          'It also assumes every payment is made on time and never missed. ' +
           'Reinvesting is assumed to happen at no cost and with nothing lost to tax, which favours it slightly over the cash case in reality. ' +
           'Nothing here accounts for inflation, tax or a dividend being cut. In real terms a target fixed today buys less in thirty years than it does now.',
       }),
