@@ -1,6 +1,6 @@
 {
   "description": "Constituents of S&P 500, Nasdaq listed, Russell 2000, fetched from the sources below and validated against Yahoo Finance. Rebuild with: node pipeline/build-universe.js",
-  "generated_at": "2026-08-18T18:21:26.432Z",
+  "generated_at": "2026-08-24T22:56:01.234Z",
   "indexes": {
     "sp500": {
       "label": "S&P 500",
@@ -10,7 +10,7 @@
     "nasdaq": {
       "label": "Nasdaq listed",
       "source": "https://www.nasdaqtrader.com/dynamic/symdir/nasdaqlisted.txt",
-      "listed": 4328
+      "listed": 4329
     },
     "russell2000": {
       "label": "Russell 2000",
@@ -33,13 +33,10 @@
       "entities": "prices only"
     }
   },
-  "resolved": 5466,
+  "resolved": 5467,
   "dropped": [],
   "symbols": [
     "A",
-    "AACB",
-    "AACBR",
-    "AACBU",
     "AACG",
     "AACI",
     "AACIU",
@@ -549,7 +546,6 @@
     "AVAH",
     "AVAT",
     "AVAV",
-    "AVB",
     "AVBC",
     "AVBH",
     "AVBP",
@@ -884,6 +880,7 @@
     "BTCS",
     "BTCT",
     "BTDR",
+    "BTLN",
     "BTMD",
     "BTOC",
     "BTOG",
@@ -1122,6 +1119,7 @@
     "CHSCP",
     "CHSN",
     "CHTR",
+    "CHTRP",
     "CHW",
     "CHY",
     "CHYM",
@@ -1722,7 +1720,6 @@
     "EQBK",
     "EQIX",
     "EQPT",
-    "EQR",
     "EQT",
     "ERAS",
     "ERIC",
@@ -1812,6 +1809,7 @@
     "FAST",
     "FATE",
     "FATN",
+    "FBDT",
     "FBGL",
     "FBIO",
     "FBIOP",
@@ -2111,7 +2109,6 @@
     "GGAL",
     "GGR",
     "GGROW",
-    "GGRP",
     "GH",
     "GHC",
     "GHM",
@@ -2802,6 +2799,7 @@
     "KLRS",
     "KLTR",
     "KLXE",
+    "KLXER",
     "KMB",
     "KMDA",
     "KMI",
@@ -2892,9 +2890,6 @@
     "LAW",
     "LAWR",
     "LBGJ",
-    "LBRDA",
-    "LBRDK",
-    "LBRDP",
     "LBRT",
     "LBRX",
     "LBTYA",
@@ -3213,7 +3208,9 @@
     "MGYR",
     "MH",
     "MHO",
+    "MIAC",
     "MIACU",
+    "MIACW",
     "MIAX",
     "MIDD",
     "MIMI",
@@ -3763,7 +3760,9 @@
     "OSG",
     "OSIS",
     "OSPN",
+    "OSPR",
     "OSPRU",
+    "OSPRW",
     "OSRH",
     "OSRHW",
     "OSS",
@@ -4116,6 +4115,7 @@
     "QLYS",
     "QMCO",
     "QMLS",
+    "QNBC",
     "QNCX",
     "QNME",
     "QNRX",
@@ -4186,6 +4186,7 @@
     "RDAGU",
     "RDAGW",
     "RDCM",
+    "RDDT",
     "RDGT",
     "RDHL",
     "RDI",
@@ -4298,7 +4299,6 @@
     "RNST",
     "RNTX",
     "RNW",
-    "RNWWW",
     "RNXT",
     "ROAD",
     "ROC",
@@ -4947,6 +4947,7 @@
     "TRC",
     "TRDA",
     "TREE",
+    "TREO",
     "TRGP",
     "TRGS",
     "TRGSR",
@@ -5187,6 +5188,7 @@
     "VMC",
     "VMD",
     "VMET",
+    "VMRK",
     "VNCE",
     "VNDA",
     "VNET",
@@ -5401,7 +5403,6 @@
     "XNET",
     "XOM",
     "XOS",
-    "XOSWW",
     "XP",
     "XPEL",
     "XPER",
@@ -5506,15 +5507,6 @@
   "members": {
     "A": [
       "sp500"
-    ],
-    "AACB": [
-      "nasdaq"
-    ],
-    "AACBR": [
-      "nasdaq"
-    ],
-    "AACBU": [
-      "nasdaq"
     ],
     "AACG": [
       "nasdaq"
@@ -7176,9 +7168,6 @@
     "AVAV": [
       "nasdaq"
     ],
-    "AVB": [
-      "sp500"
-    ],
     "AVBC": [
       "russell2000"
     ],
@@ -8241,6 +8230,9 @@
       "nasdaq",
       "russell2000"
     ],
+    "BTLN": [
+      "nasdaq"
+    ],
     "BTMD": [
       "nasdaq"
     ],
@@ -9017,6 +9009,9 @@
     ],
     "CHTR": [
       "sp500",
+      "nasdaq"
+    ],
+    "CHTRP": [
       "nasdaq"
     ],
     "CHW": [
@@ -10959,9 +10954,6 @@
     "EQPT": [
       "nasdaq"
     ],
-    "EQR": [
-      "sp500"
-    ],
     "EQT": [
       "sp500"
     ],
@@ -11252,6 +11244,9 @@
       "nasdaq"
     ],
     "FATN": [
+      "nasdaq"
+    ],
+    "FBDT": [
       "nasdaq"
     ],
     "FBGL": [
@@ -12234,9 +12229,6 @@
       "nasdaq"
     ],
     "GGROW": [
-      "nasdaq"
-    ],
-    "GGRP": [
       "nasdaq"
     ],
     "GH": [
@@ -14463,6 +14455,9 @@
     "KLXE": [
       "nasdaq"
     ],
+    "KLXER": [
+      "nasdaq"
+    ],
     "KMB": [
       "sp500",
       "nasdaq"
@@ -14752,15 +14747,6 @@
       "nasdaq"
     ],
     "LBGJ": [
-      "nasdaq"
-    ],
-    "LBRDA": [
-      "nasdaq"
-    ],
-    "LBRDK": [
-      "nasdaq"
-    ],
-    "LBRDP": [
       "nasdaq"
     ],
     "LBRT": [
@@ -15796,7 +15782,13 @@
     "MHO": [
       "russell2000"
     ],
+    "MIAC": [
+      "nasdaq"
+    ],
     "MIACU": [
+      "nasdaq"
+    ],
+    "MIACW": [
       "nasdaq"
     ],
     "MIAX": [
@@ -17584,7 +17576,13 @@
       "nasdaq",
       "russell2000"
     ],
+    "OSPR": [
+      "nasdaq"
+    ],
     "OSPRU": [
+      "nasdaq"
+    ],
+    "OSPRW": [
       "nasdaq"
     ],
     "OSRH": [
@@ -18747,6 +18745,9 @@
     "QMLS": [
       "nasdaq"
     ],
+    "QNBC": [
+      "nasdaq"
+    ],
     "QNCX": [
       "nasdaq"
     ],
@@ -18971,6 +18972,9 @@
     ],
     "RDCM": [
       "nasdaq"
+    ],
+    "RDDT": [
+      "sp500"
     ],
     "RDGT": [
       "nasdaq"
@@ -19335,9 +19339,6 @@
       "nasdaq"
     ],
     "RNW": [
-      "nasdaq"
-    ],
-    "RNWWW": [
       "nasdaq"
     ],
     "RNXT": [
@@ -21448,6 +21449,9 @@
       "nasdaq",
       "russell2000"
     ],
+    "TREO": [
+      "nasdaq"
+    ],
     "TRGP": [
       "sp500"
     ],
@@ -22237,6 +22241,9 @@
     "VMET": [
       "nasdaq"
     ],
+    "VMRK": [
+      "sp500"
+    ],
     "VNCE": [
       "nasdaq"
     ],
@@ -22935,9 +22942,6 @@
     "XOS": [
       "nasdaq"
     ],
-    "XOSWW": [
-      "nasdaq"
-    ],
     "XP": [
       "nasdaq"
     ],
@@ -23299,7 +23303,6 @@
     "ARE",
     "ARES",
     "ATO",
-    "AVB",
     "AVGO",
     "AVY",
     "AWK",
@@ -23419,7 +23422,6 @@
     "EMR",
     "EOG",
     "EQIX",
-    "EQR",
     "EQT",
     "ERIE",
     "ES",
@@ -23642,6 +23644,7 @@
     "Q",
     "QCOM",
     "RCL",
+    "RDDT",
     "REG",
     "REGN",
     "RF",
@@ -23725,6 +23728,7 @@
     "VLO",
     "VLTO",
     "VMC",
+    "VMRK",
     "VRSK",
     "VRSN",
     "VRT",
