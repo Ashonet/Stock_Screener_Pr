@@ -1701,7 +1701,9 @@ function renderMix(node, wallet, data, facets, state, handlers, mountChart) {
         slice.members.map((m) => m.symbol).join(', '),
       ]),
     },
-  });
+    // A fresh host every render, so it is tracked for disposal as a batch
+    // rather than relying on the same element being mounted twice.
+  }, 'mix');
 
   // A folded tail is only honest if the reader can see what went into it.
   const folded = coloured.find((slice) => slice.folded);

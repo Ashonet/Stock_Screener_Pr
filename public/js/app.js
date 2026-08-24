@@ -270,9 +270,35 @@ const dom = {
 
 /** Chart cards install resize observers; drop the old ones before re-rendering. */
 const disposers = new Map();
-function mountChart(container, config) {
+
+/**
+ * Charts mounted into hosts that are rebuilt on every render, by group name.
+ *
+ * The per-container dispose below only fires when the *same* element is mounted
+ * twice. A grid that creates a fresh host for every chart on every render never
+ * hits that path, so each render left its resize observers and its theme
+ * listener attached to nodes that had already been thrown away. Fifteen charts
+ * a company, and a leak that grows with every company looked at.
+ *
+ * A group is disposed as a batch by whoever is about to rebuild it.
+ */
+const chartGroups = new Map();
+
+function disposeGroup(group) {
+  for (const container of chartGroups.get(group) ?? []) {
+    disposers.get(container)?.();
+    disposers.delete(container);
+  }
+  chartGroups.set(group, new Set());
+}
+
+function mountChart(container, config, group = null) {
   disposers.get(container)?.();
   disposers.set(container, chartCard(container, config));
+  if (group) {
+    if (!chartGroups.has(group)) chartGroups.set(group, new Set());
+    chartGroups.get(group).add(container);
+  }
 }
 
 /* --------------------------------------------------------------- fundamentals */
@@ -301,6 +327,11 @@ function renderFundamentals(stock) {
   const code = stock.quote?.currency ?? 'USD';
   const period = stock.financialsPeriod === 'quarterly' ? 'quarterly' : 'annual';
   const { charts, unavailable } = fundamentalCharts(rows, basis);
+
+  // Before any early return: whatever is on screen is about to be replaced,
+  // and a company with no statements to chart still has to let go of the last
+  // company's observers.
+  disposeGroup('fundamentals');
 
   if (!charts.length) {
     render(dom.fundamentalsCard, el('p', { class: 'empty', text: 'No reported statements to chart for this security.' }));
@@ -365,7 +396,7 @@ function renderFundamentals(stock) {
           .map((date, i) => [isoDate(date), ...series.map((entry) => format(entry.values[i]))])
           .reverse(),
       },
-    });
+    }, 'fundamentals');
   }
 }
 
@@ -990,6 +1021,9 @@ function afterWalletEdit() {
 }
 
 function renderWalletView() {
+  // The breakdown mounts its donut into a host built fresh each time, same as
+  // the fundamentals grid.
+  disposeGroup('mix');
   renderWallet({
     nodes: {
       hero: dom.walletHero,
@@ -1468,6 +1502,7 @@ function renderDetail(stock) {
   renderHero(stock);
   renderPriceChart(stock);
   renderScore(stock);
+  renderFundamentals(stock);
   renderStats(stock);
   renderFinancials(stock);
   renderDividends(stock);
