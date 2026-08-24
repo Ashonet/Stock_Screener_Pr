@@ -116,23 +116,44 @@ describe('groupByFacet', () => {
     assert.equal(total, 250, 'every priced holding is represented');
   });
 
-  test('the tail folds into one slice once the palette runs out', () => {
-    const many = Array.from({ length: 12 }, (_, i) => ({ value: 12 - i, sector: `S${i}` }));
-    const groups = groupByFacet(many, 'sector', { maxSlices: 6 });
+  test('the remainder is kept under its cap rather than cut at a slice count', () => {
+    // The reported problem: a fixed cut at six folded five industries into a
+    // single 32% wedge, the largest thing on the chart and the least
+    // informative. Slices are now named until the tail is small.
+    const many = Array.from({ length: 20 }, (_, i) => ({ value: 20 - i, sector: `S${i}` }));
+    const groups = groupByFacet(many, 'sector');
+    const total = groups.reduce((sum, g) => sum + g.value, 0);
+    const other = groups.find((g) => g.label === 'Other');
 
-    assert.equal(groups.length, 6, 'the fold takes a slot rather than adding one');
-    assert.equal(groups.at(-1).label, 'Other');
-    assert.equal(groups.at(-1).folded, 7);
+    assert.ok(other, 'twenty sectors still need a fold');
+    assert.ok((other.value / total) * 100 <= 10, `Other is ${((other.value / total) * 100).toFixed(1)}%`);
     // Nothing is lost: Other carries the value and the names behind it.
-    assert.equal(
-      groups.reduce((sum, g) => sum + g.value, 0),
-      many.reduce((sum, r) => sum + r.value, 0),
-    );
-    assert.equal(groups.at(-1).members.length, 7);
+    assert.equal(total, many.reduce((sum, r) => sum + r.value, 0));
+    assert.equal(other.members.length, other.folded);
+  });
+
+  test('ten holdings across ten sectors need no fold at all', () => {
+    // The wallet that prompted this. Every sector gets named and there is no
+    // Other slice to dominate.
+    const ten = Array.from({ length: 10 }, (_, i) => ({ value: 10, sector: `S${i}` }));
+    const groups = groupByFacet(ten, 'sector');
+
+    assert.equal(groups.length, 10);
+    assert.ok(groups.every((g) => g.folded === undefined));
+  });
+
+  test('the ceiling still applies when no amount of slicing helps', () => {
+    // A hundred holdings at 1% each: the tail cannot be got under a tenth, so
+    // something has to give and the cap decides what.
+    const flat = Array.from({ length: 100 }, (_, i) => ({ value: 1, sector: `S${i}` }));
+    const groups = groupByFacet(flat, 'sector');
+
+    assert.equal(groups.length, 16, 'capped, fold included');
+    assert.equal(groups.at(-1).label, 'Other');
   });
 
   test('no fold when everything fits', () => {
-    const groups = groupByFacet(rows, 'sector', { maxSlices: 6 });
+    const groups = groupByFacet(rows, 'sector');
     assert.ok(groups.every((g) => g.folded === undefined));
   });
 

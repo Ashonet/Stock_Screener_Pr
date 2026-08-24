@@ -473,10 +473,14 @@ industry, quality grade, type (REIT against operating company) or country.
 Concentration is the thing worth seeing and it hides well in a holdings table:
 three positions can look diversified and turn out to be one sector.
 
-The palette is capped at six slices because that is how many categorical
-colours stay distinguishable from each other and from the background in both
-themes, and a portfolio can hold forty industries. The tail folds into one
-labelled slice, and the names inside it are printed rather than left to trust.
+Slices are named until the remainder is under a tenth of the chart, then
+folded. Cutting at a fixed six instead made "Other" the story rather than the
+remainder: a ten-holding wallet across ten industries folded five of them into
+a single 32% wedge, the largest thing on the chart and the one saying the
+least. A ceiling of sixteen still applies for the case where no amount of
+slicing helps, and past the six palette hues the repeats are mixed toward the
+surface and then the text so a colour is separable from the one it repeats.
+The names inside "Other" are printed rather than left to trust.
 Every slice carries its share on the ring, so the reading never depends on
 matching a colour back to a legend, and the table twin holds the exact values,
 because people compare angles badly.

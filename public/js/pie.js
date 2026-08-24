@@ -99,17 +99,25 @@ export function sliceLayout(items, { startAngle = 0 } = {}) {
 /**
  * Group rows onto one facet, keeping the largest and folding the rest.
  *
- * The fold is not cosmetic. The categorical palette holds six colours that are
- * genuinely distinguishable from one another and from the background in both
- * themes; past that, "distinct colours" become near-neighbours that a reader
- * cannot match back to a legend, and a colourblind reader cannot separate at
- * all. A portfolio can hold forty industries, so the tail is collected into one
- * labelled slice rather than rendered as thirty-four shades of nothing.
+ * The fold exists because colour is the encoding here and the categorical
+ * palette only holds so many genuinely distinguishable hues. A portfolio can
+ * hold forty industries, and rendering forty is rendering none.
+ *
+ * But a fixed cut at six slices made "Other" the story rather than the
+ * remainder: a ten-holding wallet split across ten industries folded five of
+ * them into a single 32% wedge, the largest thing on the chart and the one
+ * saying the least. A remainder that outweighs the parts is not a remainder.
+ *
+ * So the cut is driven by what is left over rather than by a slice count.
+ * Named slices are kept, largest first, until the tail is at or under
+ * `maxOtherShare` of the total, and only then folded. `maxSlices` remains as a
+ * ceiling for the pathological case, a hundred holdings each worth 1%, where no
+ * amount of slicing gets the tail down and something has to give.
  *
  * The tail is still returned in full, because the table twin should list what
  * "Other" contains rather than making the reader take it on trust.
  */
-export function groupByFacet(rows, facet, { maxSlices = 6, otherLabel = 'Other' } = {}) {
+export function groupByFacet(rows, facet, { maxSlices = 16, maxOtherShare = 10, otherLabel = 'Other' } = {}) {
   const buckets = new Map();
 
   for (const row of rows) {
@@ -127,9 +135,22 @@ export function groupByFacet(rows, facet, { maxSlices = 6, otherLabel = 'Other' 
   const ordered = [...buckets.values()].sort((a, b) => b.value - a.value);
   if (ordered.length <= maxSlices) return ordered;
 
-  // Keep one slot for the fold itself, or the chart would show maxSlices + 1.
-  const kept = ordered.slice(0, maxSlices - 1);
-  const tail = ordered.slice(maxSlices - 1);
+  const total = ordered.reduce((sum, bucket) => sum + bucket.value, 0);
+
+  // How many to name before the rest is small enough to be a remainder. One
+  // slot is always reserved for the fold itself, or the chart would draw
+  // maxSlices + 1.
+  const ceiling = Math.max(1, maxSlices - 1);
+  let keep = 1;
+  while (keep < ceiling) {
+    const tailValue = ordered.slice(keep).reduce((sum, bucket) => sum + bucket.value, 0);
+    if (total <= 0 || (tailValue / total) * 100 <= maxOtherShare) break;
+    keep++;
+  }
+
+  const kept = ordered.slice(0, keep);
+  const tail = ordered.slice(keep);
+  if (!tail.length) return kept;
 
   kept.push({
     label: otherLabel,

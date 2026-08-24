@@ -250,32 +250,7 @@ function renderHero(node, wallet, data, handlers, score, income, rangeBlurb) {
 
 /* -------------------------------------------------------------------- chart */
 
-/**
- * What the line is and is not.
- *
- * Each holding joins on its purchase date, so the line steps when one is added
- * and that step is money paid in rather than performance. Saying so is the
- * difference between a value chart and a return chart, and only one of them is
- * being drawn.
- */
-function seriesNote(data) {
-  const start =
-    data.startReason === 'purchase'
-      ? `Starts ${shortDate(data.startedAt)}, your earliest purchase date.`
-      : `Starts ${shortDate(data.startedAt)}, the earliest date every holding has a price for.`;
-
-  const added = (data.contributions ?? []).length;
-  const steps = added
-    ? ` The line steps up on ${added === 1 ? 'the date a later holding was' : `${added} dates as later holdings were`} added, which is money paid in rather than a gain.`
-    : '';
-
-  // The remaining approximation, stated where it is now the only one left.
-  const counts = " Share counts are today's throughout, so topping a position up reads back through the whole period it was held.";
-
-  return start + steps + counts;
-}
-
-function renderChart(node, wallet, data, rangeBlurb, mountChart) {
+function renderChart(node, wallet, data, mountChart) {
   const points = data?.points ?? [];
   const code = data?.currency ?? 'USD';
 
@@ -291,7 +266,6 @@ function renderChart(node, wallet, data, rangeBlurb, mountChart) {
   const first = points[0].c;
   const last = points.at(-1).c;
   const change = last - first;
-  const changePct = first ? (change / first) * 100 : null;
   const dir = direction(change);
   const color = dir === 'down' ? cssVar('--down') : dir === 'up' ? cssVar('--up') : cssVar('--series-1');
   const symbol = currencySymbol(code);
@@ -299,9 +273,6 @@ function renderChart(node, wallet, data, rangeBlurb, mountChart) {
 
   mountChart(node, {
     title: 'Wallet value',
-    subtitle:
-      `${rangeBlurb} · value of the ${wallet.holdings.length} holdings you hold today, at historical prices` +
-      (changePct != null ? ` · ${signedPercent(changePct)} over the period` : ''),
     height: 320,
     draw: (width, height) =>
       areaChart(width, height, {
@@ -318,7 +289,6 @@ function renderChart(node, wallet, data, rangeBlurb, mountChart) {
           ].filter(Boolean),
         ],
       }),
-    note: !intraday && data.startedAt ? seriesNote(data) : null,
     table: {
       columns: ['Date', 'Value'],
       rows: [...points].reverse().map((p) => [intraday ? dateTime(p.t) : shortDate(p.t), currency(p.c, code)]),
@@ -1614,8 +1584,28 @@ const MIX_FACETS = [
   ['country', 'Country'],
 ];
 
-/** Categorical slots, capped at what stays distinguishable. */
+/** Categorical slots, in the order they are handed out. */
 const MIX_COLOURS = ['--series-1', '--series-2', '--series-3', '--series-4', '--series-5', '--series-6'];
+
+/**
+ * A fill for slice `i`, past the end of the palette as well as inside it.
+ *
+ * Six hues is what the categorical palette carries, and keeping the fold under
+ * a tenth of the chart needs more slices than that on a ten-holding wallet. The
+ * second pass round the palette is mixed toward the card surface, so a repeat
+ * is visibly paler than its twin rather than identical to it. It is a weaker
+ * separation than six distinct hues, which is why the ceiling is twelve and not
+ * forty, and why every slice carries its share as text.
+ */
+function sliceColour(index) {
+  const token = `var(${MIX_COLOURS[index % MIX_COLOURS.length]})`;
+  const pass = Math.floor(index / MIX_COLOURS.length);
+  if (pass === 0) return cssVar(MIX_COLOURS[index]);
+  // Second pass toward the card surface, third toward the text: paler then
+  // deeper, so a repeated hue is still separable from the one it repeats.
+  if (pass === 1) return `color-mix(in srgb, ${token} 52%, var(--surface-1))`;
+  return `color-mix(in srgb, ${token} 72%, var(--text-primary))`;
+}
 
 function renderMix(node, wallet, data, facets, state, handlers, mountChart) {
   const code = data?.currency ?? 'USD';
@@ -1660,9 +1650,12 @@ function renderMix(node, wallet, data, facets, state, handlers, mountChart) {
     .filter((row) => Number.isFinite(row.value) && row.value > 0)
     .map((row) => ({ symbol: row.symbol, value: row.value, facet: facetOf(row) }));
 
-  const groups = groupByFacet(enriched, 'facet', { maxSlices: MIX_COLOURS.length });
+  // Named slices are kept until the remainder is small, rather than cut at a
+  // fixed count: folding five industries into one 32% wedge made "Other" the
+  // largest thing on the chart and the one saying the least.
+  const groups = groupByFacet(enriched, 'facet', { maxSlices: 16, maxOtherShare: 10 });
   const { slices, total } = sliceLayout(groups);
-  const coloured = slices.map((slice, i) => ({ ...slice, color: cssVar(MIX_COLOURS[i % MIX_COLOURS.length]) }));
+  const coloured = slices.map((slice, i) => ({ ...slice, color: sliceColour(i) }));
 
   const unresolved = enriched.filter((row) => row.facet == null).length;
   const facetLabel = MIX_FACETS.find(([key]) => key === state.facet)?.[1] ?? state.facet;
@@ -1717,7 +1710,7 @@ function renderMix(node, wallet, data, facets, state, handlers, mountChart) {
       el('p', {
         class: 'card-sub',
         style: { marginTop: '12px', marginBottom: 0 },
-        text: `"Other" holds ${folded.foldedLabels.join(', ')}. The palette carries six colours that stay distinguishable from one another, so the tail is folded rather than drawn in shades nobody can match to a legend.`,
+        text: `"Other" holds ${folded.foldedLabels.join(', ')}, together ${percent(folded.share, { digits: 1 })} of the wallet. Slices are named until the remainder is under a tenth, then folded, because a remainder larger than its parts is not a remainder.`,
       }),
     );
   }
@@ -1778,7 +1771,7 @@ export function renderWallet({ nodes, wallet, data, income, score, facets, mix, 
     return;
   }
 
-  renderChart(nodes.chart, wallet, data, rangeBlurb, mountChart);
+  renderChart(nodes.chart, wallet, data, mountChart);
   renderHoldings(nodes.holdings, wallet, data, handlers, editing);
   renderIncome(nodes.income, nodes.incomeChart, wallet, data, income, mountChart);
   renderForecast(nodes.forecast, nodes.forecastChart, wallet, data, income, mountChart, handlers, forecastYears);
