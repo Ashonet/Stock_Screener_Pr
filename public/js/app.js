@@ -26,6 +26,7 @@ import {
 } from './store.js';
 import { renderWallet } from './wallet.js';
 import { renderCompare } from './compare.js';
+import { fundamentalCharts } from './fundamentals.js';
 import { renderScreener } from './screener.js';
 import { renderMap } from './map.js';
 import { chartCard, areaChart, columnChart, sparkline, dataTable, cssVar, hideTooltip } from './charts.js';
@@ -110,6 +111,13 @@ const TABS = [
       renderFinancials(state.stock);
       renderDividends(state.stock);
       renderIncomeStatement(state.stock);
+    },
+  },
+  {
+    id: 'fundamentals',
+    label: 'Fundamentals',
+    repaint: () => {
+      if (state.stock) renderFundamentals(state.stock);
     },
   },
   { id: 'score', label: 'Quality score' },
@@ -244,6 +252,7 @@ const dom = {
   periodPicker: document.getElementById('period-picker'),
   priceCard: document.getElementById('price-card'),
   scoreCard: document.getElementById('score-card'),
+  fundamentalsCard: document.getElementById('fundamentals-card'),
   stats: document.getElementById('stats'),
   financialsCard: document.getElementById('financials-card'),
   incomeStatement: document.getElementById('income-statement'),
@@ -260,6 +269,105 @@ const disposers = new Map();
 function mountChart(container, config) {
   disposers.get(container)?.();
   disposers.set(container, chartCard(container, config));
+}
+
+/* --------------------------------------------------------------- fundamentals */
+
+/** Axis and tooltip formatting per kind of quantity. */
+const FUNDAMENTAL_FORMAT = {
+  currency: (v, code) => compactCurrency(v, code),
+  perShare: (v, code) => currency(v, code, { digits: 2 }),
+  percent: (v) => percent(v, { digits: 1 }),
+  multiple: (v) => `${ratio(v, { digits: 1 })}×`,
+  count: (v) => compact(v),
+};
+
+/**
+ * A grid of statement trends, branching on the same basis the scorer uses.
+ *
+ * A REIT is not charted like an operating company for the same reason it is not
+ * scored like one: depreciation on property that is holding its value pushes
+ * reported earnings far below the cash produced, so a chart of a REIT's net
+ * income and EPS shows a business in trouble when nothing is wrong. The REIT
+ * set leads with FFO and cash flow and leaves EPS out.
+ */
+function renderFundamentals(stock) {
+  const basis = stock.score?.basis ?? 'standard';
+  const rows = stock.financials ?? [];
+  const code = stock.quote?.currency ?? 'USD';
+  const period = stock.financialsPeriod === 'quarterly' ? 'quarterly' : 'annual';
+  const { charts, unavailable } = fundamentalCharts(rows, basis);
+
+  if (!charts.length) {
+    render(
+      dom.fundamentalsCard,
+      el(
+        'div',
+        { class: 'card' },
+        el('div', { class: 'card-head' }, el('h3', { class: 'card-title', text: 'Fundamentals' })),
+        el('p', { class: 'empty', text: 'No reported statements to chart for this security.' }),
+      ),
+    );
+    return;
+  }
+
+  const head = el(
+    'div',
+    { class: 'card' },
+    el(
+      'div',
+      { class: 'card-head' },
+      el('h3', { class: 'card-title', text: 'Fundamentals' }),
+      el('span', { class: 'tag', text: basis === 'reit' ? 'REIT basis' : 'Standard basis' }),
+    ),
+    el('p', {
+      class: 'card-sub',
+      style: { marginBottom: 0 },
+      text:
+        basis === 'reit'
+          ? `${charts.length} ${period} series. Charted on FFO and cash flow rather than earnings: depreciation on property that is holding its value pushes a REIT's reported earnings and EPS far below the cash it produces, so both misread.`
+          : `${charts.length} ${period} series, from the reported statements.`,
+    }),
+    // Naming what cannot be drawn, rather than leaving the reader to wonder
+    // whether the company simply does not report it.
+    unavailable.length
+      ? el('p', {
+          class: 'card-sub',
+          style: { marginTop: '8px', marginBottom: 0 },
+          text: `Not available from this data source: ${unavailable.join(', ').toLowerCase()}. Those live in REIT supplementals and earnings decks, not in the financial statements this is built from.`,
+        })
+      : null,
+  );
+
+  const grid = el('div', { class: 'fundamental-grid' });
+  render(dom.fundamentalsCard, head, grid);
+
+  const colour = cssVar('--series-1');
+  for (const spec of charts) {
+    const host = el('div', { class: 'card card-chart' });
+    grid.append(host);
+
+    const format = (v) => (v == null ? DASH : (FUNDAMENTAL_FORMAT[spec.kind] ?? ((x) => String(x)))(v, code));
+
+    mountChart(host, {
+      title: spec.title,
+      height: 220,
+      draw: (width, height) =>
+        columnChart(width, height, {
+          categories: spec.periods.map((date) => ({ label: periodLabel(date, period), tooltipLabel: isoDate(date) })),
+          series: [{ key: spec.key, name: spec.title, color: colour, values: spec.values }],
+          formatValue: format,
+          ariaLabel: `${spec.title} by ${period === 'quarterly' ? 'quarter' : 'year'}`,
+        }),
+      note: spec.note ?? null,
+      table: {
+        columns: ['Period', spec.title],
+        rows: [...spec.periods]
+          .map((date, i) => [isoDate(date), format(spec.values[i])])
+          .reverse(),
+      },
+    });
+  }
 }
 
 /* --------------------------------------------------------------- primitives */

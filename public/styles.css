@@ -2224,3 +2224,20 @@ table.screener thead th:first-child {
 .grade-member-symbol {
   font-weight: 650;
 }
+
+/* ------------------------------------------------------------ fundamentals */
+
+/* Two across on a normal screen, one when there is no room for two. Small
+   multiples: the same mark and the same period axis in every panel, so the eye
+   compares shapes across the grid rather than re-learning each chart. */
+.fundamental-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+@media (max-width: 760px) {
+  .fundamental-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

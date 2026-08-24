@@ -547,7 +547,22 @@ wallet that went from 3,550 to 16,089 by buying more, and without a per-lot
 ledger the two cannot be separated, so the rate is withheld rather than
 published with a caveat nobody reads.
 
-**Per-security view**: price chart (1D–MAX, crosshair, table view), then three
+**Fundamentals**: a grid of statement trends that branches on the same basis
+the scorer does. A REIT is charted on FFO, FFO per share, cash flow per share
+and payout against cash flow, and is not charted on EPS or net income at all,
+because depreciation on property that is holding its value pushes both far
+below the cash produced and a chart of them shows a business in trouble when
+nothing is wrong. An operating company gets earnings, EPS, book value per
+share, margins and return on equity. Both get revenue, cash flow, leverage,
+interest coverage and the share count, which is where a REIT's dilution and an
+operating company's buybacks both show up.
+
+**Occupancy is not available, and the card says so.** Nor is same-store NOI,
+releasing spread or weighted average lease term: they live in REIT
+supplementals and earnings decks, not in the financial statements this is built
+from. Inventing a proxy and calling it occupancy would be worse than the gap.
+
+**Per-security view**: price chart (1D–MAX, crosshair, table view), then four
 tabs: key statistics as one dense card, financials (revenue/net income,
 dividends per share, full income statement), and the quality score with every
 pillar input expanded.
