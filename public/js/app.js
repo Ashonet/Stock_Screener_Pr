@@ -342,28 +342,39 @@ function renderFundamentals(stock) {
   const grid = el('div', { class: 'fundamental-grid' });
   render(dom.fundamentalsCard, head, grid);
 
-  const colour = cssVar('--series-1');
   for (const spec of charts) {
     const host = el('div', { class: 'card card-chart' });
     grid.append(host);
 
     const format = (v) => (v == null ? DASH : (FUNDAMENTAL_FORMAT[spec.kind] ?? ((x) => String(x)))(v, code));
 
+    // A spec is either one series or a band of two. A band gets a legend, since
+    // two series without one is a chart the reader has to guess at.
+    const bands = spec.series ?? [{ name: spec.title, values: spec.values }];
+    const palette = [cssVar('--series-1'), cssVar('--series-2')];
+    const series = bands.map((entry, i) => ({
+      key: `${spec.key}-${i}`,
+      name: entry.name,
+      color: palette[i % palette.length],
+      values: entry.values,
+    }));
+
     mountChart(host, {
       title: spec.title,
       height: 220,
+      legend: series.length > 1 ? series.map((entry) => ({ name: entry.name, color: entry.color })) : [],
       draw: (width, height) =>
         columnChart(width, height, {
           categories: spec.periods.map((date) => ({ label: periodLabel(date, period), tooltipLabel: isoDate(date) })),
-          series: [{ key: spec.key, name: spec.title, color: colour, values: spec.values }],
+          series,
           formatValue: format,
           ariaLabel: `${spec.title} by ${period === 'quarterly' ? 'quarter' : 'year'}`,
         }),
       note: spec.note ?? null,
       table: {
-        columns: ['Period', spec.title],
+        columns: ['Period', ...series.map((entry) => entry.name)],
         rows: [...spec.periods]
-          .map((date, i) => [isoDate(date), format(spec.values[i])])
+          .map((date, i) => [isoDate(date), ...series.map((entry) => format(entry.values[i]))])
           .reverse(),
       },
     });

@@ -21,12 +21,37 @@
  * calling it occupancy would be worse than the gap. The UI says so rather than
  * leaving the reader to wonder.
  *
- * **AFFO is approximated by operating cash flow**, which is the same proxy the
- * quality score uses and is labelled as a proxy in both places. True AFFO is
- * FFO less recurring maintenance capex, and the upstream reports no capex line
- * for a material share of REITs, so a real AFFO cannot be computed for all of
- * them. Applying the proxy uniformly keeps REITs comparable with each other,
- * which mixing real AFFO for some with a proxy for others would not.
+ * **AFFO is shown as a range, because a single figure would be wrong.**
+ *
+ * True AFFO is FFO less *recurring maintenance* capex. The statement feed
+ * carries one capital expenditure line, covering maintenance and growth
+ * together, and nothing in it separates the two. For a landlord that spends
+ * almost nothing the distinction hardly matters: Realty Income and VICI report
+ * no capex line at all, and Welltower's is 1% of FFO. For a REIT that builds it
+ * decides the answer. American Tower spends 37% of FFO on capex and Equinix
+ * spends 126% of it, so subtracting the whole line gives Equinix a negative
+ * AFFO, which is not a hard number to interpret so much as a wrong one.
+ *
+ * So both estimates are drawn and neither is called AFFO on its own:
+ *
+ *   FFO less capex        treats every pound of growth spending as if it were
+ *                         maintenance, so it understates a REIT that is building
+ *   Operating cash flow   subtracts no capex at all, and carries working capital
+ *                         movements that AFFO excludes
+ *
+ * Which reads higher is not fixed. For a builder like American Tower the cash
+ * flow line is far above the other; for VICI, which spends almost nothing on
+ * capex, it is below it, because working capital moved against them. The pair
+ * brackets the answer in the usual case rather than bounding it in every case,
+ * and the real figure is published in the company's own supplemental, which
+ * this warehouse does not read. Showing both is the honest version of an answer
+ * we do not have.
+ *
+ * The quality score keeps using operating cash flow alone for every REIT,
+ * because its payout column is compared *between* REITs and a measure that
+ * changed definition per company would make that column mean two things at
+ * once. These charts compare a company against its own past, where a band is
+ * more useful than a false precision.
  */
 
 const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
@@ -45,6 +70,21 @@ const ffo = (row) =>
 const netDebt = (row) => (isNum(row.totalDebt) ? row.totalDebt - (row.cashAndCashEquivalents ?? 0) : null);
 
 /**
+ * AFFO: FFO less the capital expenditure needed to keep the portfolio earning.
+ *
+ * Capex is reported as a negative number, so its magnitude is taken. This is
+ * the standard approximation rather than a company's own definition: a real
+ * AFFO reconciliation also normalises straight-line rent and amortises leasing
+ * costs, and none of that reaches the statement feed. It is closer than
+ * operating cash flow, which ignores capex entirely, and further from the truth
+ * than the figure in the company's supplemental.
+ */
+const affo = (row) => {
+  const base = ffo(row);
+  return isNum(base) && isNum(row.capitalExpenditure) ? base - Math.abs(row.capitalExpenditure) : null;
+};
+
+/**
  * @param {Array}  rows   statement rows, oldest first
  * @param {string} basis  'reit' | 'standard'
  * @returns {{ charts, unavailable, basis }}
@@ -55,10 +95,25 @@ export function fundamentalCharts(rows = [], basis = 'standard') {
 
   const reit = basis === 'reit';
 
+  const periods = usable.map((row) => row.date);
+
   /** A spec, dropped entirely when nothing in the series has a value. */
   const chart = (spec) => {
     const values = usable.map((row) => spec.value(row));
-    return values.some(isNum) ? { ...spec, values, periods: usable.map((row) => row.date) } : null;
+    return values.some(isNum) ? { ...spec, values, periods } : null;
+  };
+
+  /**
+   * Two series on one axis, for a quantity that is a band rather than a number.
+   *
+   * Both must be in the same unit, which they are: two estimates of the same
+   * thing. Dropped unless at least one of them has a value somewhere.
+   */
+  const band = (spec) => {
+    const series = spec.series
+      .map((entry) => ({ name: entry.name, values: usable.map((row) => entry.value(row)) }))
+      .filter((entry) => entry.values.some(isNum));
+    return series.length ? { ...spec, series, periods } : null;
   };
 
   const shared = [
@@ -117,6 +172,12 @@ export function fundamentalCharts(rows = [], basis = 'standard') {
     }),
   ];
 
+  // The two estimates, drawn side by side rather than blended into one line,
+  // because the gap between them is mostly the growth spending and that is the
+  // thing a reader most needs to see. Neither is reliably the larger.
+  const affoFloor = (row) => affo(row);
+  const affoCeiling = (row) => row.operatingCashFlow;
+
   const reitCharts = [
     chart({ key: 'ffo', title: 'FFO', kind: 'currency', value: ffo, note: 'Net income plus depreciation and amortisation.' }),
     chart({
@@ -126,18 +187,50 @@ export function fundamentalCharts(rows = [], basis = 'standard') {
       value: (row) => div(ffo(row), row.dilutedAverageShares),
       note: 'The figure a REIT is actually valued on, and the one share issuance can dilute while total FFO still rises.',
     }),
-    chart({
+    band({
+      key: 'affo',
+      title: 'AFFO range',
+      kind: 'currency',
+      series: [
+        { name: 'FFO less capex', value: affoFloor },
+        { name: 'Operating cash flow', value: affoCeiling },
+      ],
+      note:
+        'AFFO is FFO less recurring maintenance capex, and the statement feed carries one capex line covering maintenance and growth together. So the lower bar treats all growth spending as maintenance and the upper subtracts no capex at all. The real figure sits between them, in the company\u2019s own supplemental, which this does not read.',
+    }),
+    band({
       key: 'affoPerShare',
-      title: 'Cash flow per share (AFFO proxy)',
+      title: 'AFFO per share range',
       kind: 'perShare',
-      value: (row) => div(row.operatingCashFlow, row.dilutedAverageShares),
+      series: [
+        { name: 'FFO less capex', value: (row) => div(affoFloor(row), row.dilutedAverageShares) },
+        { name: 'Operating cash flow', value: (row) => div(affoCeiling(row), row.dilutedAverageShares) },
+      ],
+      note: 'What the dividend is paid out of, per share, on both estimates.',
+    }),
+    band({
+      key: 'affoPayout',
+      title: 'Payout against AFFO range',
+      kind: 'percent',
+      series: [
+        {
+          name: 'Of FFO less capex',
+          value: (row) => pct(isNum(row.cashDividendsPaid) ? Math.abs(row.cashDividendsPaid) : null, affoFloor(row)),
+        },
+        {
+          name: 'Of operating cash flow',
+          value: (row) => pct(isNum(row.cashDividendsPaid) ? Math.abs(row.cashDividendsPaid) : null, affoCeiling(row)),
+        },
+      ],
+      note:
+        'The number a REIT investor watches, on both estimates. Against earnings the same dividend routinely reads over 100% and looks like distress when nothing is wrong. Measured against FFO less capex it can also exceed 100% for a REIT that is building, which is growth spending rather than an unaffordable dividend.',
     }),
     chart({
-      key: 'payout',
-      title: 'Payout of operating cash flow',
-      kind: 'percent',
-      value: (row) => pct(isNum(row.cashDividendsPaid) ? Math.abs(row.cashDividendsPaid) : null, row.operatingCashFlow),
-      note: 'Against cash flow rather than earnings. A REIT routinely pays out over 100% of EPS and is perfectly sound.',
+      key: 'capex',
+      title: 'Capital expenditure',
+      kind: 'currency',
+      value: (row) => (isNum(row.capitalExpenditure) ? Math.abs(row.capitalExpenditure) : null),
+      note: 'Most of the gap between the two AFFO estimates. Maintenance and growth are not separated in the feed, so a rising line can be either a portfolio getting older or one getting bigger.',
     }),
     chart({ key: 'ffoMargin', title: 'FFO margin', kind: 'percent', value: (row) => pct(ffo(row), row.totalRevenue) }),
   ];
@@ -191,6 +284,9 @@ export function fundamentalCharts(rows = [], basis = 'standard') {
   return {
     charts,
     basis,
+    // Whether both estimates exist. A REIT reporting no capex line has only the
+    // cash flow one, and the card should not promise a range it cannot draw.
+    affoBounded: reit ? usable.some((row) => isNum(affo(row))) : null,
     // Named rather than silently missing. A reader looking for occupancy should
     // be told it is not obtainable here, not left to conclude the company does
     // not report it.

@@ -59,12 +59,53 @@ describe('fundamentalCharts, REIT basis', () => {
     assert.deepEqual(perShare.values, [0.4, 0.4, 0.4]);
   });
 
-  test('payout is measured against cash flow, not earnings', () => {
+  test('AFFO is drawn as a band, never as a single figure', () => {
+    // The feed carries one capex line covering maintenance and growth together,
+    // and nothing separates them. Subtracting the whole line calls all growth
+    // spending maintenance; subtracting none of it ignores capex entirely. The
+    // truth is between, so both are drawn and neither is called AFFO alone.
+    const affo = result.charts.find((c) => c.key === 'affo');
+
+    assert.ok(affo.series, 'a band, not a single series');
+    assert.equal(affo.series.length, 2);
+    // FFO 400 less capex 40 is the floor; operating cash flow 420 is the ceiling.
+    assert.deepEqual(affo.series[0].values, [360, 360, 360]);
+    assert.deepEqual(affo.series[1].values, [420, 420, 420]);
+    // Which reads higher is not fixed: VICI's FFO less capex sits above its
+    // operating cash flow because working capital moved against it. The pair
+    // brackets the answer in the usual case, not in every case.
+    assert.equal(affo.series[0].name, 'FFO less capex');
+    assert.equal(affo.series[1].name, 'Operating cash flow');
+  });
+
+  test('payout is measured against cash flow, not earnings, on both bounds', () => {
     // 250 of dividends against 420 of operating cash flow is 60%. Against 100
     // of net income it would read 250% and look like a company in distress.
-    const payout = result.charts.find((c) => c.key === 'payout');
-    assert.ok(Math.abs(payout.values[0] - 59.52) < 0.01, `got ${payout.values[0]}`);
-    assert.match(payout.title, /operating cash flow/i);
+    const payout = result.charts.find((c) => c.key === 'affoPayout');
+    assert.ok(Math.abs(payout.series[1].values[0] - 59.52) < 0.01, `got ${payout.series[1].values[0]}`);
+    assert.ok(payout.series[0].values[0] > payout.series[1].values[0], 'subtracting capex raises the payout');
+  });
+
+  test('a REIT that builds does not get a negative AFFO presented as fact', () => {
+    // Equinix spends more on capex than it earns in FFO. The floor goes
+    // negative, which is a statement about growth spending rather than about
+    // the dividend, and it is only ever shown beside the ceiling.
+    const builder = years.map((y) => ({ ...y, capitalExpenditure: -500 }));
+    const built = fundamentalCharts(builder, 'reit');
+    const affo = built.charts.find((c) => c.key === 'affo');
+
+    assert.ok(affo.series[0].values[0] < 0, 'subtracting all capex can go negative');
+    assert.ok(affo.series[1].values[0] > 0, 'and is never shown without the other estimate');
+    assert.equal(affo.series.length, 2);
+  });
+
+  test('a REIT with no capex line still gets the ceiling', () => {
+    const noCapex = years.map((y) => ({ ...y, capitalExpenditure: null }));
+    const result2 = fundamentalCharts(noCapex, 'reit');
+    const affo = result2.charts.find((c) => c.key === 'affo');
+
+    assert.equal(affo.series.length, 1, 'only the estimate that exists');
+    assert.equal(result2.affoBounded, false, 'and the card is told there is no range');
   });
 
   test('interest coverage is measured before depreciation', () => {
@@ -152,10 +193,16 @@ describe('missing data', () => {
   });
 
   test('every chart carries its periods, aligned with its values', () => {
-    const result = fundamentalCharts(years, 'reit');
-    for (const chart of result.charts) {
-      assert.equal(chart.values.length, chart.periods.length, chart.key);
-      assert.deepEqual(chart.periods, ['2022-12-31', '2023-12-31', '2024-12-31']);
+    // Two shapes: a single series carries `values`, a band carries `series`.
+    // Either way one value per period, or the bars land against the wrong year.
+    for (const basis of ['reit', 'standard']) {
+      for (const chart of fundamentalCharts(years, basis).charts) {
+        const lanes = chart.series ? chart.series.map((s) => s.values) : [chart.values];
+        for (const values of lanes) {
+          assert.equal(values.length, chart.periods.length, `${basis}/${chart.key}`);
+        }
+        assert.deepEqual(chart.periods, ['2022-12-31', '2023-12-31', '2024-12-31']);
+      }
     }
   });
 

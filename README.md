@@ -548,14 +548,33 @@ ledger the two cannot be separated, so the rate is withheld rather than
 published with a caveat nobody reads.
 
 **Fundamentals**: a grid of statement trends that branches on the same basis
-the scorer does. A REIT is charted on FFO, FFO per share, cash flow per share
-and payout against cash flow, and is not charted on EPS or net income at all,
+the scorer does. A REIT is charted on FFO, FFO per share, an AFFO range, payout
+against that range and capital expenditure, and is not charted on EPS or net
+income at all,
 because depreciation on property that is holding its value pushes both far
 below the cash produced and a chart of them shows a business in trouble when
 nothing is wrong. An operating company gets earnings, EPS, book value per
 share, margins and return on equity. Both get revenue, cash flow, leverage,
 interest coverage and the share count, which is where a REIT's dilution and an
 operating company's buybacks both show up.
+
+**AFFO is drawn as a range rather than a figure.** True AFFO is FFO less
+*recurring maintenance* capex, and the statement feed carries one capex line
+covering maintenance and growth together. For a landlord that spends nothing
+the distinction is immaterial: Realty Income and VICI report no capex line at
+all and Welltower's is 1% of FFO. For a REIT that builds it decides the answer.
+American Tower spends 37% of FFO on capex and Equinix spends 126%, so
+subtracting the whole line gives Equinix a **negative AFFO**, which is not a
+hard number so much as a wrong one. Both estimates are therefore drawn side by
+side, FFO less capex against operating cash flow, and neither is called AFFO on
+its own. Which reads higher is not fixed either: VICI's FFO less capex sits
+above its operating cash flow because working capital moved against it.
+
+The quality score keeps using operating cash flow alone for every REIT, because
+its payout column is compared *between* REITs and a measure that changed
+definition per company would make that column mean two things at once. These
+charts compare a company against its own past, where a range beats a false
+precision.
 
 **Occupancy is not available, and the card says so.** Nor is same-store NOI,
 releasing spread or weighted average lease term: they live in REIT
