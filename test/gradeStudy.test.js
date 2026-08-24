@@ -174,3 +174,48 @@ describe('GRADE_ORDER', () => {
     assert.equal(GRADE_ORDER.length, 8);
   });
 });
+
+describe('grade membership', () => {
+  test('each grade lists what was in it, best first', () => {
+    // The summary describes a portfolio; without its constituents the reader
+    // has a number to read and no way to check it.
+    const study = gradePortfolios(
+      rows([
+        ['MID', 20],
+        ['BEST', 90],
+        ['WORST', -10],
+      ]),
+      grading([
+        ['MID', 'B'],
+        ['BEST', 'B'],
+        ['WORST', 'B'],
+      ]),
+      1,
+    );
+
+    assert.deepEqual(
+      study.rows[0].members.map((m) => m.symbol),
+      ['BEST', 'MID', 'WORST'],
+    );
+    assert.equal(study.rows[0].members.length, study.rows[0].count, 'every member is listed');
+    assert.equal(study.rows[0].members[0].totalReturn, 90);
+  });
+
+  test('members agree with the best and worst already reported', () => {
+    const study = gradePortfolios(
+      rows([
+        ['A1', 5],
+        ['A2', 55],
+      ]),
+      grading([
+        ['A1', 'A'],
+        ['A2', 'A'],
+      ]),
+      1,
+    );
+    const row = study.rows[0];
+
+    assert.equal(row.members[0].symbol, row.best.symbol);
+    assert.equal(row.members.at(-1).symbol, row.worst.symbol);
+  });
+});

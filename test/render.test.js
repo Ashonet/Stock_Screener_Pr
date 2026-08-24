@@ -178,14 +178,100 @@ const facets = {
   unknown: [],
 };
 
+/* ---------------------------------------------------- compare view fixtures */
+
+const gradeStudy = {
+  basis: 'then',
+  graded: 504,
+  asOf: '2026-08-25',
+  windows: [
+    {
+      years: 1,
+      available: true,
+      start: '2025-08-25',
+      universeMean: 34.4,
+      universeCount: 502,
+      spread: -56.4,
+      topGrade: 'A+',
+      bottomGrade: 'F',
+      rows: [
+        {
+          grade: 'A+',
+          count: 2,
+          totalReturn: 4,
+          medianReturn: 10.7,
+          annualisedReturn: 4,
+          positive: 1,
+          best: { symbol: 'PLD', totalReturn: 37.7 },
+          worst: { symbol: 'COIN', totalReturn: -53.1 },
+          members: [
+            { symbol: 'PLD', totalReturn: 37.7 },
+            { symbol: 'COIN', totalReturn: -53.1 },
+          ],
+        },
+        {
+          grade: 'F',
+          count: 1,
+          totalReturn: 60.5,
+          medianReturn: 19.5,
+          annualisedReturn: 60.5,
+          positive: 1,
+          best: { symbol: 'MU', totalReturn: 720.2 },
+          worst: { symbol: 'MU', totalReturn: 720.2 },
+          // A grade with no member list must not break the disclosure.
+          members: [],
+        },
+      ],
+    },
+    { years: 10, available: false, reason: 'price history does not reach back this far' },
+  ],
+  gradeOrder: ['A+', 'A', 'B+', 'B', 'C+', 'C', 'D', 'F'],
+};
+
+const comparison = {
+  base: 10_000,
+  startedAt: start,
+  years: 5,
+  unavailable: [],
+  dropped: [],
+  series: [
+    {
+      symbol: 'O',
+      name: 'Realty Income',
+      years: 5,
+      priceReturn: 3.8,
+      totalReturn: 39.8,
+      dividendContribution: 36,
+      dividendShare: 90.4,
+      totalCagr: 5.8,
+      price: series(start, 20, 10_000),
+      total: series(start, 20, 10_000),
+    },
+    {
+      symbol: 'KO',
+      name: 'Coca-Cola',
+      years: 5,
+      priceReturn: 75.6,
+      totalReturn: 110.2,
+      dividendContribution: 34.6,
+      dividendShare: 31.4,
+      totalCagr: 13.3,
+      price: series(start, 20, 10_000),
+      total: series(start, 20, 10_000),
+    },
+  ],
+};
+
 const PANELS = ['hero', 'chart', 'holdings', 'income', 'incomeChart', 'forecast', 'forecastChart', 'goal', 'goalChart', 'score', 'scoreChart', 'mix'];
 
 let renderWallet;
+let renderCompare;
 let chartCard;
 
 before(async () => {
   installDom();
   ({ renderWallet } = await import('../public/js/wallet.js'));
+  ({ renderCompare } = await import('../public/js/compare.js'));
   ({ chartCard } = await import('../public/js/charts.js'));
 });
 
@@ -262,5 +348,58 @@ describe('the wallet view runs', () => {
   test('no warehouse means a degraded breakdown, not a crash', () => {
     const panes = draw({ facets: { available: false, facets: {}, unknown: ['O', 'KO', 'JNJ'] } });
     assert.ok(panes.mix.children.length > 0);
+  });
+});
+
+describe('the compare view runs', () => {
+  const paint = (over = {}) => {
+    const node = new StubNode('div');
+    renderCompare({
+      node,
+      data: comparison,
+      grades: gradeStudy,
+      state: { symbols: ['O', 'KO'], years: 5, mode: 'total', tab: 'tickers', grades: { basis: 'then', years: 1 } },
+      handlers: new Proxy({}, { get: () => () => {} }),
+      ...over,
+    });
+    return node;
+  };
+
+  test('the ticker tab renders', () => {
+    assert.ok(paint().children.length > 0);
+  });
+
+  test('the grade tab renders, with its expandable rows', () => {
+    // This is the case that would have caught a missing `direction` import: the
+    // member rows are built only on this tab, and only when a grade has members.
+    const node = paint({
+      state: { symbols: [], years: 5, mode: 'total', tab: 'grades', grades: { basis: 'then', years: 1 } },
+    });
+    assert.ok(node.children.length > 0);
+  });
+
+  test('a grade with no members does not break the row', () => {
+    const node = paint({
+      state: { symbols: [], years: 5, mode: 'total', tab: 'grades', grades: { basis: 'now', years: 1 } },
+    });
+    assert.ok(node.children.length > 0);
+  });
+
+  test('a window with no data renders the empty state', () => {
+    const node = paint({
+      grades: { ...gradeStudy, windows: [{ years: 10, available: false, reason: 'no data' }] },
+      state: { symbols: [], years: 5, mode: 'total', tab: 'grades', grades: { basis: 'then', years: 10 } },
+    });
+    assert.ok(node.children.length > 0);
+  });
+
+  test('nothing loaded yet renders a loading state rather than throwing', () => {
+    assert.ok(paint({ data: null, grades: null }).children.length > 0);
+    assert.ok(
+      paint({
+        grades: null,
+        state: { symbols: [], years: 5, mode: 'total', tab: 'grades', grades: { basis: 'then', years: 1 } },
+      }).children.length > 0,
+    );
   });
 });

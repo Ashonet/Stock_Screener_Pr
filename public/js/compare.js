@@ -16,7 +16,7 @@
 
 import { el, svg, render } from './dom.js';
 import { chartCard, columnChart, niceTicks, showTooltip, hideTooltip, cssVar } from './charts.js';
-import { axisDate, compact, currency, percent, shortDate } from './format.js';
+import { axisDate, compact, currency, direction, percent, shortDate } from './format.js';
 
 /** Categorical series tokens, in the order they are handed out. */
 const SERIES_VARS = ['--series-1', '--series-2', '--series-3', '--series-4', '--series-5', '--series-6'];
@@ -300,20 +300,7 @@ function renderGradeStudy({ node, data, state, handlers }) {
         el(
           'tbody',
           {},
-          ...active.rows.map((r) =>
-            el(
-              'tr',
-              {},
-              el('th', { scope: 'row', text: r.grade }),
-              el('td', { text: String(r.count) }),
-              el('td', { text: signed(r.totalReturn) }),
-              el('td', { text: r.annualisedReturn == null ? '' : signed(r.annualisedReturn) }),
-              el('td', { text: signed(r.medianReturn) }),
-              el('td', { text: `${r.positive}/${r.count}` }),
-              el('td', {}, el('span', { class: 'muted', text: `${r.best.symbol} ` }), signed(r.best.totalReturn)),
-              el('td', {}, el('span', { class: 'muted', text: `${r.worst.symbol} ` }), signed(r.worst.totalReturn)),
-            ),
-          ),
+          ...active.rows.flatMap((r) => gradeRow(r, handlers)),
         ),
       ),
     ),
@@ -427,6 +414,83 @@ export function renderCompare({ node, data, state, handlers, grades }) {
   });
 
   renderSummary(summary, data, series, totalReturn);
+}
+
+/**
+ * One grade's summary row, plus the row that lists what was in it.
+ *
+ * The summary describes a portfolio; expanding it shows the constituents, which
+ * is the difference between a number to read and a number to check. A grade
+ * that posts a good mean off one holding looks identical to one that earned it
+ * across sixty until you can see the sixty.
+ *
+ * Two rows rather than a nested table, because a table inside a cell breaks
+ * column alignment and screen-reader row association. The disclosure row spans
+ * every column and is hidden until asked for.
+ */
+function gradeRow(row, handlers) {
+  const members = row.members ?? [];
+  const detail = el('tr', { class: 'grade-detail', hidden: true });
+
+  const toggle = el(
+    'button',
+    {
+      class: 'grade-toggle',
+      type: 'button',
+      'aria-expanded': 'false',
+      'aria-label': `Show the ${row.count} companies graded ${row.grade}`,
+      disabled: members.length ? null : '',
+      onclick: () => {
+        const open = detail.hidden;
+        detail.hidden = !open;
+        toggle.setAttribute('aria-expanded', String(open));
+        toggle.setAttribute('aria-label', `${open ? 'Hide' : 'Show'} the ${row.count} companies graded ${row.grade}`);
+        caret.textContent = open ? '▾' : '▸';
+      },
+    },
+    el('span', { class: 'grade-toggle-label', text: row.grade }),
+  );
+  const caret = el('span', { class: 'grade-caret', 'aria-hidden': 'true', text: '▸' });
+  toggle.append(caret);
+
+  const summary = el(
+    'tr',
+    {},
+    el('th', { scope: 'row' }, toggle),
+    el('td', { text: String(row.count) }),
+    el('td', { text: signed(row.totalReturn) }),
+    el('td', { text: row.annualisedReturn == null ? '' : signed(row.annualisedReturn) }),
+    el('td', { text: signed(row.medianReturn) }),
+    el('td', { text: `${row.positive}/${row.count}` }),
+    el('td', {}, el('span', { class: 'muted', text: `${row.best.symbol} ` }), signed(row.best.totalReturn)),
+    el('td', {}, el('span', { class: 'muted', text: `${row.worst.symbol} ` }), signed(row.worst.totalReturn)),
+  );
+
+  detail.append(
+    el(
+      'td',
+      { colspan: '8' },
+      el(
+        'div',
+        { class: 'grade-members' },
+        ...members.map((member) =>
+          el(
+            'button',
+            {
+              class: 'grade-member',
+              type: 'button',
+              title: `Open ${member.symbol}`,
+              onclick: () => handlers.onSelectSymbol?.(member.symbol),
+            },
+            el('span', { class: 'grade-member-symbol', text: member.symbol }),
+            el('span', { class: `delta-${direction(member.totalReturn)}`, text: signed(member.totalReturn) }),
+          ),
+        ),
+      ),
+    ),
+  );
+
+  return [summary, detail];
 }
 
 function renderSummary(node, data, series, totalReturn) {

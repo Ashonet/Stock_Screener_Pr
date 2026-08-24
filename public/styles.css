@@ -2047,7 +2047,6 @@ table.screener thead th:first-child {
 }
 .forecast-assumptions p {
   margin: 8px 0 0;
-  max-width: 68ch;
   line-height: 1.55;
 }
 
@@ -2151,4 +2150,77 @@ table.screener thead th:first-child {
 .donut-chart path:focus-visible {
   outline: 2px solid var(--series-1);
   outline-offset: 2px;
+}
+
+/* ------------------------------------------------------- grade membership */
+
+/* The grade cell becomes the control, so the whole label is the hit target
+   rather than a caret a few pixels wide. */
+.grade-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 4px;
+  margin: -2px -4px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  font: inherit;
+  font-weight: 650;
+  color: inherit;
+  cursor: pointer;
+}
+.grade-toggle:hover {
+  background: var(--wash);
+}
+.grade-toggle:focus-visible {
+  outline: 2px solid var(--series-1);
+  outline-offset: 1px;
+}
+.grade-toggle[disabled] {
+  cursor: default;
+}
+.grade-toggle[disabled] .grade-caret {
+  visibility: hidden;
+}
+.grade-caret {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.grade-detail > td {
+  padding-top: 4px;
+  padding-bottom: 12px;
+  background: var(--wash);
+}
+/* Wraps rather than scrolls: a grade can hold ninety companies and a horizontal
+   scrollbar inside a table row is a place things go to be missed. */
+.grade-members {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+}
+.grade-member {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-1);
+  font: inherit;
+  font-size: 12px;
+  color: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.grade-member:hover {
+  border-color: var(--border-strong);
+}
+.grade-member:focus-visible {
+  outline: 2px solid var(--series-1);
+  outline-offset: 1px;
+}
+.grade-member-symbol {
+  font-weight: 650;
 }

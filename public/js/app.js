@@ -1120,6 +1120,9 @@ function renderCompareView() {
         state.compare.grades.years = years;
         renderCompareView();
       },
+      // Expanding a grade lists its companies, and a company in a list should
+      // be openable.
+      onSelectSymbol: (symbol) => selectSymbol(symbol),
     },
   });
 }
