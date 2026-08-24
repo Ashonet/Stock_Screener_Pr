@@ -58,9 +58,47 @@ const NASDAQ_URL = 'https://www.nasdaqtrader.com/dynamic/symdir/nasdaqlisted.txt
  * Every Nasdaq-listed common stock.
  *
  * The file is pipe-delimited with a trailing "File Creation Time" line that is
- * not a record. ETFs and test issues are dropped: an ETF has no financial
- * statements to score, and a test issue is not a company at all.
+ * not a record. ETFs and test issues are dropped by their own columns: an ETF
+ * has no financial statements to score and a test issue is not a company.
+ *
+ * A quarter of what is left is still not a company. The listing carries 377
+ * warrants, 284 preferreds, 259 units, 103 rights and 56 notes, and their
+ * tickers look exactly like ordinary ones: AACIU is a SPAC unit, AACIW its
+ * warrant, AACPR a preferred. Nothing in the file marks them except the
+ * security name, so that is what is read. Left in, they are 1,079 symbols with
+ * no statements to score, filling a screener with instruments nobody screens.
  */
+/**
+ * Whether a security name describes something other than common stock.
+ *
+ * Three separate traps sit in what looks like a one-line regex.
+ *
+ * The **word boundaries** are load-bearing. Without them "unit" matches inside
+ * United and Communities, and "note" inside Noteworthy.
+ *
+ * **"Depositary" is deliberately absent.** An ADR is a real company's equity
+ * with real statements behind it, and matching the word would drop PDD, Baidu,
+ * JD and NetEase along with 181 others. The depositary issues actually worth
+ * excluding are preferreds wrapped in a receipt, and they say so in full:
+ * "Depositary Shares, each representing ... Series A Preferred Stock" is
+ * already caught by `preferred`.
+ *
+ * **Only the security type is tested, not the company name.** The file writes
+ * each row as "Company Name - Security Type", and a company is free to have one
+ * of these words in its name: Preferred Bank is an ordinary Nasdaq-listed bank
+ * whose common stock reads "Preferred Bank - Common Stock". Matching the whole
+ * string deletes it. Matching only what follows the separator does not.
+ */
+const NOT_COMMON_STOCK = /\b(?:warrants?|units?|rights?|preferred|notes?|debenture)\b/i;
+
+function isCommonStock(securityName) {
+  const name = String(securityName ?? '');
+  const separator = name.indexOf(' - ');
+  // No separator means the row does not declare a type; judge the whole string
+  // rather than assume, since an undeclared warrant is worse than a lost row.
+  const type = separator === -1 ? name : name.slice(separator + 3);
+  return !NOT_COMMON_STOCK.test(type);
+}
 async function fetchNasdaq() {
   const text = await getText(NASDAQ_URL);
   const lines = text.trim().split(/\r?\n/).filter((line) => line && !line.startsWith('File Creation'));
@@ -72,6 +110,7 @@ async function fetchNasdaq() {
     const cells = line.split('|');
     if (cells[index('ETF')] === 'Y') continue;
     if (cells[index('Test Issue')] === 'Y') continue;
+    if (!isCommonStock(cells[index('Security Name')])) continue;
     const ticker = toYahoo(cells[index('Symbol')]);
     if (PLAUSIBLE.test(ticker)) symbols.add(ticker);
   }

@@ -1,6 +1,6 @@
 {
   "description": "Constituents of S&P 500, Nasdaq listed, Russell 2000, fetched from the sources below and validated against Yahoo Finance. Rebuild with: node pipeline/build-universe.js",
-  "generated_at": "2026-08-24T22:56:01.234Z",
+  "generated_at": "2026-08-24T23:39:18.444Z",
   "indexes": {
     "sp500": {
       "label": "S&P 500",
@@ -10,7 +10,7 @@
     "nasdaq": {
       "label": "Nasdaq listed",
       "source": "https://www.nasdaqtrader.com/dynamic/symdir/nasdaqlisted.txt",
-      "listed": 4329
+      "listed": 3435
     },
     "russell2000": {
       "label": "Russell 2000",
@@ -21,33 +21,28 @@
   "tiers": {
     "deep": {
       "indexes": [
-        "sp500"
+        "sp500",
+        "nasdaq"
       ],
       "entities": "prices, financials, dividends, profile"
     },
     "wide": {
       "indexes": [
-        "nasdaq",
         "russell2000"
       ],
       "entities": "prices only"
     }
   },
-  "resolved": 5467,
-  "dropped": [],
+  "resolved": 4572,
+  "dropped": [
+    "SVA"
+  ],
   "symbols": [
     "A",
     "AACG",
     "AACI",
-    "AACIU",
-    "AACIW",
     "AACO",
-    "AACOU",
-    "AACOW",
     "AACP",
-    "AACPR",
-    "AACPU",
-    "AACPW",
     "AADX",
     "AAL",
     "AAME",
@@ -66,7 +61,6 @@
     "ABEO",
     "ABG",
     "ABLV",
-    "ABLVW",
     "ABM",
     "ABNB",
     "ABOS",
@@ -81,8 +75,6 @@
     "ABX",
     "ACA",
     "ACAA",
-    "ACAAU",
-    "ACAAW",
     "ACAD",
     "ACB",
     "ACCL",
@@ -92,11 +84,7 @@
     "ACET",
     "ACFN",
     "ACGC",
-    "ACGCU",
-    "ACGCW",
     "ACGL",
-    "ACGLN",
-    "ACGLO",
     "ACH",
     "ACHC",
     "ACHR",
@@ -111,7 +99,6 @@
     "ACNT",
     "ACOG",
     "ACON",
-    "ACONW",
     "ACR",
     "ACRE",
     "ACRS",
@@ -123,19 +110,8 @@
     "ACVA",
     "ACXP",
     "ADAC",
-    "ADACU",
-    "ADACW",
     "ADAG",
     "ADAM",
-    "ADAMG",
-    "ADAMH",
-    "ADAMI",
-    "ADAMK",
-    "ADAML",
-    "ADAMM",
-    "ADAMN",
-    "ADAMO",
-    "ADAMZ",
     "ADBE",
     "ADCT",
     "ADEA",
@@ -148,7 +124,6 @@
     "ADP",
     "ADPT",
     "ADSE",
-    "ADSEW",
     "ADSK",
     "ADTN",
     "ADUR",
@@ -157,8 +132,6 @@
     "ADVB",
     "ADXN",
     "AEAQ",
-    "AEAQU",
-    "AEAQW",
     "AEBI",
     "AEC",
     "AEE",
@@ -168,26 +141,18 @@
     "AEIS",
     "AEMD",
     "AENT",
-    "AENTW",
     "AEO",
     "AEP",
     "AERT",
-    "AERTW",
     "AES",
     "AESI",
     "AESP",
-    "AESPR",
-    "AESPU",
-    "AESPW",
     "AEVA",
     "AEYE",
     "AFCG",
     "AFJK",
-    "AFJKR",
-    "AFJKU",
     "AFL",
     "AFRI",
-    "AFRIW",
     "AFRM",
     "AFYA",
     "AGCC",
@@ -198,12 +163,6 @@
     "AGMB",
     "AGMH",
     "AGNC",
-    "AGNCL",
-    "AGNCM",
-    "AGNCN",
-    "AGNCO",
-    "AGNCP",
-    "AGNCZ",
     "AGNT",
     "AGPU",
     "AGRZ",
@@ -225,10 +184,8 @@
     "AIHS",
     "AII",
     "AIIO",
-    "AIIOW",
     "AIIR",
     "AIMD",
-    "AIMDW",
     "AIN",
     "AIOS",
     "AIOT",
@@ -237,13 +194,10 @@
     "AIRE",
     "AIRG",
     "AIRJ",
-    "AIRJW",
     "AIRO",
     "AIRS",
     "AIRT",
-    "AIRTP",
     "AISP",
-    "AISPW",
     "AIXC",
     "AIXI",
     "AIZ",
@@ -259,13 +213,9 @@
     "ALB",
     "ALCO",
     "ALDF",
-    "ALDFU",
-    "ALDFW",
     "ALDX",
     "ALEC",
     "ALF",
-    "ALFUU",
-    "ALFUW",
     "ALG",
     "ALGM",
     "ALGN",
@@ -274,8 +224,6 @@
     "ALH",
     "ALHC",
     "ALIS",
-    "ALISR",
-    "ALISU",
     "ALKS",
     "ALKT",
     "ALL",
@@ -291,15 +239,10 @@
     "ALNY",
     "ALOT",
     "ALOV",
-    "ALOVU",
-    "ALOVW",
     "ALOY",
     "ALP",
     "ALPS",
     "ALPX",
-    "ALPXR",
-    "ALPXU",
-    "ALPXW",
     "ALRM",
     "ALRS",
     "ALT",
@@ -307,11 +250,9 @@
     "ALTI",
     "ALTO",
     "ALVO",
-    "ALVOW",
     "ALX",
     "ALXO",
     "ALZN",
-    "AMACU",
     "AMAL",
     "AMAN",
     "AMAT",
@@ -331,10 +272,8 @@
     "AMLX",
     "AMN",
     "AMOD",
-    "AMODW",
     "AMP",
     "AMPG",
-    "AMPGZ",
     "AMPH",
     "AMPL",
     "AMPX",
@@ -356,7 +295,6 @@
     "ANET",
     "ANF",
     "ANGH",
-    "ANGHW",
     "ANGI",
     "ANGO",
     "ANIK",
@@ -364,7 +302,6 @@
     "ANIX",
     "ANL",
     "ANNA",
-    "ANNAW",
     "ANNX",
     "ANPA",
     "ANRO",
@@ -380,8 +317,6 @@
     "AP",
     "APA",
     "APAC",
-    "APACR",
-    "APACU",
     "APAM",
     "APC",
     "APD",
@@ -392,10 +327,7 @@
     "APLD",
     "APLE",
     "APLM",
-    "APLMW",
     "APMC",
-    "APMCR",
-    "APMCU",
     "APMD",
     "APO",
     "APOG",
@@ -406,12 +338,9 @@
     "APRE",
     "APTV",
     "APUR",
-    "APURR",
     "APVO",
     "APWC",
     "APXT",
-    "APXTU",
-    "APXTW",
     "APYX",
     "AQB",
     "AQMS",
@@ -420,17 +349,11 @@
     "ARAY",
     "ARBB",
     "ARBE",
-    "ARBEW",
     "ARBK",
     "ARCB",
     "ARCC",
     "ARCI",
-    "ARCIU",
-    "ARCIW",
     "ARCL",
-    "ARCLR",
-    "ARCLU",
-    "ARCLW",
     "ARCT",
     "ARDT",
     "ARDX",
@@ -443,20 +366,16 @@
     "ARKR",
     "ARL",
     "ARLO",
-    "ARLP",
     "ARM",
     "ARMP",
     "AROC",
     "AROW",
     "ARQ",
     "ARQQ",
-    "ARQQW",
     "ARQT",
     "ARR",
     "ARRY",
     "ARTC",
-    "ARTCU",
-    "ARTCW",
     "ARTL",
     "ARTNA",
     "ARTV",
@@ -468,7 +387,6 @@
     "ASAN",
     "ASB",
     "ASBP",
-    "ASBPW",
     "ASC",
     "ASH",
     "ASIC",
@@ -479,13 +397,9 @@
     "ASND",
     "ASO",
     "ASPC",
-    "ASPCR",
-    "ASPCU",
     "ASPI",
     "ASPN",
     "ASPS",
-    "ASPSW",
-    "ASPSZ",
     "ASRV",
     "ASST",
     "ASTC",
@@ -493,7 +407,6 @@
     "ASTH",
     "ASTI",
     "ASTL",
-    "ASTLW",
     "ASTS",
     "ASUR",
     "ASYS",
@@ -508,13 +421,8 @@
     "ATHE",
     "ATHR",
     "ATII",
-    "ATIIU",
-    "ATIIW",
     "ATKR",
     "ATLC",
-    "ATLCL",
-    "ATLCP",
-    "ATLCZ",
     "ATLO",
     "ATLX",
     "ATMU",
@@ -539,7 +447,6 @@
     "AUR",
     "AURA",
     "AURE",
-    "AUROW",
     "AUTL",
     "AUUD",
     "AVA",
@@ -570,8 +477,6 @@
     "AXG",
     "AXGN",
     "AXIN",
-    "AXINR",
-    "AXINU",
     "AXON",
     "AXP",
     "AXSM",
@@ -587,17 +492,13 @@
     "BA",
     "BAC",
     "BACC",
-    "BACCR",
-    "BACCU",
     "BAER",
-    "BAERW",
     "BAFN",
     "BALL",
     "BALY",
     "BANC",
     "BAND",
     "BANF",
-    "BANFP",
     "BANL",
     "BANR",
     "BANX",
@@ -607,15 +508,11 @@
     "BAX",
     "BBAI",
     "BBBY",
-    "BBBYW",
     "BBCP",
     "BBCQ",
-    "BBCQU",
-    "BBCQW",
     "BBGI",
     "BBIO",
     "BBLG",
-    "BBLGW",
     "BBNX",
     "BBOT",
     "BBSI",
@@ -626,61 +523,44 @@
     "BCAB",
     "BCAL",
     "BCAR",
-    "BCARU",
-    "BCARW",
     "BCAX",
     "BCBP",
     "BCC",
     "BCCQ",
-    "BCCQU",
-    "BCCQW",
     "BCDA",
     "BCG",
-    "BCGWW",
     "BCIC",
     "BCML",
     "BCO",
     "BCPC",
     "BCRX",
     "BCTX",
-    "BCTXL",
-    "BCTXZ",
     "BCYC",
     "BDC",
     "BDCI",
-    "BDCIU",
-    "BDCIW",
     "BDMD",
-    "BDMDW",
     "BDN",
     "BDRX",
     "BDSX",
     "BDTX",
     "BDX",
     "BEAG",
-    "BEAGR",
-    "BEAGU",
     "BEAM",
     "BEAT",
-    "BEATW",
     "BEEM",
     "BEEP",
     "BELFA",
     "BELFB",
     "BEN",
     "BENF",
-    "BENFW",
     "BETA",
     "BETR",
-    "BETRW",
     "BF-B",
     "BFC",
     "BFH",
     "BFLY",
     "BFRG",
-    "BFRGW",
     "BFRI",
-    "BFRIW",
     "BFS",
     "BFST",
     "BG",
@@ -689,46 +569,32 @@
     "BGIN",
     "BGL",
     "BGLC",
-    "BGLWW",
     "BGM",
     "BGMS",
     "BGS",
     "BH",
     "BH-A",
     "BHAV",
-    "BHAVR",
-    "BHAVU",
     "BHB",
     "BHE",
     "BHF",
     "BHFAL",
-    "BHFAM",
-    "BHFAN",
-    "BHFAO",
-    "BHFAP",
     "BHR",
     "BHRB",
     "BHST",
     "BHVN",
     "BIAF",
-    "BIAFW",
     "BID",
     "BIDU",
-    "BIDWR",
-    "BIDWU",
     "BIIB",
     "BILI",
     "BIOA",
     "BIOT",
-    "BIOTW",
     "BIOX",
     "BIPC",
     "BIRD",
     "BIVI",
-    "BIVIW",
     "BIXI",
-    "BIXIU",
-    "BIXIW",
     "BIYA",
     "BJDX",
     "BJRI",
@@ -736,8 +602,6 @@
     "BKE",
     "BKH",
     "BKHA",
-    "BKHAR",
-    "BKHAU",
     "BKKT",
     "BKNG",
     "BKR",
@@ -761,19 +625,13 @@
     "BLNE",
     "BLNK",
     "BLRK",
-    "BLRKU",
-    "BLRKW",
     "BLRX",
     "BLSM",
     "BLTE",
     "BLUW",
-    "BLUWU",
-    "BLUWW",
     "BLX",
     "BLZE",
     "BLZR",
-    "BLZRU",
-    "BLZRW",
     "BMBL",
     "BMEA",
     "BMGL",
@@ -786,10 +644,7 @@
     "BMRN",
     "BMY",
     "BNAI",
-    "BNAIW",
     "BNC",
-    "BNCWW",
-    "BNCWZ",
     "BNED",
     "BNGO",
     "BNKK",
@@ -817,15 +672,8 @@
     "BOX",
     "BOXL",
     "BPAC",
-    "BPACR",
-    "BPACU",
     "BPOP",
-    "BPOPM",
     "BPRN",
-    "BPYPM",
-    "BPYPN",
-    "BPYPO",
-    "BPYPP",
     "BR",
     "BRAG",
     "BRAI",
@@ -835,35 +683,25 @@
     "BRCB",
     "BRCC",
     "BREZ",
-    "BREZR",
     "BRFH",
     "BRID",
     "BRK-B",
     "BRKH",
-    "BRKHU",
-    "BRKHW",
     "BRKR",
-    "BRKRP",
     "BRLS",
-    "BRLSW",
     "BRLT",
     "BRNS",
     "BRNX",
     "BRO",
     "BRR",
-    "BRRWW",
     "BRSL",
     "BRSP",
     "BRT",
-    "BRTMU",
     "BRTX",
     "BRUN",
-    "BRUNW",
     "BRVE",
     "BRZE",
     "BSAA",
-    "BSAAR",
-    "BSAAU",
     "BSBK",
     "BSEM",
     "BSET",
@@ -875,7 +713,6 @@
     "BSY",
     "BTAI",
     "BTBD",
-    "BTBDW",
     "BTBT",
     "BTCS",
     "BTCT",
@@ -886,14 +723,11 @@
     "BTOG",
     "BTQ",
     "BTSG",
-    "BTSGU",
     "BTTC",
     "BTU",
     "BULL",
-    "BULLW",
     "BUR",
     "BUSE",
-    "BUSEP",
     "BUUU",
     "BV",
     "BVC",
@@ -902,7 +736,6 @@
     "BW",
     "BWAY",
     "BWB",
-    "BWBBP",
     "BWEN",
     "BWFG",
     "BWIN",
@@ -920,9 +753,7 @@
     "BYSI",
     "BZ",
     "BZAI",
-    "BZAIW",
     "BZFD",
-    "BZFDW",
     "BZH",
     "BZUN",
     "C",
@@ -938,8 +769,6 @@
     "CAH",
     "CAI",
     "CAII",
-    "CAIIU",
-    "CAIIW",
     "CAKE",
     "CAL",
     "CALC",
@@ -950,13 +779,9 @@
     "CAMT",
     "CAN",
     "CAPN",
-    "CAPNR",
-    "CAPNU",
     "CAPR",
     "CAPS",
     "CAQ",
-    "CAQUU",
-    "CAQUW",
     "CAR",
     "CARE",
     "CARG",
@@ -969,7 +794,6 @@
     "CAST",
     "CASY",
     "CAT",
-    "CATLU",
     "CATX",
     "CATY",
     "CB",
@@ -995,40 +819,29 @@
     "CC",
     "CCAP",
     "CCAQ",
-    "CCAQU",
-    "CCAQW",
     "CCB",
     "CCBG",
     "CCC",
     "CCCC",
     "CCCT",
-    "CCCTU",
-    "CCCTW",
     "CCD",
     "CCEC",
     "CCEP",
     "CCG",
-    "CCGWW",
     "CCHH",
     "CCI",
     "CCII",
-    "CCIIU",
-    "CCIIW",
     "CCL",
     "CCLD",
     "CCNE",
-    "CCNEP",
     "CCO",
     "CCOI",
     "CCS",
     "CCSI",
     "CCTG",
     "CCXI",
-    "CCXIU",
-    "CCXIW",
     "CD",
     "CDIO",
-    "CDIOW",
     "CDLX",
     "CDNA",
     "CDNL",
@@ -1036,10 +849,8 @@
     "CDP",
     "CDRE",
     "CDRO",
-    "CDROW",
     "CDT",
     "CDTG",
-    "CDTTW",
     "CDW",
     "CDXS",
     "CDZI",
@@ -1070,12 +881,9 @@
     "CFFN",
     "CFG",
     "CG",
-    "CGABL",
     "CGBD",
     "CGC",
     "CGCF",
-    "CGCFU",
-    "CGCFW",
     "CGEM",
     "CGEN",
     "CGNT",
@@ -1087,16 +895,12 @@
     "CHA",
     "CHAI",
     "CHAR",
-    "CHARR",
-    "CHARU",
     "CHCI",
     "CHCO",
     "CHCT",
     "CHD",
     "CHDN",
     "CHEC",
-    "CHECU",
-    "CHECW",
     "CHEF",
     "CHGA",
     "CHI",
@@ -1104,22 +908,14 @@
     "CHMG",
     "CHNR",
     "CHPG",
-    "CHPGR",
-    "CHPGU",
     "CHPT",
     "CHR",
     "CHRD",
     "CHRN",
     "CHRS",
     "CHRW",
-    "CHSCL",
-    "CHSCM",
-    "CHSCN",
-    "CHSCO",
-    "CHSCP",
     "CHSN",
     "CHTR",
-    "CHTRP",
     "CHW",
     "CHY",
     "CHYM",
@@ -1133,7 +929,6 @@
     "CIM",
     "CINF",
     "CING",
-    "CINGW",
     "CIRC",
     "CISO",
     "CISS",
@@ -1162,7 +957,6 @@
     "CLRB",
     "CLRO",
     "CLSK",
-    "CLSKW",
     "CLST",
     "CLVT",
     "CLW",
@@ -1179,8 +973,6 @@
     "CMG",
     "CMI",
     "CMII",
-    "CMIIU",
-    "CMIIW",
     "CMMB",
     "CMND",
     "CMP",
@@ -1196,7 +988,6 @@
     "CMTV",
     "CNC",
     "CNCK",
-    "CNCKW",
     "CNDT",
     "CNET",
     "CNEY",
@@ -1206,7 +997,6 @@
     "CNNE",
     "CNO",
     "CNOB",
-    "CNOBP",
     "CNP",
     "CNR",
     "CNS",
@@ -1223,7 +1013,6 @@
     "CNXU",
     "COAG",
     "COCH",
-    "COCHW",
     "COCO",
     "COCP",
     "CODA",
@@ -1237,8 +1026,6 @@
     "COIN",
     "COKE",
     "COLA",
-    "COLAR",
-    "COLAU",
     "COLB",
     "COLL",
     "COLM",
@@ -1246,13 +1033,10 @@
     "CON",
     "COO",
     "COOT",
-    "COOTW",
     "COP",
     "COR",
     "CORT",
     "CORZ",
-    "CORZW",
-    "CORZZ",
     "COSM",
     "COSO",
     "COST",
@@ -1275,16 +1059,9 @@
     "CPT",
     "CPZ",
     "CRAC",
-    "CRACR",
-    "CRACU",
-    "CRACW",
     "CRAI",
     "CRAN",
-    "CRANR",
-    "CRANU",
     "CRAQ",
-    "CRAQR",
-    "CRAQU",
     "CRBP",
     "CRBU",
     "CRC",
@@ -1297,7 +1074,6 @@
     "CRESY",
     "CREX",
     "CRGO",
-    "CRGOW",
     "CRGY",
     "CRH",
     "CRI",
@@ -1307,7 +1083,6 @@
     "CRM",
     "CRMD",
     "CRML",
-    "CRMLW",
     "CRMT",
     "CRNC",
     "CRNT",
@@ -1329,7 +1104,6 @@
     "CSCO",
     "CSGP",
     "CSHR",
-    "CSHRW",
     "CSIQ",
     "CSPI",
     "CSQ",
@@ -1343,8 +1117,6 @@
     "CSWC",
     "CSX",
     "CTAA",
-    "CTAAR",
-    "CTAAU",
     "CTAS",
     "CTBI",
     "CTEV",
@@ -1368,8 +1140,6 @@
     "CTXR",
     "CUB",
     "CUBI",
-    "CUBWU",
-    "CUBWW",
     "CUE",
     "CULP",
     "CUPR",
@@ -1402,18 +1172,14 @@
     "CWST",
     "CWT",
     "CXAI",
-    "CXAIW",
     "CXDO",
     "CXII",
-    "CXIIU",
-    "CXIIW",
     "CXM",
     "CXT",
     "CXW",
     "CYAB",
     "CYCN",
     "CYCU",
-    "CYCUW",
     "CYH",
     "CYN",
     "CYPH",
@@ -1425,10 +1191,7 @@
     "CZWI",
     "D",
     "DAAQ",
-    "DAAQU",
-    "DAAQW",
     "DAIC",
-    "DAICW",
     "DAIO",
     "DAKT",
     "DAL",
@@ -1436,10 +1199,7 @@
     "DARE",
     "DASH",
     "DAVE",
-    "DAVEW",
     "DBCA",
-    "DBCAU",
-    "DBCAW",
     "DBD",
     "DBGI",
     "DBI",
@@ -1469,15 +1229,11 @@
     "DERM",
     "DETX",
     "DFDV",
-    "DFDVW",
     "DFH",
     "DFIN",
     "DFLI",
-    "DFLIW",
     "DFNS",
-    "DFNSW",
     "DFSC",
-    "DFSCW",
     "DFTX",
     "DG",
     "DGICA",
@@ -1488,8 +1244,6 @@
     "DGXX",
     "DH",
     "DHC",
-    "DHCNI",
-    "DHCNL",
     "DHI",
     "DHR",
     "DHT",
@@ -1499,7 +1253,6 @@
     "DIS",
     "DJCO",
     "DJT",
-    "DJTWW",
     "DK",
     "DKI",
     "DKNG",
@@ -1512,21 +1265,14 @@
     "DLX",
     "DLXY",
     "DMAA",
-    "DMAAR",
-    "DMAAU",
     "DMAC",
     "DMC",
     "DMII",
-    "DMIIR",
-    "DMIIU",
-    "DMLP",
     "DMRA",
     "DMRC",
     "DNA",
     "DNLI",
     "DNMX",
-    "DNMXU",
-    "DNMXW",
     "DNOW",
     "DNTH",
     "DNUT",
@@ -1548,20 +1294,15 @@
     "DPZ",
     "DRCT",
     "DRDB",
-    "DRDBU",
-    "DRDBW",
     "DRH",
     "DRI",
     "DRIO",
     "DRMA",
     "DRS",
     "DRTS",
-    "DRTSW",
     "DRUG",
     "DRVN",
     "DSAC",
-    "DSACU",
-    "DSACW",
     "DSC",
     "DSGN",
     "DSGR",
@@ -1569,19 +1310,15 @@
     "DSP",
     "DSWL",
     "DSY",
-    "DSYWW",
     "DTCX",
     "DTE",
     "DTI",
     "DTIL",
     "DTSQ",
-    "DTSQR",
-    "DTSQU",
     "DTSS",
     "DTST",
     "DUK",
     "DUKR",
-    "DUKRW",
     "DUO",
     "DUOL",
     "DUOT",
@@ -1601,11 +1338,7 @@
     "DYAI",
     "DYN",
     "DYNC",
-    "DYNCU",
-    "DYNCW",
     "DYOR",
-    "DYORU",
-    "DYORW",
     "EAF",
     "EAT",
     "EBAY",
@@ -1621,10 +1354,8 @@
     "ECPG",
     "ECVT",
     "ECX",
-    "ECXWW",
     "ED",
     "EDBL",
-    "EDBLW",
     "EDHL",
     "EDIT",
     "EDRY",
@@ -1638,7 +1369,6 @@
     "EFOI",
     "EFOR",
     "EFSC",
-    "EFSCP",
     "EFSI",
     "EFTY",
     "EFX",
@@ -1646,8 +1376,6 @@
     "EGAN",
     "EGBN",
     "EGHA",
-    "EGHAR",
-    "EGHAU",
     "EGHT",
     "EGY",
     "EH",
@@ -1681,12 +1409,10 @@
     "EMBC",
     "EME",
     "EMIS",
-    "EMISR",
     "EML",
     "EMPD",
     "EMR",
     "ENGN",
-    "ENGNW",
     "ENGS",
     "ENLT",
     "ENLV",
@@ -1694,7 +1420,6 @@
     "ENPH",
     "ENR",
     "ENRD",
-    "ENRDW",
     "ENS",
     "ENSC",
     "ENSG",
@@ -1707,7 +1432,6 @@
     "EOG",
     "EOLS",
     "EOSE",
-    "EOSEW",
     "EPAC",
     "EPC",
     "EPM",
@@ -1726,7 +1450,6 @@
     "ERIE",
     "ERII",
     "ERNA",
-    "ERNAW",
     "EROC",
     "EROK",
     "ES",
@@ -1734,7 +1457,6 @@
     "ESE",
     "ESEA",
     "ESLA",
-    "ESLAW",
     "ESLT",
     "ESNT",
     "ESOA",
@@ -1751,10 +1473,7 @@
     "ETS",
     "EU",
     "EUDA",
-    "EUDAW",
     "EURK",
-    "EURKR",
-    "EURKU",
     "EVAX",
     "EVC",
     "EVCM",
@@ -1768,14 +1487,10 @@
     "EVMN",
     "EVO",
     "EVOX",
-    "EVOXU",
-    "EVOXW",
     "EVRG",
     "EVTC",
     "EW",
     "EWAV",
-    "EWAVR",
-    "EWAVU",
     "EWBC",
     "EWTX",
     "EXC",
@@ -1790,7 +1505,6 @@
     "EXR",
     "EXTR",
     "EXYN",
-    "EXYNW",
     "EYE",
     "EYPT",
     "EZGO",
@@ -1801,9 +1515,6 @@
     "FABC",
     "FAC",
     "FACT",
-    "FACTU",
-    "FACTW",
-    "FACWW",
     "FAMI",
     "FANG",
     "FAST",
@@ -1812,7 +1523,6 @@
     "FBDT",
     "FBGL",
     "FBIO",
-    "FBIOP",
     "FBIZ",
     "FBK",
     "FBLA",
@@ -1822,8 +1532,6 @@
     "FBRT",
     "FBRX",
     "FBYD",
-    "FBYDP",
-    "FBYDW",
     "FC",
     "FCAP",
     "FCBC",
@@ -1833,16 +1541,11 @@
     "FCFS",
     "FCHL",
     "FCNCA",
-    "FCNCN",
-    "FCNCO",
-    "FCNCP",
     "FCPT",
     "FCUV",
     "FCX",
     "FDBC",
     "FDMM",
-    "FDMMU",
-    "FDMMW",
     "FDMT",
     "FDS",
     "FDSB",
@@ -1859,8 +1562,6 @@
     "FENC",
     "FER",
     "FERA",
-    "FERAR",
-    "FERAU",
     "FERG",
     "FET",
     "FF",
@@ -1870,15 +1571,10 @@
     "FFIV",
     "FG",
     "FGBI",
-    "FGBIP",
     "FGI",
     "FGII",
-    "FGIIU",
-    "FGIIW",
-    "FGIWW",
     "FGL",
     "FGNX",
-    "FGNXP",
     "FHB",
     "FHTX",
     "FIBK",
@@ -1887,8 +1583,6 @@
     "FIGR",
     "FIGS",
     "FIGX",
-    "FIGXU",
-    "FIGXW",
     "FINW",
     "FIP",
     "FIS",
@@ -1900,11 +1594,9 @@
     "FIVN",
     "FIX",
     "FIZZ",
-    "FJDIU",
     "FJET",
     "FKWL",
     "FLD",
-    "FLDDW",
     "FLEX",
     "FLG",
     "FLGT",
@@ -1926,15 +1618,12 @@
     "FLYX",
     "FLZH",
     "FMAC",
-    "FMACR",
-    "FMACU",
     "FMAO",
     "FMBH",
     "FMC",
     "FMFC",
     "FMNB",
     "FMST",
-    "FMSTW",
     "FNGR",
     "FNKO",
     "FNLC",
@@ -1954,7 +1643,6 @@
     "FOXA",
     "FOXF",
     "FOXX",
-    "FOXXW",
     "FPI",
     "FRAF",
     "FRBA",
@@ -1963,7 +1651,6 @@
     "FRGT",
     "FRHC",
     "FRME",
-    "FRMEP",
     "FRMI",
     "FRMM",
     "FRNM",
@@ -1980,8 +1667,6 @@
     "FSBW",
     "FSEA",
     "FSHP",
-    "FSHPR",
-    "FSHPU",
     "FSLR",
     "FSLY",
     "FSS",
@@ -1989,15 +1674,12 @@
     "FSUN",
     "FSV",
     "FTAI",
-    "FTAIM",
     "FTCI",
     "FTDR",
     "FTEK",
     "FTFT",
     "FTH",
     "FTHA",
-    "FTHAU",
-    "FTHAW",
     "FTHM",
     "FTK",
     "FTLF",
@@ -2006,44 +1688,31 @@
     "FTV",
     "FUBO",
     "FUFU",
-    "FUFUW",
     "FUL",
     "FULC",
     "FULT",
-    "FULTP",
     "FUN",
     "FUNC",
     "FUND",
     "FUSB",
     "FUSE",
-    "FUSEW",
     "FUTU",
     "FVAV",
     "FVCB",
     "FVN",
-    "FVNNR",
-    "FVNNU",
     "FVR",
     "FWAC",
-    "FWACR",
-    "FWACU",
-    "FWACW",
     "FWDI",
     "FWONA",
     "FWONK",
     "FWRD",
     "FWRG",
     "FXAC",
-    "FXACU",
-    "FXACW",
     "FXHO",
     "FXNC",
     "GABC",
     "GAIA",
     "GAIN",
-    "GAING",
-    "GAINI",
-    "GAINZ",
     "GALT",
     "GAME",
     "GANX",
@@ -2058,10 +1727,7 @@
     "GBX",
     "GCBC",
     "GCGR",
-    "GCGRU",
-    "GCGRW",
     "GCL",
-    "GCLWW",
     "GCMG",
     "GCO",
     "GCT",
@@ -2070,7 +1736,6 @@
     "GDC",
     "GDDY",
     "GDEV",
-    "GDEVW",
     "GDHG",
     "GDOT",
     "GDRX",
@@ -2079,13 +1744,9 @@
     "GDYN",
     "GE",
     "GECC",
-    "GECCG",
-    "GECCH",
-    "GECCI",
     "GEF",
     "GEF-B",
     "GEG",
-    "GEGGL",
     "GEHC",
     "GELS",
     "GEMI",
@@ -2094,30 +1755,23 @@
     "GENC",
     "GENI",
     "GENK",
-    "GENVR",
     "GEO",
     "GEOS",
     "GERN",
     "GEV",
     "GEVO",
     "GFAI",
-    "GFAIW",
     "GFF",
     "GFS",
     "GFUZ",
-    "GFUZW",
     "GGAL",
     "GGR",
-    "GGROW",
     "GH",
     "GHC",
     "GHM",
     "GHRS",
     "GHXI",
-    "GHXIU",
-    "GHXIW",
     "GIBO",
-    "GIBOW",
     "GIC",
     "GIFT",
     "GIGM",
@@ -2125,15 +1779,10 @@
     "GILD",
     "GILT",
     "GIPR",
-    "GIPRW",
     "GIS",
     "GITS",
     "GIW",
-    "GIWWR",
-    "GIWWU",
     "GIX",
-    "GIXXR",
-    "GIXXU",
     "GKOS",
     "GL",
     "GLAD",
@@ -2144,7 +1793,6 @@
     "GLIBK",
     "GLMD",
     "GLND",
-    "GLNDW",
     "GLNG",
     "GLOB",
     "GLOO",
@@ -2178,22 +1826,14 @@
     "GOLD",
     "GOLF",
     "GOOD",
-    "GOODN",
-    "GOODO",
     "GOOG",
     "GOOGL",
-    "GOOGM",
-    "GOOGN",
     "GORO",
     "GOSS",
     "GOVX",
     "GP",
     "GPAC",
-    "GPACU",
-    "GPACW",
     "GPAT",
-    "GPATU",
-    "GPATW",
     "GPC",
     "GPCR",
     "GPGI",
@@ -2203,7 +1843,6 @@
     "GPRE",
     "GPRO",
     "GRAB",
-    "GRABW",
     "GRAL",
     "GRAN",
     "GRBK",
@@ -2211,11 +1850,9 @@
     "GRCE",
     "GRDN",
     "GRDX",
-    "GREEL",
     "GRFS",
     "GRI",
     "GRML",
-    "GRMLW",
     "GRMN",
     "GRND",
     "GRNQ",
@@ -2223,7 +1860,6 @@
     "GROW",
     "GRPN",
     "GRRR",
-    "GRRRW",
     "GRSD",
     "GRVY",
     "GRWG",
@@ -2232,28 +1868,17 @@
     "GSBC",
     "GSHD",
     "GSHR",
-    "GSHRU",
-    "GSHRW",
     "GSIT",
     "GSIW",
     "GSM",
     "GSRF",
-    "GSRFR",
-    "GSRFU",
     "GSRV",
-    "GSRVR",
-    "GSRVU",
     "GSUN",
     "GT",
     "GTBP",
     "GTEC",
     "GTEN",
-    "GTENU",
-    "GTENW",
     "GTERA",
-    "GTERR",
-    "GTERU",
-    "GTERW",
     "GTIM",
     "GTLB",
     "GTM",
@@ -2261,8 +1886,6 @@
     "GTX",
     "GTY",
     "GUAC",
-    "GUACU",
-    "GUACW",
     "GURE",
     "GUTS",
     "GVA",
@@ -2275,8 +1898,6 @@
     "GYRE",
     "GYRO",
     "HACQ",
-    "HACQU",
-    "HACQW",
     "HAE",
     "HAFC",
     "HAIN",
@@ -2287,14 +1908,8 @@
     "HAS",
     "HASI",
     "HAVA",
-    "HAVAR",
-    "HAVAU",
     "HAWK",
     "HBAN",
-    "HBANL",
-    "HBANM",
-    "HBANP",
-    "HBANZ",
     "HBB",
     "HBCP",
     "HBIO",
@@ -2303,28 +1918,21 @@
     "HBT",
     "HCA",
     "HCAC",
-    "HCACR",
-    "HCACU",
     "HCAI",
     "HCAT",
     "HCC",
     "HCHL",
     "HCI",
     "HCIC",
-    "HCICR",
-    "HCICU",
     "HCKT",
     "HCM",
     "HCMA",
-    "HCMAU",
-    "HCMAW",
     "HCSG",
     "HCTI",
     "HCWB",
     "HD",
     "HDL",
     "HDRN",
-    "HDRNW",
     "HDSN",
     "HE",
     "HELE",
@@ -2376,7 +1984,6 @@
     "HOFT",
     "HOG",
     "HOLO",
-    "HOLOW",
     "HOMB",
     "HON",
     "HONA",
@@ -2384,20 +1991,16 @@
     "HOPE",
     "HOUR",
     "HOV",
-    "HOVNP",
     "HOVR",
-    "HOVRW",
     "HOWL",
     "HP",
     "HPAI",
-    "HPAIW",
     "HPE",
     "HPK",
     "HPP",
     "HPQ",
     "HQ",
     "HQI",
-    "HQWWW",
     "HQY",
     "HRI",
     "HRL",
@@ -2408,7 +2011,6 @@
     "HRZN",
     "HSAI",
     "HSCS",
-    "HSCSW",
     "HSDT",
     "HSHP",
     "HSIC",
@@ -2426,33 +2028,24 @@
     "HTO",
     "HTOO",
     "HTZ",
-    "HTZWW",
     "HUBB",
     "HUBC",
-    "HUBCW",
-    "HUBCZ",
     "HUBG",
     "HUDI",
     "HUHU",
     "HUIZ",
     "HUM",
     "HUMA",
-    "HUMAW",
     "HUN",
     "HURA",
     "HURC",
     "HURN",
     "HUT",
     "HVII",
-    "HVIIR",
-    "HVIIU",
     "HVMC",
-    "HVMCU",
-    "HVMCW",
     "HVT",
     "HWBK",
     "HWC",
-    "HWCPZ",
     "HWH",
     "HWKN",
     "HWM",
@@ -2468,14 +2061,9 @@
     "HZO",
     "IA",
     "IACO",
-    "IACOU",
-    "IACOW",
     "IACQ",
-    "IACQU",
-    "IACQW",
     "IART",
     "IBAC",
-    "IBACR",
     "IBCP",
     "IBEX",
     "IBG",
@@ -2496,11 +2084,8 @@
     "ICMB",
     "ICON",
     "ICU",
-    "ICUCW",
     "ICUI",
     "IDAC",
-    "IDACU",
-    "IDACW",
     "IDAI",
     "IDCC",
     "IDN",
@@ -2510,17 +2095,12 @@
     "IDYA",
     "IE",
     "IEAG",
-    "IEAGR",
-    "IEAGU",
-    "IEP",
     "IESC",
     "IEX",
     "IFBD",
     "IFF",
     "IFRX",
     "IGAC",
-    "IGACR",
-    "IGACU",
     "IGIC",
     "IHRT",
     "III",
@@ -2530,10 +2110,7 @@
     "IKT",
     "ILAG",
     "ILLR",
-    "ILLRW",
     "ILLU",
-    "ILLUU",
-    "ILLUW",
     "ILMN",
     "ILPT",
     "IMA",
@@ -2549,11 +2126,9 @@
     "IMNN",
     "IMOS",
     "IMPP",
-    "IMPPP",
     "IMRN",
     "IMRX",
     "IMSR",
-    "IMSRW",
     "IMTE",
     "IMTX",
     "IMUX",
@@ -2561,10 +2136,7 @@
     "IMXI",
     "INAB",
     "INAC",
-    "INACR",
-    "INACU",
     "INBK",
-    "INBKZ",
     "INBS",
     "INBX",
     "INCR",
@@ -2619,11 +2191,7 @@
     "IPAR",
     "IPDN",
     "IPEX",
-    "IPEXR",
-    "IPEXU",
     "IPFX",
-    "IPFXU",
-    "IPFXW",
     "IPGP",
     "IPHA",
     "IPI",
@@ -2631,14 +2199,11 @@
     "IPSC",
     "IPST",
     "IPVV",
-    "IPVVU",
-    "IPVVW",
     "IPW",
     "IPWR",
     "IPX",
     "IQ",
     "IQMX",
-    "IQMXW",
     "IQST",
     "IQV",
     "IR",
@@ -2646,8 +2211,6 @@
     "IRDM",
     "IREN",
     "IRHO",
-    "IRHOR",
-    "IRHOU",
     "IRIX",
     "IRM",
     "IRMD",
@@ -2657,8 +2220,6 @@
     "IRWD",
     "ISBA",
     "ISNR",
-    "ISNRU",
-    "ISNRW",
     "ISPC",
     "ISPR",
     "ISRG",
@@ -2668,8 +2229,6 @@
     "ITG",
     "ITGR",
     "ITHA",
-    "ITHAU",
-    "ITHAW",
     "ITIC",
     "ITOC",
     "ITRI",
@@ -2677,7 +2236,6 @@
     "ITW",
     "IVA",
     "IVDA",
-    "IVDAW",
     "IVF",
     "IVR",
     "IVT",
@@ -2688,9 +2246,6 @@
     "IZM",
     "J",
     "JAB",
-    "JABRR",
-    "JABRU",
-    "JABRW",
     "JACK",
     "JAGX",
     "JAKK",
@@ -2727,15 +2282,12 @@
     "JNJ",
     "JOBY",
     "JOE",
-    "JONEU",
     "JOUT",
     "JOYY",
     "JPM",
     "JRSH",
     "JRVR",
-    "JSM",
     "JSPR",
-    "JSPRW",
     "JTAI",
     "JUNS",
     "JVA",
@@ -2754,15 +2306,10 @@
     "KAZR",
     "KBH",
     "KBON",
-    "KBONU",
-    "KBONW",
     "KBSX",
     "KC",
     "KCHV",
-    "KCHVR",
-    "KCHVU",
     "KDK",
-    "KDKRW",
     "KDP",
     "KE",
     "KEEL",
@@ -2772,12 +2319,8 @@
     "KEY",
     "KEYS",
     "KEYY",
-    "KEYYU",
-    "KEYYW",
     "KFFB",
     "KFII",
-    "KFIIR",
-    "KFIIU",
     "KFRC",
     "KFY",
     "KG",
@@ -2786,11 +2329,9 @@
     "KHC",
     "KIDS",
     "KIDZ",
-    "KIDZW",
     "KIM",
     "KINS",
     "KITT",
-    "KITTW",
     "KKR",
     "KLAC",
     "KLC",
@@ -2799,7 +2340,6 @@
     "KLRS",
     "KLTR",
     "KLXE",
-    "KLXER",
     "KMB",
     "KMDA",
     "KMI",
@@ -2820,15 +2360,11 @@
     "KOS",
     "KOSS",
     "KOYN",
-    "KOYNU",
-    "KOYNW",
     "KPLT",
     "KPRX",
     "KPTI",
     "KR",
     "KRAQ",
-    "KRAQU",
-    "KRAQW",
     "KREF",
     "KRG",
     "KRKR",
@@ -2848,21 +2384,16 @@
     "KTCC",
     "KTOS",
     "KTTA",
-    "KTTAW",
     "KTWO",
-    "KTWOR",
-    "KTWOU",
     "KURA",
     "KUST",
     "KVHI",
     "KVUE",
     "KWM",
-    "KWMWW",
     "KWR",
     "KWY",
     "KXIN",
     "KYIV",
-    "KYIVW",
     "KYMR",
     "KYNB",
     "KYTX",
@@ -2873,19 +2404,13 @@
     "LADR",
     "LAES",
     "LAFA",
-    "LAFAR",
-    "LAFAU",
     "LAKE",
     "LAMR",
     "LAND",
-    "LANDO",
-    "LANDP",
     "LARK",
     "LASE",
     "LASR",
     "LATA",
-    "LATAU",
-    "LATAW",
     "LAUR",
     "LAW",
     "LAWR",
@@ -2896,10 +2421,7 @@
     "LBTYB",
     "LBTYK",
     "LCCC",
-    "LCCCR",
-    "LCCCU",
     "LCFY",
-    "LCFYW",
     "LCID",
     "LCII",
     "LCLN",
@@ -2921,11 +2443,8 @@
     "LEU",
     "LEXX",
     "LFAC",
-    "LFACU",
-    "LFACW",
     "LFCR",
     "LFMD",
-    "LFMDP",
     "LFS",
     "LFST",
     "LFTO",
@@ -2955,7 +2474,6 @@
     "LILAP",
     "LIME",
     "LIMN",
-    "LIMNW",
     "LIN",
     "LINC",
     "LIND",
@@ -2971,8 +2489,6 @@
     "LKFT",
     "LKQ",
     "LKSP",
-    "LKSPR",
-    "LKSPU",
     "LLY",
     "LLYVA",
     "LLYVK",
@@ -2989,7 +2505,6 @@
     "LNT",
     "LNTH",
     "LNZA",
-    "LNZAW",
     "LOAN",
     "LOB",
     "LOBO",
@@ -3000,19 +2515,12 @@
     "LOOP",
     "LOPE",
     "LOT",
-    "LOTWW",
     "LOVE",
     "LOW",
     "LPAA",
-    "LPAAU",
-    "LPAAW",
     "LPBB",
-    "LPBBU",
-    "LPBBW",
     "LPCN",
     "LPCV",
-    "LPCVU",
-    "LPCVW",
     "LPG",
     "LPLA",
     "LPSN",
@@ -3034,15 +2542,11 @@
     "LTC",
     "LTGO",
     "LTGR",
-    "LTGRU",
-    "LTGRW",
     "LTH",
     "LTRN",
     "LTRX",
-    "LTRYW",
     "LUCD",
     "LUCY",
-    "LUCYW",
     "LULU",
     "LUMN",
     "LUNG",
@@ -3053,8 +2557,6 @@
     "LVS",
     "LVWR",
     "LWAC",
-    "LWACU",
-    "LWACW",
     "LWAY",
     "LWLG",
     "LX",
@@ -3078,8 +2580,6 @@
     "MAAS",
     "MAC",
     "MACI",
-    "MACIU",
-    "MACIW",
     "MAGH",
     "MAGN",
     "MAKO",
@@ -3091,7 +2591,6 @@
     "MANH",
     "MAR",
     "MARA",
-    "MARPS",
     "MAS",
     "MASK",
     "MASS",
@@ -3109,34 +2608,23 @@
     "MBC",
     "MBI",
     "MBIN",
-    "MBINL",
-    "MBINM",
-    "MBINN",
     "MBIO",
     "MBLY",
-    "MBNKO",
     "MBOT",
     "MBRX",
     "MBUU",
     "MBVI",
-    "MBVIU",
-    "MBVIW",
     "MBWM",
     "MBX",
     "MC",
     "MCAH",
-    "MCAHR",
-    "MCAHU",
     "MCB",
     "MCBS",
     "MCD",
     "MCFT",
     "MCGA",
-    "MCGAU",
-    "MCGAW",
     "MCHB",
     "MCHP",
-    "MCHPP",
     "MCHX",
     "MCK",
     "MCO",
@@ -3147,11 +2635,9 @@
     "MCY",
     "MD",
     "MDAI",
-    "MDAIW",
     "MDB",
     "MDBH",
     "MDCX",
-    "MDCXW",
     "MDGL",
     "MDIA",
     "MDLN",
@@ -3172,23 +2658,16 @@
     "MEOH",
     "MERC",
     "MESH",
-    "MESHU",
-    "MESHW",
     "MESO",
     "MET",
     "META",
     "METC",
     "METCB",
-    "METCI",
-    "METCZ",
     "MEVO",
-    "MEVOU",
-    "MEVOW",
     "MF",
     "MFA",
     "MFI",
     "MFIC",
-    "MFICL",
     "MFIN",
     "MFP",
     "MG",
@@ -3209,8 +2688,6 @@
     "MH",
     "MHO",
     "MIAC",
-    "MIACU",
-    "MIACW",
     "MIAX",
     "MIDD",
     "MIMI",
@@ -3223,23 +2700,16 @@
     "MITT",
     "MKC",
     "MKDW",
-    "MKDWW",
     "MKLY",
-    "MKLYR",
-    "MKLYU",
     "MKSI",
     "MKTW",
     "MKTX",
     "MKZR",
     "MLAA",
-    "MLAAU",
-    "MLAAW",
     "MLAB",
     "MLCI",
-    "MLCIL",
     "MLCO",
     "MLEC",
-    "MLECW",
     "MLGO",
     "MLKN",
     "MLM",
@@ -3249,13 +2719,10 @@
     "MLYS",
     "MMED",
     "MMI",
-    "MMLP",
     "MMM",
     "MMS",
     "MMSI",
     "MMTX",
-    "MMTXU",
-    "MMTXW",
     "MMYT",
     "MNDO",
     "MNDR",
@@ -3271,13 +2738,10 @@
     "MNTN",
     "MNTS",
     "MNY",
-    "MNYWW",
     "MO",
     "MOB",
-    "MOBBW",
     "MOBI",
     "MOBX",
-    "MOBXW",
     "MODD",
     "MOG-A",
     "MOLN",
@@ -3296,8 +2760,6 @@
     "MRAM",
     "MRBK",
     "MRCO",
-    "MRCOU",
-    "MRCOW",
     "MRCY",
     "MRDN",
     "MREO",
@@ -3307,7 +2769,6 @@
     "MRM",
     "MRNA",
     "MRNO",
-    "MRNOW",
     "MRSH",
     "MRTN",
     "MRVI",
@@ -3315,9 +2776,7 @@
     "MRX",
     "MS",
     "MSAI",
-    "MSAIW",
     "MSBI",
-    "MSBIP",
     "MSCI",
     "MSEX",
     "MSFT",
@@ -3328,13 +2787,11 @@
     "MSLE",
     "MSS",
     "MSTR",
-    "MTAKU",
     "MTB",
     "MTC",
     "MTCH",
     "MTD",
     "MTEK",
-    "MTEKW",
     "MTEN",
     "MTEX",
     "MTH",
@@ -3350,8 +2807,6 @@
     "MUR",
     "MUX",
     "MUZE",
-    "MUZEU",
-    "MUZEW",
     "MVBF",
     "MVIS",
     "MVST",
@@ -3369,9 +2824,6 @@
     "MYSE",
     "MYSZ",
     "MYX",
-    "MYXXR",
-    "MYXXU",
-    "MYXXW",
     "MZTI",
     "NA",
     "NAAS",
@@ -3381,9 +2833,7 @@
     "NAKA",
     "NAMI",
     "NAMM",
-    "NAMMW",
     "NAMS",
-    "NAMSW",
     "NAT",
     "NATH",
     "NATL",
@@ -3400,8 +2850,6 @@
     "NBP",
     "NBR",
     "NBRG",
-    "NBRGR",
-    "NBRGU",
     "NBTB",
     "NBTX",
     "NC",
@@ -3413,11 +2861,7 @@
     "NCNA",
     "NCNO",
     "NCO",
-    "NCOOR",
-    "NCOOU",
-    "NCOOW",
     "NCPL",
-    "NCPLW",
     "NCRA",
     "NCSM",
     "NCT",
@@ -3435,21 +2879,14 @@
     "NEOG",
     "NEON",
     "NEOV",
-    "NEOVW",
     "NEPH",
     "NERV",
     "NESR",
     "NEUP",
     "NEWT",
-    "NEWTG",
-    "NEWTH",
-    "NEWTI",
-    "NEWTO",
-    "NEWTP",
     "NEXM",
     "NEXN",
     "NEXR",
-    "NEXRW",
     "NEXT",
     "NFE",
     "NFLX",
@@ -3462,25 +2899,17 @@
     "NHC",
     "NHI",
     "NHIC",
-    "NHICU",
-    "NHICW",
     "NHIV",
-    "NHIVU",
-    "NHIVW",
     "NHP",
-    "NHPAP",
-    "NHPBP",
     "NHTC",
     "NI",
     "NIC",
     "NICE",
     "NICM",
     "NIKI",
-    "NIOBW",
     "NIPG",
     "NIU",
     "NIVF",
-    "NIVFW",
     "NIXX",
     "NJR",
     "NKE",
@@ -3493,11 +2922,8 @@
     "NMAD",
     "NMAX",
     "NMFC",
-    "NMFCZ",
     "NMIH",
     "NMP",
-    "NMPAR",
-    "NMPAU",
     "NMRA",
     "NMRK",
     "NMTC",
@@ -3511,18 +2937,12 @@
     "NOC",
     "NODK",
     "NOEM",
-    "NOEMR",
-    "NOEMU",
-    "NOEMW",
     "NOG",
     "NOMA",
     "NOVT",
-    "NOVTU",
     "NOW",
     "NP",
     "NPAC",
-    "NPACU",
-    "NPACW",
     "NPB",
     "NPCE",
     "NPK",
@@ -3538,13 +2958,10 @@
     "NRIM",
     "NRIX",
     "NRSN",
-    "NRSNW",
     "NRXP",
-    "NSAIU",
     "NSC",
     "NSIT",
     "NSLR",
-    "NSLRL",
     "NSP",
     "NSPR",
     "NSSC",
@@ -3562,20 +2979,14 @@
     "NTNX",
     "NTRA",
     "NTRB",
-    "NTRBW",
     "NTRP",
     "NTRS",
-    "NTRSO",
     "NTSK",
     "NTST",
     "NTWK",
     "NTWO",
-    "NTWOU",
-    "NTWOW",
     "NUAI",
-    "NUAIW",
     "NUCL",
-    "NUCLW",
     "NUE",
     "NUR",
     "NUS",
@@ -3590,7 +3001,6 @@
     "NVGS",
     "NVMI",
     "NVNI",
-    "NVNIW",
     "NVNO",
     "NVR",
     "NVRI",
@@ -3610,7 +3020,6 @@
     "NXDR",
     "NXDT",
     "NXGL",
-    "NXGLW",
     "NXH",
     "NXL",
     "NXPI",
@@ -3626,28 +3035,19 @@
     "NYXH",
     "O",
     "OABI",
-    "OABIW",
     "OACC",
-    "OACCU",
-    "OACCW",
     "OBA",
     "OBAI",
-    "OBAWU",
-    "OBAWW",
     "OBIO",
     "OBK",
     "OBT",
     "OBX",
     "OCC",
     "OCCI",
-    "OCCIM",
-    "OCCIN",
     "OCFC",
     "OCG",
     "OCGN",
-    "OCLTU",
     "OCS",
-    "OCSAW",
     "OCSL",
     "OCTV",
     "OCUL",
@@ -3664,21 +3064,13 @@
     "OFLX",
     "OFRM",
     "OFS",
-    "OFSSH",
-    "OFSSO",
-    "OGGWZ",
     "OGI",
     "OGS",
     "OHAC",
-    "OHACR",
-    "OHACU",
     "OI",
     "OII",
     "OIM",
-    "OIMAU",
-    "OIMAW",
     "OIO",
-    "OIOWW",
     "OIS",
     "OKE",
     "OKTA",
@@ -3701,32 +3093,23 @@
     "OMSE",
     "ON",
     "ONB",
-    "ONBPO",
-    "ONBPP",
     "ONC",
     "ONCH",
-    "ONCHU",
-    "ONCHW",
     "ONCO",
     "ONCY",
     "ONDS",
     "ONEG",
     "ONEW",
     "ONFO",
-    "ONFOW",
     "ONIT",
     "ONL",
     "ONMD",
-    "ONMDW",
     "ONT",
     "OOMA",
     "OPAL",
     "OPBK",
     "OPCH",
     "OPEN",
-    "OPENL",
-    "OPENW",
-    "OPENZ",
     "OPFI",
     "OPI",
     "OPK",
@@ -3737,7 +3120,6 @@
     "OPTH",
     "OPTU",
     "OPTX",
-    "OPTXW",
     "OPXS",
     "ORA",
     "ORBS",
@@ -3747,8 +3129,6 @@
     "ORIC",
     "ORIO",
     "ORIQ",
-    "ORIQU",
-    "ORIQW",
     "ORKA",
     "ORKT",
     "ORLY",
@@ -3761,18 +3141,13 @@
     "OSIS",
     "OSPN",
     "OSPR",
-    "OSPRU",
-    "OSPRW",
     "OSRH",
-    "OSRHW",
     "OSS",
     "OST",
     "OSUR",
     "OSW",
     "OTEX",
     "OTGA",
-    "OTGAU",
-    "OTGAW",
     "OTIS",
     "OTLK",
     "OTLY",
@@ -3784,33 +3159,15 @@
     "OVLY",
     "OWLS",
     "OXBR",
-    "OXBRW",
     "OXLC",
-    "OXLCG",
-    "OXLCI",
-    "OXLCL",
-    "OXLCM",
-    "OXLCN",
-    "OXLCO",
-    "OXLCZ",
     "OXM",
     "OXSQ",
-    "OXSQG",
-    "OXSQH",
     "OXY",
     "OYSE",
-    "OYSER",
-    "OYSEU",
     "OZK",
-    "OZKAP",
-    "PAA",
     "PAAC",
-    "PAACU",
-    "PAACW",
     "PACB",
     "PACH",
-    "PACHU",
-    "PACHW",
     "PACK",
     "PACS",
     "PAGP",
@@ -3819,14 +3176,11 @@
     "PAL",
     "PALI",
     "PALO",
-    "PALOU",
-    "PALOW",
     "PAMT",
     "PANL",
     "PANW",
     "PAR",
     "PARA",
-    "PARAW",
     "PARK",
     "PARR",
     "PASG",
@@ -3849,12 +3203,9 @@
     "PBK",
     "PBLS",
     "PBM",
-    "PBMWW",
     "PBYI",
     "PC",
     "PCAP",
-    "PCAPU",
-    "PCAPW",
     "PCAR",
     "PCB",
     "PCG",
@@ -3862,8 +3213,6 @@
     "PCRX",
     "PCSA",
     "PCT",
-    "PCTTU",
-    "PCTTW",
     "PCTY",
     "PCVX",
     "PCYO",
@@ -3876,14 +3225,10 @@
     "PDM",
     "PDSB",
     "PDYN",
-    "PDYNW",
     "PEB",
     "PEBK",
     "PEBO",
     "PECE",
-    "PECER",
-    "PECEU",
-    "PECEW",
     "PECO",
     "PED",
     "PEG",
@@ -3905,17 +3250,13 @@
     "PFSA",
     "PFSI",
     "PFX",
-    "PFXNZ",
     "PG",
     "PGAC",
-    "PGACR",
-    "PGACU",
     "PGC",
     "PGEN",
     "PGNY",
     "PGR",
     "PGY",
-    "PGYWW",
     "PH",
     "PHAR",
     "PHAT",
@@ -3931,7 +3272,6 @@
     "PICS",
     "PII",
     "PIII",
-    "PIIIW",
     "PINE",
     "PIPR",
     "PJT",
@@ -3947,13 +3287,9 @@
     "PLBY",
     "PLCE",
     "PLCI",
-    "PLCIR",
-    "PLCIU",
     "PLD",
     "PLGO",
     "PLMK",
-    "PLMKU",
-    "PLMKW",
     "PLMR",
     "PLOW",
     "PLPC",
@@ -3979,8 +3315,6 @@
     "PMN",
     "PMT",
     "PMTR",
-    "PMTRU",
-    "PMTRW",
     "PMTS",
     "PMVP",
     "PN",
@@ -3996,19 +3330,14 @@
     "POET",
     "POLA",
     "POLE",
-    "POLEU",
-    "POLEW",
     "POM",
     "PONO",
-    "PONOR",
-    "PONOU",
     "PONY",
     "POOL",
     "POR",
     "POWI",
     "POWL",
     "POWW",
-    "POWWP",
     "PPBT",
     "PPC",
     "PPCB",
@@ -4025,13 +3354,11 @@
     "PRCT",
     "PRDO",
     "PRE",
-    "PRENW",
     "PRFX",
     "PRG",
     "PRGO",
     "PRGS",
     "PRHI",
-    "PRHIZ",
     "PRK",
     "PRKS",
     "PRLB",
@@ -4067,8 +3394,6 @@
     "PSTL",
     "PSX",
     "PTAC",
-    "PTACU",
-    "PTACW",
     "PTC",
     "PTCT",
     "PTEN",
@@ -4078,8 +3403,6 @@
     "PTN",
     "PTON",
     "PTOR",
-    "PTORU",
-    "PTORW",
     "PTRN",
     "PUBM",
     "PULM",
@@ -4100,16 +3423,12 @@
     "PZZA",
     "Q",
     "QADR",
-    "QADRU",
-    "QADRW",
     "QBTS",
     "QCLS",
     "QCOM",
     "QCRH",
     "QDEL",
     "QETA",
-    "QETAR",
-    "QETAU",
     "QFIN",
     "QH",
     "QLYS",
@@ -4127,8 +3446,6 @@
     "QRVO",
     "QS",
     "QSEA",
-    "QSEAR",
-    "QSEAU",
     "QSI",
     "QTEX",
     "QTI",
@@ -4140,8 +3457,6 @@
     "QUCY",
     "QUIK",
     "QUMS",
-    "QUMSR",
-    "QUMSU",
     "QURE",
     "QVCG",
     "QXL",
@@ -4150,12 +3465,9 @@
     "RADX",
     "RAIL",
     "RAIN",
-    "RAINW",
     "RAMP",
     "RAND",
     "RANG",
-    "RANGR",
-    "RANGU",
     "RANI",
     "RAPP",
     "RARE",
@@ -4172,7 +3484,6 @@
     "RCBC",
     "RCEL",
     "RCKT",
-    "RCKTW",
     "RCKY",
     "RCL",
     "RCMT",
@@ -4180,11 +3491,7 @@
     "RCT",
     "RCUS",
     "RDAC",
-    "RDACR",
-    "RDACU",
     "RDAG",
-    "RDAGU",
-    "RDAGW",
     "RDCM",
     "RDDT",
     "RDGT",
@@ -4198,7 +3505,6 @@
     "RDW",
     "RDWR",
     "RDZN",
-    "RDZNW",
     "REA",
     "REAL",
     "REAX",
@@ -4208,8 +3514,6 @@
     "REFI",
     "REFR",
     "REG",
-    "REGCO",
-    "REGCP",
     "REGN",
     "REI",
     "REKR",
@@ -4222,17 +3526,12 @@
     "RES",
     "RETO",
     "REVB",
-    "REVBW",
     "REX",
     "REYN",
     "REZI",
     "RF",
     "RFAI",
-    "RFAIR",
-    "RFAIU",
     "RFAM",
-    "RFAMR",
-    "RFAMU",
     "RFIL",
     "RGC",
     "RGCO",
@@ -4243,23 +3542,14 @@
     "RGR",
     "RGS",
     "RGTI",
-    "RGTIW",
     "RH",
     "RHLD",
     "RHP",
     "RIBB",
-    "RIBBR",
-    "RIBBU",
     "RICK",
     "RIG",
     "RIGL",
     "RILY",
-    "RILYG",
-    "RILYL",
-    "RILYN",
-    "RILYP",
-    "RILYT",
-    "RILYZ",
     "RIME",
     "RIOT",
     "RITR",
@@ -4281,21 +3571,17 @@
     "RMBS",
     "RMCF",
     "RMCO",
-    "RMCOW",
     "RMD",
     "RMIX",
     "RMNI",
     "RMR",
     "RMSG",
-    "RMSGW",
     "RMTI",
     "RNA",
     "RNAC",
     "RNAZ",
     "RNGR",
     "RNGT",
-    "RNGTU",
-    "RNGTW",
     "RNST",
     "RNTX",
     "RNW",
@@ -4322,8 +3608,6 @@
     "RR",
     "RRBI",
     "RREV",
-    "RREVU",
-    "RREVW",
     "RRGB",
     "RRR",
     "RSG",
@@ -4331,26 +3615,19 @@
     "RSSS",
     "RSVR",
     "RTAC",
-    "RTACU",
-    "RTACW",
     "RTB",
     "RTX",
     "RUBI",
     "RUM",
-    "RUMBW",
     "RUN",
     "RUSHA",
     "RUSHB",
     "RVLV",
     "RVMD",
-    "RVMDW",
     "RVSB",
     "RVSN",
-    "RVSNW",
     "RVTY",
     "RWAY",
-    "RWAYI",
-    "RWAYL",
     "RWT",
     "RXO",
     "RXRX",
@@ -4365,13 +3642,9 @@
     "RYZ",
     "RZLT",
     "RZLV",
-    "RZLVW",
     "SAAQ",
-    "SAAQU",
-    "SAAQW",
     "SABR",
     "SABS",
-    "SABSW",
     "SAFE",
     "SAFT",
     "SAFX",
@@ -4380,25 +3653,20 @@
     "SAIA",
     "SAIC",
     "SAIH",
-    "SAIHW",
     "SAIL",
     "SAM",
     "SAMG",
     "SANA",
     "SANG",
     "SANM",
-    "SATA",
     "SATL",
-    "SATLW",
     "SB",
     "SBAC",
     "SBC",
     "SBCF",
-    "SBCWW",
     "SBET",
     "SBFG",
     "SBFM",
-    "SBFMW",
     "SBGI",
     "SBH",
     "SBLK",
@@ -4408,22 +3676,16 @@
     "SBT",
     "SBUX",
     "SCAG",
-    "SCAGW",
     "SCHL",
     "SCHW",
     "SCII",
-    "SCIIR",
-    "SCIIU",
     "SCKT",
     "SCL",
     "SCLX",
-    "SCLXW",
     "SCNI",
     "SCNX",
     "SCOR",
     "SCPQ",
-    "SCPQU",
-    "SCPQW",
     "SCSC",
     "SCTX",
     "SCWO",
@@ -4431,17 +3693,12 @@
     "SCZM",
     "SD",
     "SDA",
-    "SDAWW",
     "SDGR",
     "SDHI",
-    "SDHIR",
-    "SDHIU",
     "SDOT",
     "SDRL",
     "SDST",
-    "SDSTW",
     "SEAT",
-    "SEATW",
     "SEDG",
     "SEED",
     "SEER",
@@ -4486,19 +3743,15 @@
     "SHC",
     "SHEN",
     "SHFS",
-    "SHFSW",
     "SHIM",
     "SHIP",
     "SHLS",
     "SHMD",
-    "SHMDW",
     "SHO",
     "SHOE",
     "SHOO",
     "SHOP",
     "SHOT",
-    "SHOTR",
-    "SHOTU",
     "SHPH",
     "SHW",
     "SI",
@@ -4509,12 +3762,9 @@
     "SIG",
     "SIGA",
     "SIGI",
-    "SIGIP",
     "SILC",
     "SILO",
     "SIMA",
-    "SIMAU",
-    "SIMAW",
     "SIMO",
     "SINT",
     "SION",
@@ -4530,7 +3780,6 @@
     "SKWD",
     "SKY",
     "SKYA",
-    "SKYAW",
     "SKYE",
     "SKYH",
     "SKYQ",
@@ -4543,32 +3792,27 @@
     "SLDB",
     "SLDE",
     "SLDP",
-    "SLDPW",
     "SLE",
     "SLG",
     "SLGB",
     "SLGL",
     "SLM",
-    "SLMBP",
     "SLMT",
     "SLN",
     "SLNG",
     "SLNH",
-    "SLNHP",
     "SLP",
     "SLRC",
     "SLS",
     "SLSN",
     "SLVM",
     "SLXN",
-    "SLXNW",
     "SM",
     "SMA",
     "SMBC",
     "SMBK",
     "SMC",
     "SMCI",
-    "SMCIP",
     "SMHI",
     "SMID",
     "SMMT",
@@ -4582,7 +3826,6 @@
     "SMTK",
     "SMX",
     "SMXT",
-    "SMXWW",
     "SNA",
     "SNAL",
     "SND",
@@ -4606,8 +3849,6 @@
     "SOBR",
     "SOC",
     "SOCA",
-    "SOCAU",
-    "SOCAW",
     "SOFI",
     "SOGP",
     "SOHU",
@@ -4618,11 +3859,8 @@
     "SOPH",
     "SORA",
     "SORN",
-    "SORNU",
-    "SORNW",
     "SOTK",
     "SOUN",
-    "SOUNW",
     "SOWG",
     "SPAI",
     "SPB",
@@ -4630,8 +3868,6 @@
     "SPCE",
     "SPCX",
     "SPEG",
-    "SPEGR",
-    "SPEGU",
     "SPFI",
     "SPG",
     "SPGI",
@@ -4639,8 +3875,6 @@
     "SPHR",
     "SPIR",
     "SPKL",
-    "SPKLU",
-    "SPKLW",
     "SPNT",
     "SPOK",
     "SPPL",
@@ -4653,10 +3887,7 @@
     "SPTX",
     "SPWH",
     "SPWR",
-    "SPWRW",
     "SQFT",
-    "SQFTP",
-    "SQFTW",
     "SR",
     "SRAD",
     "SRBK",
@@ -4669,13 +3900,8 @@
     "SRTS",
     "SRZN",
     "SSAC",
-    "SSACR",
-    "SSACU",
-    "SSACW",
     "SSBI",
     "SSEA",
-    "SSEAR",
-    "SSEAU",
     "SSII",
     "SSM",
     "SSMR",
@@ -4702,19 +3928,13 @@
     "STKS",
     "STLD",
     "STLN",
-    "STLNW",
     "STNE",
     "STNG",
     "STOK",
     "STRA",
-    "STRC",
-    "STRD",
-    "STRF",
-    "STRK",
     "STRL",
     "STRO",
     "STRR",
-    "STRRP",
     "STRT",
     "STRW",
     "STRZ",
@@ -4728,48 +3948,34 @@
     "SUIG",
     "SUJA",
     "SUMA",
-    "SUMAR",
-    "SUMAU",
     "SUNE",
     "SUNS",
     "SUPN",
     "SUPX",
     "SURG",
-    "SVA",
     "SVAQ",
-    "SVAQU",
-    "SVAQW",
     "SVC",
     "SVCC",
-    "SVCCU",
-    "SVCCW",
     "SVCO",
     "SVIV",
-    "SVIVU",
-    "SVIVW",
     "SVRA",
     "SVRE",
-    "SVREW",
     "SVRN",
     "SVV",
     "SW",
     "SWAG",
-    "SWAGW",
     "SWBI",
     "SWIM",
     "SWK",
-    "SWKHL",
     "SWKS",
     "SWMR",
     "SWVL",
-    "SWVLW",
     "SWX",
     "SXC",
     "SXI",
     "SXT",
     "SXTC",
     "SXTP",
-    "SXTPW",
     "SY",
     "SYBT",
     "SYF",
@@ -4780,15 +3986,9 @@
     "SYRE",
     "SYY",
     "SZZL",
-    "SZZLR",
-    "SZZLU",
     "T",
     "TACH",
-    "TACHU",
-    "TACHW",
     "TACO",
-    "TACOU",
-    "TACOW",
     "TACT",
     "TALK",
     "TALO",
@@ -4801,19 +4001,15 @@
     "TASK",
     "TATT",
     "TAVI",
-    "TAVIR",
-    "TAVIU",
     "TAYD",
     "TBBK",
     "TBCH",
-    "TBCVU",
     "TBI",
     "TBLA",
     "TBLD",
     "TBPH",
     "TC",
     "TCBI",
-    "TCBIO",
     "TCBK",
     "TCBS",
     "TCBX",
@@ -4826,8 +4022,6 @@
     "TCRX",
     "TCX",
     "TDAC",
-    "TDACU",
-    "TDACW",
     "TDAY",
     "TDC",
     "TDG",
@@ -4838,8 +4032,6 @@
     "TDUP",
     "TDW",
     "TDWD",
-    "TDWDR",
-    "TDWDU",
     "TDY",
     "TE",
     "TEAD",
@@ -4866,8 +4058,6 @@
     "TH",
     "THCH",
     "THEO",
-    "THEOR",
-    "THEOU",
     "THFF",
     "THH",
     "THRD",
@@ -4890,31 +4080,21 @@
     "TLIH",
     "TLN",
     "TLNC",
-    "TLNCU",
-    "TLNCW",
     "TLPH",
     "TLRY",
     "TLS",
     "TLSA",
     "TLSI",
-    "TLSIW",
     "TLX",
     "TMC",
     "TMCI",
     "TMCR",
-    "TMCWW",
     "TMDX",
     "TMO",
     "TMP",
     "TMS",
-    "TMSWW",
     "TMTS",
-    "TMTSU",
-    "TMTSW",
     "TMUS",
-    "TMUSI",
-    "TMUSL",
-    "TMUSZ",
     "TNC",
     "TNDM",
     "TNET",
@@ -4922,7 +4102,6 @@
     "TNK",
     "TNMG",
     "TNON",
-    "TNONW",
     "TNXP",
     "TNYA",
     "TOI",
@@ -4937,7 +4116,6 @@
     "TPC",
     "TPCS",
     "TPG",
-    "TPGXL",
     "TPL",
     "TPR",
     "TPST",
@@ -4950,8 +4128,6 @@
     "TREO",
     "TRGP",
     "TRGS",
-    "TRGSR",
-    "TRGSU",
     "TRI",
     "TRIB",
     "TRIP",
@@ -4999,16 +4175,9 @@
     "TURB",
     "TUSK",
     "TVA",
-    "TVACU",
-    "TVACW",
     "TVAI",
-    "TVAIR",
-    "TVAIU",
     "TVGN",
-    "TVGNW",
     "TVIV",
-    "TVIVU",
-    "TVIVW",
     "TVRD",
     "TVTX",
     "TW",
@@ -5018,8 +4187,6 @@
     "TWI",
     "TWIN",
     "TWLV",
-    "TWLVR",
-    "TWLVU",
     "TWO",
     "TWST",
     "TXG",
@@ -5042,7 +4209,6 @@
     "UCAR",
     "UCB",
     "UCFI",
-    "UCFIW",
     "UCL",
     "UCTT",
     "UDR",
@@ -5064,7 +4230,6 @@
     "ULTA",
     "UMAC",
     "UMBF",
-    "UMBFO",
     "UMH",
     "UNB",
     "UNCY",
@@ -5095,7 +4260,6 @@
     "USB",
     "USCB",
     "USDE",
-    "USDEW",
     "USEA",
     "USGO",
     "USIO",
@@ -5114,8 +4278,6 @@
     "UVV",
     "UXIN",
     "UYSC",
-    "UYSCR",
-    "UYSCU",
     "UZX",
     "V",
     "VABK",
@@ -5135,7 +4297,6 @@
     "VCYT",
     "VECO",
     "VEEA",
-    "VEEAW",
     "VEEE",
     "VEEV",
     "VEL",
@@ -5148,15 +4309,11 @@
     "VERX",
     "VFF",
     "VFS",
-    "VFSWW",
     "VGAS",
-    "VGASW",
     "VGNT",
     "VGZ",
     "VHC",
     "VHCP",
-    "VHCPU",
-    "VHCPW",
     "VHI",
     "VHUB",
     "VIA",
@@ -5177,13 +4334,8 @@
     "VLGEA",
     "VLO",
     "VLOS",
-    "VLOSU",
-    "VLOSW",
     "VLTO",
     "VLY",
-    "VLYPN",
-    "VLYPO",
-    "VLYPP",
     "VMAR",
     "VMC",
     "VMD",
@@ -5193,8 +4345,6 @@
     "VNDA",
     "VNET",
     "VNME",
-    "VNMEU",
-    "VNMEW",
     "VNOM",
     "VOD",
     "VOGX",
@@ -5217,12 +4367,10 @@
     "VRTS",
     "VRTX",
     "VRXA",
-    "VRXAW",
     "VS",
     "VSA",
     "VSAT",
     "VSEC",
-    "VSECU",
     "VSH",
     "VSME",
     "VSNT",
@@ -5242,7 +4390,6 @@
     "VVOS",
     "VVX",
     "VWAV",
-    "VWAVW",
     "VYGR",
     "VYX",
     "VZ",
@@ -5252,7 +4399,6 @@
     "WAFDP",
     "WAFU",
     "WALD",
-    "WALDW",
     "WASH",
     "WAT",
     "WATR",
@@ -5273,8 +4419,6 @@
     "WELL",
     "WEN",
     "WENN",
-    "WENNU",
-    "WENNW",
     "WERN",
     "WEST",
     "WETH",
@@ -5288,13 +4432,9 @@
     "WGS",
     "WHD",
     "WHF",
-    "WHFCL",
     "WHG",
     "WHK",
     "WHLR",
-    "WHLRD",
-    "WHLRL",
-    "WHLRP",
     "WHWK",
     "WILC",
     "WIMI",
@@ -5307,15 +4447,10 @@
     "WKHS",
     "WKSP",
     "WLCO",
-    "WLCOU",
-    "WLCOW",
     "WLDN",
     "WLDS",
-    "WLDSW",
     "WLFC",
     "WLII",
-    "WLIIU",
-    "WLIIW",
     "WLTH",
     "WLY",
     "WM",
@@ -5338,7 +4473,6 @@
     "WRLD",
     "WS",
     "WSBC",
-    "WSBCO",
     "WSBF",
     "WSBK",
     "WSC",
@@ -5348,23 +4482,17 @@
     "WSM",
     "WST",
     "WSTN",
-    "WSTNR",
-    "WSTNU",
     "WT",
     "WTBA",
     "WTF",
     "WTFC",
-    "WTFCN",
     "WTG",
-    "WTGUR",
-    "WTGUU",
     "WTI",
     "WTTR",
     "WTW",
     "WULF",
     "WVE",
     "WVVI",
-    "WVVIP",
     "WW",
     "WWD",
     "WWW",
@@ -5377,16 +4505,12 @@
     "XBIO",
     "XBIT",
     "XBP",
-    "XBPEW",
     "XCBE",
-    "XCBEU",
-    "XCBEW",
     "XCH",
     "XCUR",
     "XE",
     "XEL",
     "XELB",
-    "XELLL",
     "XENE",
     "XERS",
     "XFOR",
@@ -5394,7 +4518,6 @@
     "XHG",
     "XHLD",
     "XHR",
-    "XIIIU",
     "XLO",
     "XMAX",
     "XMTR",
@@ -5412,15 +4535,9 @@
     "XRAY",
     "XRN",
     "XRPN",
-    "XRPNU",
-    "XRPNW",
     "XRTX",
     "XRX",
-    "XRXDW",
     "XSLL",
-    "XSLLU",
-    "XSLLW",
-    "XTERU",
     "XTIA",
     "XTLB",
     "XWEL",
@@ -5433,20 +4550,15 @@
     "YB",
     "YDDL",
     "YDES",
-    "YDESW",
     "YDKG",
     "YELP",
     "YEXT",
     "YHC",
     "YHGJ",
     "YHNA",
-    "YHNAR",
-    "YHNAU",
     "YI",
     "YIBO",
     "YICC",
-    "YICCU",
-    "YICCW",
     "YJ",
     "YMAT",
     "YMT",
@@ -5472,25 +4584,20 @@
     "ZDAI",
     "ZENA",
     "ZEO",
-    "ZEOWW",
     "ZETA",
     "ZG",
     "ZGN",
     "ZION",
-    "ZIONP",
     "ZIP",
     "ZJK",
     "ZJYL",
     "ZKIN",
     "ZKP",
-    "ZKPU",
-    "ZKPW",
     "ZLAB",
     "ZM",
     "ZNB",
     "ZNTL",
     "ZOOZ",
-    "ZOOZW",
     "ZS",
     "ZSQR",
     "ZSTK",
@@ -5514,31 +4621,10 @@
     "AACI": [
       "nasdaq"
     ],
-    "AACIU": [
-      "nasdaq"
-    ],
-    "AACIW": [
-      "nasdaq"
-    ],
     "AACO": [
       "nasdaq"
     ],
-    "AACOU": [
-      "nasdaq"
-    ],
-    "AACOW": [
-      "nasdaq"
-    ],
     "AACP": [
-      "nasdaq"
-    ],
-    "AACPR": [
-      "nasdaq"
-    ],
-    "AACPU": [
-      "nasdaq"
-    ],
-    "AACPW": [
       "nasdaq"
     ],
     "AADX": [
@@ -5598,9 +4684,6 @@
     "ABLV": [
       "nasdaq"
     ],
-    "ABLVW": [
-      "nasdaq"
-    ],
     "ABM": [
       "russell2000"
     ],
@@ -5647,12 +4730,6 @@
     "ACAA": [
       "nasdaq"
     ],
-    "ACAAU": [
-      "nasdaq"
-    ],
-    "ACAAW": [
-      "nasdaq"
-    ],
     "ACAD": [
       "nasdaq",
       "russell2000"
@@ -5682,20 +4759,8 @@
     "ACGC": [
       "nasdaq"
     ],
-    "ACGCU": [
-      "nasdaq"
-    ],
-    "ACGCW": [
-      "nasdaq"
-    ],
     "ACGL": [
       "sp500",
-      "nasdaq"
-    ],
-    "ACGLN": [
-      "nasdaq"
-    ],
-    "ACGLO": [
       "nasdaq"
     ],
     "ACH": [
@@ -5747,9 +4812,6 @@
     "ACON": [
       "nasdaq"
     ],
-    "ACONW": [
-      "nasdaq"
-    ],
     "ACR": [
       "russell2000"
     ],
@@ -5786,45 +4848,12 @@
     "ADAC": [
       "nasdaq"
     ],
-    "ADACU": [
-      "nasdaq"
-    ],
-    "ADACW": [
-      "nasdaq"
-    ],
     "ADAG": [
       "nasdaq"
     ],
     "ADAM": [
       "nasdaq",
       "russell2000"
-    ],
-    "ADAMG": [
-      "nasdaq"
-    ],
-    "ADAMH": [
-      "nasdaq"
-    ],
-    "ADAMI": [
-      "nasdaq"
-    ],
-    "ADAMK": [
-      "nasdaq"
-    ],
-    "ADAML": [
-      "nasdaq"
-    ],
-    "ADAMM": [
-      "nasdaq"
-    ],
-    "ADAMN": [
-      "nasdaq"
-    ],
-    "ADAMO": [
-      "nasdaq"
-    ],
-    "ADAMZ": [
-      "nasdaq"
     ],
     "ADBE": [
       "sp500",
@@ -5868,9 +4897,6 @@
     "ADSE": [
       "nasdaq"
     ],
-    "ADSEW": [
-      "nasdaq"
-    ],
     "ADSK": [
       "sp500",
       "nasdaq"
@@ -5897,12 +4923,6 @@
       "nasdaq"
     ],
     "AEAQ": [
-      "nasdaq"
-    ],
-    "AEAQU": [
-      "nasdaq"
-    ],
-    "AEAQW": [
       "nasdaq"
     ],
     "AEBI": [
@@ -5934,9 +4954,6 @@
     "AENT": [
       "nasdaq"
     ],
-    "AENTW": [
-      "nasdaq"
-    ],
     "AEO": [
       "russell2000"
     ],
@@ -5947,9 +4964,6 @@
     "AERT": [
       "nasdaq"
     ],
-    "AERTW": [
-      "nasdaq"
-    ],
     "AES": [
       "sp500"
     ],
@@ -5957,15 +4971,6 @@
       "russell2000"
     ],
     "AESP": [
-      "nasdaq"
-    ],
-    "AESPR": [
-      "nasdaq"
-    ],
-    "AESPU": [
-      "nasdaq"
-    ],
-    "AESPW": [
       "nasdaq"
     ],
     "AEVA": [
@@ -5981,21 +4986,12 @@
     "AFJK": [
       "nasdaq"
     ],
-    "AFJKR": [
-      "nasdaq"
-    ],
-    "AFJKU": [
-      "nasdaq"
-    ],
     "AFL": [
       "sp500"
     ],
     "AFRI": [
       "nasdaq",
       "russell2000"
-    ],
-    "AFRIW": [
-      "nasdaq"
     ],
     "AFRM": [
       "nasdaq"
@@ -6027,24 +5023,6 @@
       "nasdaq"
     ],
     "AGNC": [
-      "nasdaq"
-    ],
-    "AGNCL": [
-      "nasdaq"
-    ],
-    "AGNCM": [
-      "nasdaq"
-    ],
-    "AGNCN": [
-      "nasdaq"
-    ],
-    "AGNCO": [
-      "nasdaq"
-    ],
-    "AGNCP": [
-      "nasdaq"
-    ],
-    "AGNCZ": [
       "nasdaq"
     ],
     "AGNT": [
@@ -6113,16 +5091,10 @@
     "AIIO": [
       "nasdaq"
     ],
-    "AIIOW": [
-      "nasdaq"
-    ],
     "AIIR": [
       "nasdaq"
     ],
     "AIMD": [
-      "nasdaq"
-    ],
-    "AIMDW": [
       "nasdaq"
     ],
     "AIN": [
@@ -6152,9 +5124,6 @@
       "nasdaq",
       "russell2000"
     ],
-    "AIRJW": [
-      "nasdaq"
-    ],
     "AIRO": [
       "nasdaq",
       "russell2000"
@@ -6166,13 +5135,7 @@
     "AIRT": [
       "nasdaq"
     ],
-    "AIRTP": [
-      "nasdaq"
-    ],
     "AISP": [
-      "nasdaq"
-    ],
-    "AISPW": [
       "nasdaq"
     ],
     "AIXC": [
@@ -6224,12 +5187,6 @@
     "ALDF": [
       "nasdaq"
     ],
-    "ALDFU": [
-      "nasdaq"
-    ],
-    "ALDFW": [
-      "nasdaq"
-    ],
     "ALDX": [
       "nasdaq"
     ],
@@ -6238,12 +5195,6 @@
       "russell2000"
     ],
     "ALF": [
-      "nasdaq"
-    ],
-    "ALFUU": [
-      "nasdaq"
-    ],
-    "ALFUW": [
       "nasdaq"
     ],
     "ALG": [
@@ -6271,12 +5222,6 @@
       "russell2000"
     ],
     "ALIS": [
-      "nasdaq"
-    ],
-    "ALISR": [
-      "nasdaq"
-    ],
-    "ALISU": [
       "nasdaq"
     ],
     "ALKS": [
@@ -6331,12 +5276,6 @@
     "ALOV": [
       "nasdaq"
     ],
-    "ALOVU": [
-      "nasdaq"
-    ],
-    "ALOVW": [
-      "nasdaq"
-    ],
     "ALOY": [
       "nasdaq",
       "russell2000"
@@ -6348,15 +5287,6 @@
       "nasdaq"
     ],
     "ALPX": [
-      "nasdaq"
-    ],
-    "ALPXR": [
-      "nasdaq"
-    ],
-    "ALPXU": [
-      "nasdaq"
-    ],
-    "ALPXW": [
       "nasdaq"
     ],
     "ALRM": [
@@ -6385,9 +5315,6 @@
     "ALVO": [
       "nasdaq"
     ],
-    "ALVOW": [
-      "nasdaq"
-    ],
     "ALX": [
       "russell2000"
     ],
@@ -6396,9 +5323,6 @@
       "russell2000"
     ],
     "ALZN": [
-      "nasdaq"
-    ],
-    "AMACU": [
       "nasdaq"
     ],
     "AMAL": [
@@ -6465,16 +5389,10 @@
     "AMOD": [
       "nasdaq"
     ],
-    "AMODW": [
-      "nasdaq"
-    ],
     "AMP": [
       "sp500"
     ],
     "AMPG": [
-      "nasdaq"
-    ],
-    "AMPGZ": [
       "nasdaq"
     ],
     "AMPH": [
@@ -6549,9 +5467,6 @@
     "ANGH": [
       "nasdaq"
     ],
-    "ANGHW": [
-      "nasdaq"
-    ],
     "ANGI": [
       "nasdaq",
       "russell2000"
@@ -6575,9 +5490,6 @@
       "nasdaq"
     ],
     "ANNA": [
-      "nasdaq"
-    ],
-    "ANNAW": [
       "nasdaq"
     ],
     "ANNX": [
@@ -6629,12 +5541,6 @@
     "APAC": [
       "nasdaq"
     ],
-    "APACR": [
-      "nasdaq"
-    ],
-    "APACU": [
-      "nasdaq"
-    ],
     "APAM": [
       "russell2000"
     ],
@@ -6668,16 +5574,7 @@
     "APLM": [
       "nasdaq"
     ],
-    "APLMW": [
-      "nasdaq"
-    ],
     "APMC": [
-      "nasdaq"
-    ],
-    "APMCR": [
-      "nasdaq"
-    ],
-    "APMCU": [
       "nasdaq"
     ],
     "APMD": [
@@ -6715,9 +5612,6 @@
     "APUR": [
       "nasdaq"
     ],
-    "APURR": [
-      "nasdaq"
-    ],
     "APVO": [
       "nasdaq"
     ],
@@ -6725,12 +5619,6 @@
       "nasdaq"
     ],
     "APXT": [
-      "nasdaq"
-    ],
-    "APXTU": [
-      "nasdaq"
-    ],
-    "APXTW": [
       "nasdaq"
     ],
     "APYX": [
@@ -6758,9 +5646,6 @@
     "ARBE": [
       "nasdaq"
     ],
-    "ARBEW": [
-      "nasdaq"
-    ],
     "ARBK": [
       "nasdaq"
     ],
@@ -6774,22 +5659,7 @@
     "ARCI": [
       "nasdaq"
     ],
-    "ARCIU": [
-      "nasdaq"
-    ],
-    "ARCIW": [
-      "nasdaq"
-    ],
     "ARCL": [
-      "nasdaq"
-    ],
-    "ARCLR": [
-      "nasdaq"
-    ],
-    "ARCLU": [
-      "nasdaq"
-    ],
-    "ARCLW": [
       "nasdaq"
     ],
     "ARCT": [
@@ -6833,9 +5703,6 @@
     "ARLO": [
       "russell2000"
     ],
-    "ARLP": [
-      "nasdaq"
-    ],
     "ARM": [
       "nasdaq"
     ],
@@ -6855,9 +5722,6 @@
     "ARQQ": [
       "nasdaq"
     ],
-    "ARQQW": [
-      "nasdaq"
-    ],
     "ARQT": [
       "nasdaq",
       "russell2000"
@@ -6870,12 +5734,6 @@
       "russell2000"
     ],
     "ARTC": [
-      "nasdaq"
-    ],
-    "ARTCU": [
-      "nasdaq"
-    ],
-    "ARTCW": [
       "nasdaq"
     ],
     "ARTL": [
@@ -6913,9 +5771,6 @@
     "ASBP": [
       "nasdaq"
     ],
-    "ASBPW": [
-      "nasdaq"
-    ],
     "ASC": [
       "russell2000"
     ],
@@ -6949,12 +5804,6 @@
     "ASPC": [
       "nasdaq"
     ],
-    "ASPCR": [
-      "nasdaq"
-    ],
-    "ASPCU": [
-      "nasdaq"
-    ],
     "ASPI": [
       "nasdaq",
       "russell2000"
@@ -6963,12 +5812,6 @@
       "russell2000"
     ],
     "ASPS": [
-      "nasdaq"
-    ],
-    "ASPSW": [
-      "nasdaq"
-    ],
-    "ASPSZ": [
       "nasdaq"
     ],
     "ASRV": [
@@ -6993,9 +5836,6 @@
       "nasdaq"
     ],
     "ASTL": [
-      "nasdaq"
-    ],
-    "ASTLW": [
       "nasdaq"
     ],
     "ASTS": [
@@ -7045,27 +5885,12 @@
     "ATII": [
       "nasdaq"
     ],
-    "ATIIU": [
-      "nasdaq"
-    ],
-    "ATIIW": [
-      "nasdaq"
-    ],
     "ATKR": [
       "russell2000"
     ],
     "ATLC": [
       "nasdaq",
       "russell2000"
-    ],
-    "ATLCL": [
-      "nasdaq"
-    ],
-    "ATLCP": [
-      "nasdaq"
-    ],
-    "ATLCZ": [
-      "nasdaq"
     ],
     "ATLO": [
       "nasdaq",
@@ -7144,9 +5969,6 @@
       "russell2000"
     ],
     "AURE": [
-      "nasdaq"
-    ],
-    "AUROW": [
       "nasdaq"
     ],
     "AUTL": [
@@ -7252,12 +6074,6 @@
     "AXIN": [
       "nasdaq"
     ],
-    "AXINR": [
-      "nasdaq"
-    ],
-    "AXINU": [
-      "nasdaq"
-    ],
     "AXON": [
       "sp500",
       "nasdaq"
@@ -7306,16 +6122,7 @@
     "BACC": [
       "nasdaq"
     ],
-    "BACCR": [
-      "nasdaq"
-    ],
-    "BACCU": [
-      "nasdaq"
-    ],
     "BAER": [
-      "nasdaq"
-    ],
-    "BAERW": [
       "nasdaq"
     ],
     "BAFN": [
@@ -7337,9 +6144,6 @@
     "BANF": [
       "nasdaq",
       "russell2000"
-    ],
-    "BANFP": [
-      "nasdaq"
     ],
     "BANL": [
       "nasdaq"
@@ -7371,20 +6175,11 @@
     "BBBY": [
       "russell2000"
     ],
-    "BBBYW": [
-      "nasdaq"
-    ],
     "BBCP": [
       "nasdaq",
       "russell2000"
     ],
     "BBCQ": [
-      "nasdaq"
-    ],
-    "BBCQU": [
-      "nasdaq"
-    ],
-    "BBCQW": [
       "nasdaq"
     ],
     "BBGI": [
@@ -7394,9 +6189,6 @@
       "nasdaq"
     ],
     "BBLG": [
-      "nasdaq"
-    ],
-    "BBLGW": [
       "nasdaq"
     ],
     "BBNX": [
@@ -7432,12 +6224,6 @@
     "BCAR": [
       "nasdaq"
     ],
-    "BCARU": [
-      "nasdaq"
-    ],
-    "BCARW": [
-      "nasdaq"
-    ],
     "BCAX": [
       "nasdaq",
       "russell2000"
@@ -7452,19 +6238,10 @@
     "BCCQ": [
       "nasdaq"
     ],
-    "BCCQU": [
-      "nasdaq"
-    ],
-    "BCCQW": [
-      "nasdaq"
-    ],
     "BCDA": [
       "nasdaq"
     ],
     "BCG": [
-      "nasdaq"
-    ],
-    "BCGWW": [
       "nasdaq"
     ],
     "BCIC": [
@@ -7488,12 +6265,6 @@
     "BCTX": [
       "nasdaq"
     ],
-    "BCTXL": [
-      "nasdaq"
-    ],
-    "BCTXZ": [
-      "nasdaq"
-    ],
     "BCYC": [
       "nasdaq"
     ],
@@ -7503,16 +6274,7 @@
     "BDCI": [
       "nasdaq"
     ],
-    "BDCIU": [
-      "nasdaq"
-    ],
-    "BDCIW": [
-      "nasdaq"
-    ],
     "BDMD": [
-      "nasdaq"
-    ],
-    "BDMDW": [
       "nasdaq"
     ],
     "BDN": [
@@ -7534,20 +6296,11 @@
     "BEAG": [
       "nasdaq"
     ],
-    "BEAGR": [
-      "nasdaq"
-    ],
-    "BEAGU": [
-      "nasdaq"
-    ],
     "BEAM": [
       "nasdaq",
       "russell2000"
     ],
     "BEAT": [
-      "nasdaq"
-    ],
-    "BEATW": [
       "nasdaq"
     ],
     "BEEM": [
@@ -7570,18 +6323,12 @@
     "BENF": [
       "nasdaq"
     ],
-    "BENFW": [
-      "nasdaq"
-    ],
     "BETA": [
       "russell2000"
     ],
     "BETR": [
       "nasdaq",
       "russell2000"
-    ],
-    "BETRW": [
-      "nasdaq"
     ],
     "BF-B": [
       "sp500"
@@ -7599,13 +6346,7 @@
     "BFRG": [
       "nasdaq"
     ],
-    "BFRGW": [
-      "nasdaq"
-    ],
     "BFRI": [
-      "nasdaq"
-    ],
-    "BFRIW": [
       "nasdaq"
     ],
     "BFS": [
@@ -7634,9 +6375,6 @@
     "BGLC": [
       "nasdaq"
     ],
-    "BGLWW": [
-      "nasdaq"
-    ],
     "BGM": [
       "nasdaq"
     ],
@@ -7655,12 +6393,6 @@
     "BHAV": [
       "nasdaq"
     ],
-    "BHAVR": [
-      "nasdaq"
-    ],
-    "BHAVU": [
-      "nasdaq"
-    ],
     "BHB": [
       "russell2000"
     ],
@@ -7671,18 +6403,6 @@
       "nasdaq"
     ],
     "BHFAL": [
-      "nasdaq"
-    ],
-    "BHFAM": [
-      "nasdaq"
-    ],
-    "BHFAN": [
-      "nasdaq"
-    ],
-    "BHFAO": [
-      "nasdaq"
-    ],
-    "BHFAP": [
       "nasdaq"
     ],
     "BHR": [
@@ -7701,19 +6421,10 @@
     "BIAF": [
       "nasdaq"
     ],
-    "BIAFW": [
-      "nasdaq"
-    ],
     "BID": [
       "nasdaq"
     ],
     "BIDU": [
-      "nasdaq"
-    ],
-    "BIDWR": [
-      "nasdaq"
-    ],
-    "BIDWU": [
       "nasdaq"
     ],
     "BIIB": [
@@ -7730,9 +6441,6 @@
     "BIOT": [
       "nasdaq"
     ],
-    "BIOTW": [
-      "nasdaq"
-    ],
     "BIOX": [
       "nasdaq"
     ],
@@ -7745,16 +6453,7 @@
     "BIVI": [
       "nasdaq"
     ],
-    "BIVIW": [
-      "nasdaq"
-    ],
     "BIXI": [
-      "nasdaq"
-    ],
-    "BIXIU": [
-      "nasdaq"
-    ],
-    "BIXIW": [
       "nasdaq"
     ],
     "BIYA": [
@@ -7777,12 +6476,6 @@
       "russell2000"
     ],
     "BKHA": [
-      "nasdaq"
-    ],
-    "BKHAR": [
-      "nasdaq"
-    ],
-    "BKHAU": [
       "nasdaq"
     ],
     "BKKT": [
@@ -7861,12 +6554,6 @@
     "BLRK": [
       "nasdaq"
     ],
-    "BLRKU": [
-      "nasdaq"
-    ],
-    "BLRKW": [
-      "nasdaq"
-    ],
     "BLRX": [
       "nasdaq"
     ],
@@ -7879,12 +6566,6 @@
     "BLUW": [
       "nasdaq"
     ],
-    "BLUWU": [
-      "nasdaq"
-    ],
-    "BLUWW": [
-      "nasdaq"
-    ],
     "BLX": [
       "russell2000"
     ],
@@ -7893,12 +6574,6 @@
       "russell2000"
     ],
     "BLZR": [
-      "nasdaq"
-    ],
-    "BLZRU": [
-      "nasdaq"
-    ],
-    "BLZRW": [
       "nasdaq"
     ],
     "BMBL": [
@@ -7940,16 +6615,7 @@
       "nasdaq",
       "russell2000"
     ],
-    "BNAIW": [
-      "nasdaq"
-    ],
     "BNC": [
-      "nasdaq"
-    ],
-    "BNCWW": [
-      "nasdaq"
-    ],
-    "BNCWZ": [
       "nasdaq"
     ],
     "BNED": [
@@ -8034,33 +6700,12 @@
     "BPAC": [
       "nasdaq"
     ],
-    "BPACR": [
-      "nasdaq"
-    ],
-    "BPACU": [
-      "nasdaq"
-    ],
     "BPOP": [
-      "nasdaq"
-    ],
-    "BPOPM": [
       "nasdaq"
     ],
     "BPRN": [
       "nasdaq",
       "russell2000"
-    ],
-    "BPYPM": [
-      "nasdaq"
-    ],
-    "BPYPN": [
-      "nasdaq"
-    ],
-    "BPYPO": [
-      "nasdaq"
-    ],
-    "BPYPP": [
-      "nasdaq"
     ],
     "BR": [
       "sp500"
@@ -8090,9 +6735,6 @@
     "BREZ": [
       "nasdaq"
     ],
-    "BREZR": [
-      "nasdaq"
-    ],
     "BRFH": [
       "nasdaq"
     ],
@@ -8105,22 +6747,10 @@
     "BRKH": [
       "nasdaq"
     ],
-    "BRKHU": [
-      "nasdaq"
-    ],
-    "BRKHW": [
-      "nasdaq"
-    ],
     "BRKR": [
       "nasdaq"
     ],
-    "BRKRP": [
-      "nasdaq"
-    ],
     "BRLS": [
-      "nasdaq"
-    ],
-    "BRLSW": [
       "nasdaq"
     ],
     "BRLT": [
@@ -8138,9 +6768,6 @@
     "BRR": [
       "nasdaq"
     ],
-    "BRRWW": [
-      "nasdaq"
-    ],
     "BRSL": [
       "russell2000"
     ],
@@ -8150,16 +6777,10 @@
     "BRT": [
       "russell2000"
     ],
-    "BRTMU": [
-      "nasdaq"
-    ],
     "BRTX": [
       "nasdaq"
     ],
     "BRUN": [
-      "nasdaq"
-    ],
-    "BRUNW": [
       "nasdaq"
     ],
     "BRVE": [
@@ -8170,12 +6791,6 @@
       "russell2000"
     ],
     "BSAA": [
-      "nasdaq"
-    ],
-    "BSAAR": [
-      "nasdaq"
-    ],
-    "BSAAU": [
       "nasdaq"
     ],
     "BSBK": [
@@ -8213,9 +6828,6 @@
     "BTBD": [
       "nasdaq"
     ],
-    "BTBDW": [
-      "nasdaq"
-    ],
     "BTBT": [
       "nasdaq",
       "russell2000"
@@ -8249,9 +6861,6 @@
       "nasdaq",
       "russell2000"
     ],
-    "BTSGU": [
-      "nasdaq"
-    ],
     "BTTC": [
       "nasdaq"
     ],
@@ -8262,18 +6871,12 @@
       "nasdaq",
       "russell2000"
     ],
-    "BULLW": [
-      "nasdaq"
-    ],
     "BUR": [
       "russell2000"
     ],
     "BUSE": [
       "nasdaq",
       "russell2000"
-    ],
-    "BUSEP": [
-      "nasdaq"
     ],
     "BUUU": [
       "nasdaq"
@@ -8301,9 +6904,6 @@
     "BWB": [
       "nasdaq",
       "russell2000"
-    ],
-    "BWBBP": [
-      "nasdaq"
     ],
     "BWEN": [
       "nasdaq"
@@ -8360,13 +6960,7 @@
       "nasdaq",
       "russell2000"
     ],
-    "BZAIW": [
-      "nasdaq"
-    ],
     "BZFD": [
-      "nasdaq"
-    ],
-    "BZFDW": [
       "nasdaq"
     ],
     "BZH": [
@@ -8417,12 +7011,6 @@
     "CAII": [
       "nasdaq"
     ],
-    "CAIIU": [
-      "nasdaq"
-    ],
-    "CAIIW": [
-      "nasdaq"
-    ],
     "CAKE": [
       "nasdaq",
       "russell2000"
@@ -8456,12 +7044,6 @@
     "CAPN": [
       "nasdaq"
     ],
-    "CAPNR": [
-      "nasdaq"
-    ],
-    "CAPNU": [
-      "nasdaq"
-    ],
     "CAPR": [
       "nasdaq",
       "russell2000"
@@ -8470,12 +7052,6 @@
       "nasdaq"
     ],
     "CAQ": [
-      "nasdaq"
-    ],
-    "CAQUU": [
-      "nasdaq"
-    ],
-    "CAQUW": [
       "nasdaq"
     ],
     "CAR": [
@@ -8519,9 +7095,6 @@
     ],
     "CAT": [
       "sp500"
-    ],
-    "CATLU": [
-      "nasdaq"
     ],
     "CATX": [
       "russell2000"
@@ -8605,12 +7178,6 @@
     "CCAQ": [
       "nasdaq"
     ],
-    "CCAQU": [
-      "nasdaq"
-    ],
-    "CCAQW": [
-      "nasdaq"
-    ],
     "CCB": [
       "nasdaq",
       "russell2000"
@@ -8629,12 +7196,6 @@
     "CCCT": [
       "nasdaq"
     ],
-    "CCCTU": [
-      "nasdaq"
-    ],
-    "CCCTW": [
-      "nasdaq"
-    ],
     "CCD": [
       "nasdaq"
     ],
@@ -8647,9 +7208,6 @@
     "CCG": [
       "nasdaq"
     ],
-    "CCGWW": [
-      "nasdaq"
-    ],
     "CCHH": [
       "nasdaq"
     ],
@@ -8657,12 +7215,6 @@
       "sp500"
     ],
     "CCII": [
-      "nasdaq"
-    ],
-    "CCIIU": [
-      "nasdaq"
-    ],
-    "CCIIW": [
       "nasdaq"
     ],
     "CCL": [
@@ -8674,9 +7226,6 @@
     "CCNE": [
       "nasdaq",
       "russell2000"
-    ],
-    "CCNEP": [
-      "nasdaq"
     ],
     "CCO": [
       "russell2000"
@@ -8698,20 +7247,11 @@
     "CCXI": [
       "nasdaq"
     ],
-    "CCXIU": [
-      "nasdaq"
-    ],
-    "CCXIW": [
-      "nasdaq"
-    ],
     "CD": [
       "nasdaq",
       "russell2000"
     ],
     "CDIO": [
-      "nasdaq"
-    ],
-    "CDIOW": [
       "nasdaq"
     ],
     "CDLX": [
@@ -8738,16 +7278,10 @@
     "CDRO": [
       "nasdaq"
     ],
-    "CDROW": [
-      "nasdaq"
-    ],
     "CDT": [
       "nasdaq"
     ],
     "CDTG": [
-      "nasdaq"
-    ],
-    "CDTTW": [
       "nasdaq"
     ],
     "CDW": [
@@ -8855,9 +7389,6 @@
     "CG": [
       "nasdaq"
     ],
-    "CGABL": [
-      "nasdaq"
-    ],
     "CGBD": [
       "nasdaq"
     ],
@@ -8865,12 +7396,6 @@
       "nasdaq"
     ],
     "CGCF": [
-      "nasdaq"
-    ],
-    "CGCFU": [
-      "nasdaq"
-    ],
-    "CGCFW": [
       "nasdaq"
     ],
     "CGEM": [
@@ -8908,12 +7433,6 @@
     "CHAR": [
       "nasdaq"
     ],
-    "CHARR": [
-      "nasdaq"
-    ],
-    "CHARU": [
-      "nasdaq"
-    ],
     "CHCI": [
       "nasdaq",
       "russell2000"
@@ -8932,12 +7451,6 @@
       "nasdaq"
     ],
     "CHEC": [
-      "nasdaq"
-    ],
-    "CHECU": [
-      "nasdaq"
-    ],
-    "CHECW": [
       "nasdaq"
     ],
     "CHEF": [
@@ -8963,12 +7476,6 @@
     "CHPG": [
       "nasdaq"
     ],
-    "CHPGR": [
-      "nasdaq"
-    ],
-    "CHPGU": [
-      "nasdaq"
-    ],
     "CHPT": [
       "russell2000"
     ],
@@ -8989,29 +7496,11 @@
       "sp500",
       "nasdaq"
     ],
-    "CHSCL": [
-      "nasdaq"
-    ],
-    "CHSCM": [
-      "nasdaq"
-    ],
-    "CHSCN": [
-      "nasdaq"
-    ],
-    "CHSCO": [
-      "nasdaq"
-    ],
-    "CHSCP": [
-      "nasdaq"
-    ],
     "CHSN": [
       "nasdaq"
     ],
     "CHTR": [
       "sp500",
-      "nasdaq"
-    ],
-    "CHTRP": [
       "nasdaq"
     ],
     "CHW": [
@@ -9053,9 +7542,6 @@
       "nasdaq"
     ],
     "CING": [
-      "nasdaq"
-    ],
-    "CINGW": [
       "nasdaq"
     ],
     "CIRC": [
@@ -9152,9 +7638,6 @@
       "nasdaq",
       "russell2000"
     ],
-    "CLSKW": [
-      "nasdaq"
-    ],
     "CLST": [
       "nasdaq"
     ],
@@ -9207,12 +7690,6 @@
     "CMII": [
       "nasdaq"
     ],
-    "CMIIU": [
-      "nasdaq"
-    ],
-    "CMIIW": [
-      "nasdaq"
-    ],
     "CMMB": [
       "nasdaq"
     ],
@@ -9262,9 +7739,6 @@
     "CNCK": [
       "nasdaq"
     ],
-    "CNCKW": [
-      "nasdaq"
-    ],
     "CNDT": [
       "nasdaq",
       "russell2000"
@@ -9293,9 +7767,6 @@
     "CNOB": [
       "nasdaq",
       "russell2000"
-    ],
-    "CNOBP": [
-      "nasdaq"
     ],
     "CNP": [
       "sp500"
@@ -9351,9 +7822,6 @@
     "COCH": [
       "nasdaq"
     ],
-    "COCHW": [
-      "nasdaq"
-    ],
     "COCO": [
       "nasdaq",
       "russell2000"
@@ -9398,12 +7866,6 @@
     "COLA": [
       "nasdaq"
     ],
-    "COLAR": [
-      "nasdaq"
-    ],
-    "COLAU": [
-      "nasdaq"
-    ],
     "COLB": [
       "nasdaq"
     ],
@@ -9427,9 +7889,6 @@
     "COOT": [
       "nasdaq"
     ],
-    "COOTW": [
-      "nasdaq"
-    ],
     "COP": [
       "sp500"
     ],
@@ -9442,12 +7901,6 @@
     "CORZ": [
       "nasdaq",
       "russell2000"
-    ],
-    "CORZW": [
-      "nasdaq"
-    ],
-    "CORZZ": [
-      "nasdaq"
     ],
     "COSM": [
       "nasdaq"
@@ -9518,15 +7971,6 @@
     "CRAC": [
       "nasdaq"
     ],
-    "CRACR": [
-      "nasdaq"
-    ],
-    "CRACU": [
-      "nasdaq"
-    ],
-    "CRACW": [
-      "nasdaq"
-    ],
     "CRAI": [
       "nasdaq",
       "russell2000"
@@ -9534,19 +7978,7 @@
     "CRAN": [
       "nasdaq"
     ],
-    "CRANR": [
-      "nasdaq"
-    ],
-    "CRANU": [
-      "nasdaq"
-    ],
     "CRAQ": [
-      "nasdaq"
-    ],
-    "CRAQR": [
-      "nasdaq"
-    ],
-    "CRAQU": [
       "nasdaq"
     ],
     "CRBP": [
@@ -9588,9 +8020,6 @@
     "CRGO": [
       "nasdaq"
     ],
-    "CRGOW": [
-      "nasdaq"
-    ],
     "CRGY": [
       "russell2000"
     ],
@@ -9619,9 +8048,6 @@
     "CRML": [
       "nasdaq",
       "russell2000"
-    ],
-    "CRMLW": [
-      "nasdaq"
     ],
     "CRMT": [
       "nasdaq"
@@ -9695,9 +8121,6 @@
     "CSHR": [
       "nasdaq"
     ],
-    "CSHRW": [
-      "nasdaq"
-    ],
     "CSIQ": [
       "nasdaq",
       "russell2000"
@@ -9738,12 +8161,6 @@
       "nasdaq"
     ],
     "CTAA": [
-      "nasdaq"
-    ],
-    "CTAAR": [
-      "nasdaq"
-    ],
-    "CTAAU": [
       "nasdaq"
     ],
     "CTAS": [
@@ -9821,12 +8238,6 @@
     ],
     "CUBI": [
       "russell2000"
-    ],
-    "CUBWU": [
-      "nasdaq"
-    ],
-    "CUBWW": [
-      "nasdaq"
     ],
     "CUE": [
       "nasdaq"
@@ -9934,20 +8345,11 @@
     "CXAI": [
       "nasdaq"
     ],
-    "CXAIW": [
-      "nasdaq"
-    ],
     "CXDO": [
       "nasdaq",
       "russell2000"
     ],
     "CXII": [
-      "nasdaq"
-    ],
-    "CXIIU": [
-      "nasdaq"
-    ],
-    "CXIIW": [
       "nasdaq"
     ],
     "CXM": [
@@ -9966,9 +8368,6 @@
       "nasdaq"
     ],
     "CYCU": [
-      "nasdaq"
-    ],
-    "CYCUW": [
       "nasdaq"
     ],
     "CYH": [
@@ -10009,16 +8408,7 @@
     "DAAQ": [
       "nasdaq"
     ],
-    "DAAQU": [
-      "nasdaq"
-    ],
-    "DAAQW": [
-      "nasdaq"
-    ],
     "DAIC": [
-      "nasdaq"
-    ],
-    "DAICW": [
       "nasdaq"
     ],
     "DAIO": [
@@ -10045,16 +8435,7 @@
       "nasdaq",
       "russell2000"
     ],
-    "DAVEW": [
-      "nasdaq"
-    ],
     "DBCA": [
-      "nasdaq"
-    ],
-    "DBCAU": [
-      "nasdaq"
-    ],
-    "DBCAW": [
       "nasdaq"
     ],
     "DBD": [
@@ -10146,9 +8527,6 @@
     "DFDV": [
       "nasdaq"
     ],
-    "DFDVW": [
-      "nasdaq"
-    ],
     "DFH": [
       "russell2000"
     ],
@@ -10158,19 +8536,10 @@
     "DFLI": [
       "nasdaq"
     ],
-    "DFLIW": [
-      "nasdaq"
-    ],
     "DFNS": [
       "nasdaq"
     ],
-    "DFNSW": [
-      "nasdaq"
-    ],
     "DFSC": [
-      "nasdaq"
-    ],
-    "DFSCW": [
       "nasdaq"
     ],
     "DFTX": [
@@ -10207,12 +8576,6 @@
       "nasdaq",
       "russell2000"
     ],
-    "DHCNI": [
-      "nasdaq"
-    ],
-    "DHCNL": [
-      "nasdaq"
-    ],
     "DHI": [
       "sp500"
     ],
@@ -10243,9 +8606,6 @@
     "DJT": [
       "nasdaq",
       "russell2000"
-    ],
-    "DJTWW": [
-      "nasdaq"
     ],
     "DK": [
       "russell2000"
@@ -10285,12 +8645,6 @@
     "DMAA": [
       "nasdaq"
     ],
-    "DMAAR": [
-      "nasdaq"
-    ],
-    "DMAAU": [
-      "nasdaq"
-    ],
     "DMAC": [
       "nasdaq",
       "russell2000"
@@ -10299,15 +8653,6 @@
       "russell2000"
     ],
     "DMII": [
-      "nasdaq"
-    ],
-    "DMIIR": [
-      "nasdaq"
-    ],
-    "DMIIU": [
-      "nasdaq"
-    ],
-    "DMLP": [
       "nasdaq"
     ],
     "DMRA": [
@@ -10326,12 +8671,6 @@
       "russell2000"
     ],
     "DNMX": [
-      "nasdaq"
-    ],
-    "DNMXU": [
-      "nasdaq"
-    ],
-    "DNMXW": [
       "nasdaq"
     ],
     "DNOW": [
@@ -10402,12 +8741,6 @@
     "DRDB": [
       "nasdaq"
     ],
-    "DRDBU": [
-      "nasdaq"
-    ],
-    "DRDBW": [
-      "nasdaq"
-    ],
     "DRH": [
       "nasdaq",
       "russell2000"
@@ -10427,9 +8760,6 @@
     "DRTS": [
       "nasdaq"
     ],
-    "DRTSW": [
-      "nasdaq"
-    ],
     "DRUG": [
       "nasdaq",
       "russell2000"
@@ -10439,12 +8769,6 @@
       "russell2000"
     ],
     "DSAC": [
-      "nasdaq"
-    ],
-    "DSACU": [
-      "nasdaq"
-    ],
-    "DSACW": [
       "nasdaq"
     ],
     "DSC": [
@@ -10471,9 +8795,6 @@
     "DSY": [
       "nasdaq"
     ],
-    "DSYWW": [
-      "nasdaq"
-    ],
     "DTCX": [
       "nasdaq"
     ],
@@ -10490,12 +8811,6 @@
     "DTSQ": [
       "nasdaq"
     ],
-    "DTSQR": [
-      "nasdaq"
-    ],
-    "DTSQU": [
-      "nasdaq"
-    ],
     "DTSS": [
       "nasdaq"
     ],
@@ -10506,9 +8821,6 @@
       "sp500"
     ],
     "DUKR": [
-      "nasdaq"
-    ],
-    "DUKRW": [
       "nasdaq"
     ],
     "DUO": [
@@ -10572,19 +8884,7 @@
     "DYNC": [
       "nasdaq"
     ],
-    "DYNCU": [
-      "nasdaq"
-    ],
-    "DYNCW": [
-      "nasdaq"
-    ],
     "DYOR": [
-      "nasdaq"
-    ],
-    "DYORU": [
-      "nasdaq"
-    ],
-    "DYORW": [
       "nasdaq"
     ],
     "EAF": [
@@ -10638,16 +8938,10 @@
     "ECX": [
       "nasdaq"
     ],
-    "ECXWW": [
-      "nasdaq"
-    ],
     "ED": [
       "sp500"
     ],
     "EDBL": [
-      "nasdaq"
-    ],
-    "EDBLW": [
       "nasdaq"
     ],
     "EDHL": [
@@ -10691,9 +8985,6 @@
       "nasdaq",
       "russell2000"
     ],
-    "EFSCP": [
-      "nasdaq"
-    ],
     "EFSI": [
       "nasdaq",
       "russell2000"
@@ -10716,12 +9007,6 @@
       "russell2000"
     ],
     "EGHA": [
-      "nasdaq"
-    ],
-    "EGHAR": [
-      "nasdaq"
-    ],
-    "EGHAU": [
       "nasdaq"
     ],
     "EGHT": [
@@ -10831,9 +9116,6 @@
     "EMIS": [
       "nasdaq"
     ],
-    "EMISR": [
-      "nasdaq"
-    ],
     "EML": [
       "nasdaq"
     ],
@@ -10844,9 +9126,6 @@
       "sp500"
     ],
     "ENGN": [
-      "nasdaq"
-    ],
-    "ENGNW": [
       "nasdaq"
     ],
     "ENGS": [
@@ -10868,9 +9147,6 @@
       "russell2000"
     ],
     "ENRD": [
-      "nasdaq"
-    ],
-    "ENRDW": [
       "nasdaq"
     ],
     "ENS": [
@@ -10912,9 +9188,6 @@
     "EOSE": [
       "nasdaq",
       "russell2000"
-    ],
-    "EOSEW": [
-      "nasdaq"
     ],
     "EPAC": [
       "russell2000"
@@ -10975,9 +9248,6 @@
     "ERNA": [
       "nasdaq"
     ],
-    "ERNAW": [
-      "nasdaq"
-    ],
     "EROC": [
       "russell2000"
     ],
@@ -10998,9 +9268,6 @@
       "nasdaq"
     ],
     "ESLA": [
-      "nasdaq"
-    ],
-    "ESLAW": [
       "nasdaq"
     ],
     "ESLT": [
@@ -11056,16 +9323,7 @@
     "EUDA": [
       "nasdaq"
     ],
-    "EUDAW": [
-      "nasdaq"
-    ],
     "EURK": [
-      "nasdaq"
-    ],
-    "EURKR": [
-      "nasdaq"
-    ],
-    "EURKU": [
       "nasdaq"
     ],
     "EVAX": [
@@ -11111,12 +9369,6 @@
     "EVOX": [
       "nasdaq"
     ],
-    "EVOXU": [
-      "nasdaq"
-    ],
-    "EVOXW": [
-      "nasdaq"
-    ],
     "EVRG": [
       "sp500",
       "nasdaq"
@@ -11128,12 +9380,6 @@
       "sp500"
     ],
     "EWAV": [
-      "nasdaq"
-    ],
-    "EWAVR": [
-      "nasdaq"
-    ],
-    "EWAVU": [
       "nasdaq"
     ],
     "EWBC": [
@@ -11184,9 +9430,6 @@
     "EXYN": [
       "nasdaq"
     ],
-    "EXYNW": [
-      "nasdaq"
-    ],
     "EYE": [
       "nasdaq",
       "russell2000"
@@ -11220,15 +9463,6 @@
     "FACT": [
       "nasdaq"
     ],
-    "FACTU": [
-      "nasdaq"
-    ],
-    "FACTW": [
-      "nasdaq"
-    ],
-    "FACWW": [
-      "nasdaq"
-    ],
     "FAMI": [
       "nasdaq"
     ],
@@ -11253,9 +9487,6 @@
       "nasdaq"
     ],
     "FBIO": [
-      "nasdaq"
-    ],
-    "FBIOP": [
       "nasdaq"
     ],
     "FBIZ": [
@@ -11290,12 +9521,6 @@
       "nasdaq",
       "russell2000"
     ],
-    "FBYDP": [
-      "nasdaq"
-    ],
-    "FBYDW": [
-      "nasdaq"
-    ],
     "FC": [
       "russell2000"
     ],
@@ -11328,15 +9553,6 @@
     "FCNCA": [
       "nasdaq"
     ],
-    "FCNCN": [
-      "nasdaq"
-    ],
-    "FCNCO": [
-      "nasdaq"
-    ],
-    "FCNCP": [
-      "nasdaq"
-    ],
     "FCPT": [
       "russell2000"
     ],
@@ -11351,12 +9567,6 @@
       "russell2000"
     ],
     "FDMM": [
-      "nasdaq"
-    ],
-    "FDMMU": [
-      "nasdaq"
-    ],
-    "FDMMW": [
       "nasdaq"
     ],
     "FDMT": [
@@ -11411,12 +9621,6 @@
     "FERA": [
       "nasdaq"
     ],
-    "FERAR": [
-      "nasdaq"
-    ],
-    "FERAU": [
-      "nasdaq"
-    ],
     "FERG": [
       "sp500"
     ],
@@ -11448,31 +9652,16 @@
       "nasdaq",
       "russell2000"
     ],
-    "FGBIP": [
-      "nasdaq"
-    ],
     "FGI": [
       "nasdaq"
     ],
     "FGII": [
       "nasdaq"
     ],
-    "FGIIU": [
-      "nasdaq"
-    ],
-    "FGIIW": [
-      "nasdaq"
-    ],
-    "FGIWW": [
-      "nasdaq"
-    ],
     "FGL": [
       "nasdaq"
     ],
     "FGNX": [
-      "nasdaq"
-    ],
-    "FGNXP": [
       "nasdaq"
     ],
     "FHB": [
@@ -11499,12 +9688,6 @@
       "russell2000"
     ],
     "FIGX": [
-      "nasdaq"
-    ],
-    "FIGXU": [
-      "nasdaq"
-    ],
-    "FIGXW": [
       "nasdaq"
     ],
     "FINW": [
@@ -11546,9 +9729,6 @@
       "nasdaq",
       "russell2000"
     ],
-    "FJDIU": [
-      "nasdaq"
-    ],
     "FJET": [
       "russell2000"
     ],
@@ -11556,9 +9736,6 @@
       "nasdaq"
     ],
     "FLD": [
-      "nasdaq"
-    ],
-    "FLDDW": [
       "nasdaq"
     ],
     "FLEX": [
@@ -11631,12 +9808,6 @@
     "FMAC": [
       "nasdaq"
     ],
-    "FMACR": [
-      "nasdaq"
-    ],
-    "FMACU": [
-      "nasdaq"
-    ],
     "FMAO": [
       "nasdaq",
       "russell2000"
@@ -11656,9 +9827,6 @@
       "russell2000"
     ],
     "FMST": [
-      "nasdaq"
-    ],
-    "FMSTW": [
       "nasdaq"
     ],
     "FNGR": [
@@ -11725,9 +9893,6 @@
     "FOXX": [
       "nasdaq"
     ],
-    "FOXXW": [
-      "nasdaq"
-    ],
     "FPI": [
       "russell2000"
     ],
@@ -11756,9 +9921,6 @@
     "FRME": [
       "nasdaq",
       "russell2000"
-    ],
-    "FRMEP": [
-      "nasdaq"
     ],
     "FRMI": [
       "nasdaq"
@@ -11815,12 +9977,6 @@
     "FSHP": [
       "nasdaq"
     ],
-    "FSHPR": [
-      "nasdaq"
-    ],
-    "FSHPU": [
-      "nasdaq"
-    ],
     "FSLR": [
       "sp500",
       "nasdaq"
@@ -11846,9 +10002,6 @@
     "FTAI": [
       "nasdaq"
     ],
-    "FTAIM": [
-      "nasdaq"
-    ],
     "FTCI": [
       "nasdaq"
     ],
@@ -11866,12 +10019,6 @@
       "nasdaq"
     ],
     "FTHA": [
-      "nasdaq"
-    ],
-    "FTHAU": [
-      "nasdaq"
-    ],
-    "FTHAW": [
       "nasdaq"
     ],
     "FTHM": [
@@ -11900,9 +10047,6 @@
     "FUFU": [
       "nasdaq"
     ],
-    "FUFUW": [
-      "nasdaq"
-    ],
     "FUL": [
       "russell2000"
     ],
@@ -11913,9 +10057,6 @@
     "FULT": [
       "nasdaq",
       "russell2000"
-    ],
-    "FULTP": [
-      "nasdaq"
     ],
     "FUN": [
       "russell2000"
@@ -11933,9 +10074,6 @@
     "FUSE": [
       "nasdaq"
     ],
-    "FUSEW": [
-      "nasdaq"
-    ],
     "FUTU": [
       "nasdaq"
     ],
@@ -11949,25 +10087,10 @@
     "FVN": [
       "nasdaq"
     ],
-    "FVNNR": [
-      "nasdaq"
-    ],
-    "FVNNU": [
-      "nasdaq"
-    ],
     "FVR": [
       "russell2000"
     ],
     "FWAC": [
-      "nasdaq"
-    ],
-    "FWACR": [
-      "nasdaq"
-    ],
-    "FWACU": [
-      "nasdaq"
-    ],
-    "FWACW": [
       "nasdaq"
     ],
     "FWDI": [
@@ -11991,12 +10114,6 @@
     "FXAC": [
       "nasdaq"
     ],
-    "FXACU": [
-      "nasdaq"
-    ],
-    "FXACW": [
-      "nasdaq"
-    ],
     "FXHO": [
       "nasdaq"
     ],
@@ -12012,15 +10129,6 @@
       "nasdaq"
     ],
     "GAIN": [
-      "nasdaq"
-    ],
-    "GAING": [
-      "nasdaq"
-    ],
-    "GAINI": [
-      "nasdaq"
-    ],
-    "GAINZ": [
       "nasdaq"
     ],
     "GALT": [
@@ -12068,16 +10176,7 @@
     "GCGR": [
       "nasdaq"
     ],
-    "GCGRU": [
-      "nasdaq"
-    ],
-    "GCGRW": [
-      "nasdaq"
-    ],
     "GCL": [
-      "nasdaq"
-    ],
-    "GCLWW": [
       "nasdaq"
     ],
     "GCMG": [
@@ -12107,9 +10206,6 @@
     "GDEV": [
       "nasdaq"
     ],
-    "GDEVW": [
-      "nasdaq"
-    ],
     "GDHG": [
       "nasdaq"
     ],
@@ -12135,15 +10231,6 @@
     "GECC": [
       "nasdaq"
     ],
-    "GECCG": [
-      "nasdaq"
-    ],
-    "GECCH": [
-      "nasdaq"
-    ],
-    "GECCI": [
-      "nasdaq"
-    ],
     "GEF": [
       "russell2000"
     ],
@@ -12151,9 +10238,6 @@
       "russell2000"
     ],
     "GEG": [
-      "nasdaq"
-    ],
-    "GEGGL": [
       "nasdaq"
     ],
     "GEHC": [
@@ -12184,9 +10268,6 @@
     "GENK": [
       "nasdaq"
     ],
-    "GENVR": [
-      "nasdaq"
-    ],
     "GEO": [
       "russell2000"
     ],
@@ -12207,9 +10288,6 @@
     "GFAI": [
       "nasdaq"
     ],
-    "GFAIW": [
-      "nasdaq"
-    ],
     "GFF": [
       "russell2000"
     ],
@@ -12219,16 +10297,10 @@
     "GFUZ": [
       "nasdaq"
     ],
-    "GFUZW": [
-      "nasdaq"
-    ],
     "GGAL": [
       "nasdaq"
     ],
     "GGR": [
-      "nasdaq"
-    ],
-    "GGROW": [
       "nasdaq"
     ],
     "GH": [
@@ -12246,16 +10318,7 @@
     "GHXI": [
       "nasdaq"
     ],
-    "GHXIU": [
-      "nasdaq"
-    ],
-    "GHXIW": [
-      "nasdaq"
-    ],
     "GIBO": [
-      "nasdaq"
-    ],
-    "GIBOW": [
       "nasdaq"
     ],
     "GIC": [
@@ -12281,9 +10344,6 @@
     "GIPR": [
       "nasdaq"
     ],
-    "GIPRW": [
-      "nasdaq"
-    ],
     "GIS": [
       "sp500"
     ],
@@ -12293,19 +10353,7 @@
     "GIW": [
       "nasdaq"
     ],
-    "GIWWR": [
-      "nasdaq"
-    ],
-    "GIWWU": [
-      "nasdaq"
-    ],
     "GIX": [
-      "nasdaq"
-    ],
-    "GIXXR": [
-      "nasdaq"
-    ],
-    "GIXXU": [
       "nasdaq"
     ],
     "GKOS": [
@@ -12338,9 +10386,6 @@
       "nasdaq"
     ],
     "GLND": [
-      "nasdaq"
-    ],
-    "GLNDW": [
       "nasdaq"
     ],
     "GLNG": [
@@ -12449,24 +10494,12 @@
       "nasdaq",
       "russell2000"
     ],
-    "GOODN": [
-      "nasdaq"
-    ],
-    "GOODO": [
-      "nasdaq"
-    ],
     "GOOG": [
       "sp500",
       "nasdaq"
     ],
     "GOOGL": [
       "sp500",
-      "nasdaq"
-    ],
-    "GOOGM": [
-      "nasdaq"
-    ],
-    "GOOGN": [
       "nasdaq"
     ],
     "GORO": [
@@ -12484,19 +10517,7 @@
     "GPAC": [
       "nasdaq"
     ],
-    "GPACU": [
-      "nasdaq"
-    ],
-    "GPACW": [
-      "nasdaq"
-    ],
     "GPAT": [
-      "nasdaq"
-    ],
-    "GPATU": [
-      "nasdaq"
-    ],
-    "GPATW": [
       "nasdaq"
     ],
     "GPC": [
@@ -12528,9 +10549,6 @@
     "GRAB": [
       "nasdaq"
     ],
-    "GRABW": [
-      "nasdaq"
-    ],
     "GRAL": [
       "nasdaq",
       "russell2000"
@@ -12553,9 +10571,6 @@
     "GRDX": [
       "nasdaq"
     ],
-    "GREEL": [
-      "nasdaq"
-    ],
     "GRFS": [
       "nasdaq"
     ],
@@ -12563,9 +10578,6 @@
       "nasdaq"
     ],
     "GRML": [
-      "nasdaq"
-    ],
-    "GRMLW": [
       "nasdaq"
     ],
     "GRMN": [
@@ -12588,9 +10600,6 @@
       "russell2000"
     ],
     "GRRR": [
-      "nasdaq"
-    ],
-    "GRRRW": [
       "nasdaq"
     ],
     "GRSD": [
@@ -12619,12 +10628,6 @@
     "GSHR": [
       "nasdaq"
     ],
-    "GSHRU": [
-      "nasdaq"
-    ],
-    "GSHRW": [
-      "nasdaq"
-    ],
     "GSIT": [
       "nasdaq",
       "russell2000"
@@ -12639,19 +10642,7 @@
     "GSRF": [
       "nasdaq"
     ],
-    "GSRFR": [
-      "nasdaq"
-    ],
-    "GSRFU": [
-      "nasdaq"
-    ],
     "GSRV": [
-      "nasdaq"
-    ],
-    "GSRVR": [
-      "nasdaq"
-    ],
-    "GSRVU": [
       "nasdaq"
     ],
     "GSUN": [
@@ -12670,22 +10661,7 @@
     "GTEN": [
       "nasdaq"
     ],
-    "GTENU": [
-      "nasdaq"
-    ],
-    "GTENW": [
-      "nasdaq"
-    ],
     "GTERA": [
-      "nasdaq"
-    ],
-    "GTERR": [
-      "nasdaq"
-    ],
-    "GTERU": [
-      "nasdaq"
-    ],
-    "GTERW": [
       "nasdaq"
     ],
     "GTIM": [
@@ -12709,12 +10685,6 @@
       "russell2000"
     ],
     "GUAC": [
-      "nasdaq"
-    ],
-    "GUACU": [
-      "nasdaq"
-    ],
-    "GUACW": [
       "nasdaq"
     ],
     "GURE": [
@@ -12755,12 +10725,6 @@
     "HACQ": [
       "nasdaq"
     ],
-    "HACQU": [
-      "nasdaq"
-    ],
-    "HACQW": [
-      "nasdaq"
-    ],
     "HAE": [
       "russell2000"
     ],
@@ -12794,29 +10758,11 @@
     "HAVA": [
       "nasdaq"
     ],
-    "HAVAR": [
-      "nasdaq"
-    ],
-    "HAVAU": [
-      "nasdaq"
-    ],
     "HAWK": [
       "russell2000"
     ],
     "HBAN": [
       "sp500",
-      "nasdaq"
-    ],
-    "HBANL": [
-      "nasdaq"
-    ],
-    "HBANM": [
-      "nasdaq"
-    ],
-    "HBANP": [
-      "nasdaq"
-    ],
-    "HBANZ": [
       "nasdaq"
     ],
     "HBB": [
@@ -12846,12 +10792,6 @@
     "HCAC": [
       "nasdaq"
     ],
-    "HCACR": [
-      "nasdaq"
-    ],
-    "HCACU": [
-      "nasdaq"
-    ],
     "HCAI": [
       "nasdaq"
     ],
@@ -12870,12 +10810,6 @@
     "HCIC": [
       "nasdaq"
     ],
-    "HCICR": [
-      "nasdaq"
-    ],
-    "HCICU": [
-      "nasdaq"
-    ],
     "HCKT": [
       "nasdaq",
       "russell2000"
@@ -12884,12 +10818,6 @@
       "nasdaq"
     ],
     "HCMA": [
-      "nasdaq"
-    ],
-    "HCMAU": [
-      "nasdaq"
-    ],
-    "HCMAW": [
       "nasdaq"
     ],
     "HCSG": [
@@ -12909,9 +10837,6 @@
       "nasdaq"
     ],
     "HDRN": [
-      "nasdaq"
-    ],
-    "HDRNW": [
       "nasdaq"
     ],
     "HDSN": [
@@ -13077,9 +11002,6 @@
     "HOLO": [
       "nasdaq"
     ],
-    "HOLOW": [
-      "nasdaq"
-    ],
     "HOMB": [
       "russell2000"
     ],
@@ -13105,13 +11027,7 @@
     "HOV": [
       "russell2000"
     ],
-    "HOVNP": [
-      "nasdaq"
-    ],
     "HOVR": [
-      "nasdaq"
-    ],
-    "HOVRW": [
       "nasdaq"
     ],
     "HOWL": [
@@ -13121,9 +11037,6 @@
       "russell2000"
     ],
     "HPAI": [
-      "nasdaq"
-    ],
-    "HPAIW": [
       "nasdaq"
     ],
     "HPE": [
@@ -13145,9 +11058,6 @@
     "HQI": [
       "nasdaq",
       "russell2000"
-    ],
-    "HQWWW": [
-      "nasdaq"
     ],
     "HQY": [
       "nasdaq",
@@ -13181,9 +11091,6 @@
       "nasdaq"
     ],
     "HSCS": [
-      "nasdaq"
-    ],
-    "HSCSW": [
       "nasdaq"
     ],
     "HSDT": [
@@ -13244,19 +11151,10 @@
       "nasdaq",
       "russell2000"
     ],
-    "HTZWW": [
-      "nasdaq"
-    ],
     "HUBB": [
       "sp500"
     ],
     "HUBC": [
-      "nasdaq"
-    ],
-    "HUBCW": [
-      "nasdaq"
-    ],
-    "HUBCZ": [
       "nasdaq"
     ],
     "HUBG": [
@@ -13276,9 +11174,6 @@
       "sp500"
     ],
     "HUMA": [
-      "nasdaq"
-    ],
-    "HUMAW": [
       "nasdaq"
     ],
     "HUN": [
@@ -13301,19 +11196,7 @@
     "HVII": [
       "nasdaq"
     ],
-    "HVIIR": [
-      "nasdaq"
-    ],
-    "HVIIU": [
-      "nasdaq"
-    ],
     "HVMC": [
-      "nasdaq"
-    ],
-    "HVMCU": [
-      "nasdaq"
-    ],
-    "HVMCW": [
       "nasdaq"
     ],
     "HVT": [
@@ -13326,9 +11209,6 @@
     "HWC": [
       "nasdaq",
       "russell2000"
-    ],
-    "HWCPZ": [
-      "nasdaq"
     ],
     "HWH": [
       "nasdaq"
@@ -13378,19 +11258,7 @@
     "IACO": [
       "nasdaq"
     ],
-    "IACOU": [
-      "nasdaq"
-    ],
-    "IACOW": [
-      "nasdaq"
-    ],
     "IACQ": [
-      "nasdaq"
-    ],
-    "IACQU": [
-      "nasdaq"
-    ],
-    "IACQW": [
       "nasdaq"
     ],
     "IART": [
@@ -13398,9 +11266,6 @@
       "russell2000"
     ],
     "IBAC": [
-      "nasdaq"
-    ],
-    "IBACR": [
       "nasdaq"
     ],
     "IBCP": [
@@ -13470,20 +11335,11 @@
     "ICU": [
       "nasdaq"
     ],
-    "ICUCW": [
-      "nasdaq"
-    ],
     "ICUI": [
       "nasdaq",
       "russell2000"
     ],
     "IDAC": [
-      "nasdaq"
-    ],
-    "IDACU": [
-      "nasdaq"
-    ],
-    "IDACW": [
       "nasdaq"
     ],
     "IDAI": [
@@ -13517,15 +11373,6 @@
     "IEAG": [
       "nasdaq"
     ],
-    "IEAGR": [
-      "nasdaq"
-    ],
-    "IEAGU": [
-      "nasdaq"
-    ],
-    "IEP": [
-      "nasdaq"
-    ],
     "IESC": [
       "nasdaq"
     ],
@@ -13542,12 +11389,6 @@
       "nasdaq"
     ],
     "IGAC": [
-      "nasdaq"
-    ],
-    "IGACR": [
-      "nasdaq"
-    ],
-    "IGACU": [
       "nasdaq"
     ],
     "IGIC": [
@@ -13581,16 +11422,7 @@
     "ILLR": [
       "nasdaq"
     ],
-    "ILLRW": [
-      "nasdaq"
-    ],
     "ILLU": [
-      "nasdaq"
-    ],
-    "ILLUU": [
-      "nasdaq"
-    ],
-    "ILLUW": [
       "nasdaq"
     ],
     "ILMN": [
@@ -13643,9 +11475,6 @@
     "IMPP": [
       "nasdaq"
     ],
-    "IMPPP": [
-      "nasdaq"
-    ],
     "IMRN": [
       "nasdaq"
     ],
@@ -13654,9 +11483,6 @@
       "russell2000"
     ],
     "IMSR": [
-      "nasdaq"
-    ],
-    "IMSRW": [
       "nasdaq"
     ],
     "IMTE": [
@@ -13682,18 +11508,9 @@
     "INAC": [
       "nasdaq"
     ],
-    "INACR": [
-      "nasdaq"
-    ],
-    "INACU": [
-      "nasdaq"
-    ],
     "INBK": [
       "nasdaq",
       "russell2000"
-    ],
-    "INBKZ": [
-      "nasdaq"
     ],
     "INBS": [
       "nasdaq"
@@ -13875,19 +11692,7 @@
     "IPEX": [
       "nasdaq"
     ],
-    "IPEXR": [
-      "nasdaq"
-    ],
-    "IPEXU": [
-      "nasdaq"
-    ],
     "IPFX": [
-      "nasdaq"
-    ],
-    "IPFXU": [
-      "nasdaq"
-    ],
-    "IPFXW": [
       "nasdaq"
     ],
     "IPGP": [
@@ -13912,12 +11717,6 @@
     "IPVV": [
       "nasdaq"
     ],
-    "IPVVU": [
-      "nasdaq"
-    ],
-    "IPVVW": [
-      "nasdaq"
-    ],
     "IPW": [
       "nasdaq"
     ],
@@ -13931,9 +11730,6 @@
       "nasdaq"
     ],
     "IQMX": [
-      "nasdaq"
-    ],
-    "IQMXW": [
       "nasdaq"
     ],
     "IQST": [
@@ -13956,12 +11752,6 @@
       "nasdaq"
     ],
     "IRHO": [
-      "nasdaq"
-    ],
-    "IRHOR": [
-      "nasdaq"
-    ],
-    "IRHOU": [
       "nasdaq"
     ],
     "IRIX": [
@@ -13996,12 +11786,6 @@
     "ISNR": [
       "nasdaq"
     ],
-    "ISNRU": [
-      "nasdaq"
-    ],
-    "ISNRW": [
-      "nasdaq"
-    ],
     "ISPC": [
       "nasdaq"
     ],
@@ -14032,12 +11816,6 @@
     "ITHA": [
       "nasdaq"
     ],
-    "ITHAU": [
-      "nasdaq"
-    ],
-    "ITHAW": [
-      "nasdaq"
-    ],
     "ITIC": [
       "nasdaq",
       "russell2000"
@@ -14059,9 +11837,6 @@
       "nasdaq"
     ],
     "IVDA": [
-      "nasdaq"
-    ],
-    "IVDAW": [
       "nasdaq"
     ],
     "IVF": [
@@ -14093,15 +11868,6 @@
       "sp500"
     ],
     "JAB": [
-      "nasdaq"
-    ],
-    "JABRR": [
-      "nasdaq"
-    ],
-    "JABRU": [
-      "nasdaq"
-    ],
-    "JABRW": [
       "nasdaq"
     ],
     "JACK": [
@@ -14223,9 +11989,6 @@
     "JOE": [
       "russell2000"
     ],
-    "JONEU": [
-      "nasdaq"
-    ],
     "JOUT": [
       "nasdaq",
       "russell2000"
@@ -14243,13 +12006,7 @@
       "nasdaq",
       "russell2000"
     ],
-    "JSM": [
-      "nasdaq"
-    ],
     "JSPR": [
-      "nasdaq"
-    ],
-    "JSPRW": [
       "nasdaq"
     ],
     "JTAI": [
@@ -14308,12 +12065,6 @@
     "KBON": [
       "nasdaq"
     ],
-    "KBONU": [
-      "nasdaq"
-    ],
-    "KBONW": [
-      "nasdaq"
-    ],
     "KBSX": [
       "nasdaq"
     ],
@@ -14323,16 +12074,7 @@
     "KCHV": [
       "nasdaq"
     ],
-    "KCHVR": [
-      "nasdaq"
-    ],
-    "KCHVU": [
-      "nasdaq"
-    ],
     "KDK": [
-      "nasdaq"
-    ],
-    "KDKRW": [
       "nasdaq"
     ],
     "KDP": [
@@ -14366,22 +12108,10 @@
     "KEYY": [
       "nasdaq"
     ],
-    "KEYYU": [
-      "nasdaq"
-    ],
-    "KEYYW": [
-      "nasdaq"
-    ],
     "KFFB": [
       "nasdaq"
     ],
     "KFII": [
-      "nasdaq"
-    ],
-    "KFIIR": [
-      "nasdaq"
-    ],
-    "KFIIU": [
       "nasdaq"
     ],
     "KFRC": [
@@ -14411,9 +12141,6 @@
     "KIDZ": [
       "nasdaq"
     ],
-    "KIDZW": [
-      "nasdaq"
-    ],
     "KIM": [
       "sp500"
     ],
@@ -14422,9 +12149,6 @@
       "russell2000"
     ],
     "KITT": [
-      "nasdaq"
-    ],
-    "KITTW": [
       "nasdaq"
     ],
     "KKR": [
@@ -14453,9 +12177,6 @@
       "russell2000"
     ],
     "KLXE": [
-      "nasdaq"
-    ],
-    "KLXER": [
       "nasdaq"
     ],
     "KMB": [
@@ -14523,12 +12244,6 @@
     "KOYN": [
       "nasdaq"
     ],
-    "KOYNU": [
-      "nasdaq"
-    ],
-    "KOYNW": [
-      "nasdaq"
-    ],
     "KPLT": [
       "nasdaq"
     ],
@@ -14543,12 +12258,6 @@
       "sp500"
     ],
     "KRAQ": [
-      "nasdaq"
-    ],
-    "KRAQU": [
-      "nasdaq"
-    ],
-    "KRAQW": [
       "nasdaq"
     ],
     "KREF": [
@@ -14615,16 +12324,7 @@
     "KTTA": [
       "nasdaq"
     ],
-    "KTTAW": [
-      "nasdaq"
-    ],
     "KTWO": [
-      "nasdaq"
-    ],
-    "KTWOR": [
-      "nasdaq"
-    ],
-    "KTWOU": [
       "nasdaq"
     ],
     "KURA": [
@@ -14644,9 +12344,6 @@
     "KWM": [
       "nasdaq"
     ],
-    "KWMWW": [
-      "nasdaq"
-    ],
     "KWR": [
       "russell2000"
     ],
@@ -14657,9 +12354,6 @@
       "nasdaq"
     ],
     "KYIV": [
-      "nasdaq"
-    ],
-    "KYIVW": [
       "nasdaq"
     ],
     "KYMR": [
@@ -14694,12 +12388,6 @@
     "LAFA": [
       "nasdaq"
     ],
-    "LAFAR": [
-      "nasdaq"
-    ],
-    "LAFAU": [
-      "nasdaq"
-    ],
     "LAKE": [
       "nasdaq"
     ],
@@ -14709,12 +12397,6 @@
     "LAND": [
       "nasdaq",
       "russell2000"
-    ],
-    "LANDO": [
-      "nasdaq"
-    ],
-    "LANDP": [
-      "nasdaq"
     ],
     "LARK": [
       "nasdaq",
@@ -14728,12 +12410,6 @@
       "russell2000"
     ],
     "LATA": [
-      "nasdaq"
-    ],
-    "LATAU": [
-      "nasdaq"
-    ],
-    "LATAW": [
       "nasdaq"
     ],
     "LAUR": [
@@ -14768,16 +12444,7 @@
     "LCCC": [
       "nasdaq"
     ],
-    "LCCCR": [
-      "nasdaq"
-    ],
-    "LCCCU": [
-      "nasdaq"
-    ],
     "LCFY": [
-      "nasdaq"
-    ],
-    "LCFYW": [
       "nasdaq"
     ],
     "LCID": [
@@ -14850,12 +12517,6 @@
     "LFAC": [
       "nasdaq"
     ],
-    "LFACU": [
-      "nasdaq"
-    ],
-    "LFACW": [
-      "nasdaq"
-    ],
     "LFCR": [
       "nasdaq",
       "russell2000"
@@ -14863,9 +12524,6 @@
     "LFMD": [
       "nasdaq",
       "russell2000"
-    ],
-    "LFMDP": [
-      "nasdaq"
     ],
     "LFS": [
       "nasdaq"
@@ -14963,9 +12621,6 @@
     "LIMN": [
       "nasdaq"
     ],
-    "LIMNW": [
-      "nasdaq"
-    ],
     "LIN": [
       "sp500",
       "nasdaq"
@@ -15015,12 +12670,6 @@
       "nasdaq"
     ],
     "LKSP": [
-      "nasdaq"
-    ],
-    "LKSPR": [
-      "nasdaq"
-    ],
-    "LKSPU": [
       "nasdaq"
     ],
     "LLY": [
@@ -15078,9 +12727,6 @@
       "nasdaq",
       "russell2000"
     ],
-    "LNZAW": [
-      "nasdaq"
-    ],
     "LOAN": [
       "nasdaq"
     ],
@@ -15112,9 +12758,6 @@
     "LOT": [
       "nasdaq"
     ],
-    "LOTWW": [
-      "nasdaq"
-    ],
     "LOVE": [
       "nasdaq",
       "russell2000"
@@ -15125,31 +12768,13 @@
     "LPAA": [
       "nasdaq"
     ],
-    "LPAAU": [
-      "nasdaq"
-    ],
-    "LPAAW": [
-      "nasdaq"
-    ],
     "LPBB": [
-      "nasdaq"
-    ],
-    "LPBBU": [
-      "nasdaq"
-    ],
-    "LPBBW": [
       "nasdaq"
     ],
     "LPCN": [
       "nasdaq"
     ],
     "LPCV": [
-      "nasdaq"
-    ],
-    "LPCVU": [
-      "nasdaq"
-    ],
-    "LPCVW": [
       "nasdaq"
     ],
     "LPG": [
@@ -15221,12 +12846,6 @@
     "LTGR": [
       "nasdaq"
     ],
-    "LTGRU": [
-      "nasdaq"
-    ],
-    "LTGRW": [
-      "nasdaq"
-    ],
     "LTH": [
       "russell2000"
     ],
@@ -15237,17 +12856,11 @@
       "nasdaq",
       "russell2000"
     ],
-    "LTRYW": [
-      "nasdaq"
-    ],
     "LUCD": [
       "nasdaq",
       "russell2000"
     ],
     "LUCY": [
-      "nasdaq"
-    ],
-    "LUCYW": [
       "nasdaq"
     ],
     "LULU": [
@@ -15280,12 +12893,6 @@
       "russell2000"
     ],
     "LWAC": [
-      "nasdaq"
-    ],
-    "LWACU": [
-      "nasdaq"
-    ],
-    "LWACW": [
       "nasdaq"
     ],
     "LWAY": [
@@ -15364,12 +12971,6 @@
     "MACI": [
       "nasdaq"
     ],
-    "MACIU": [
-      "nasdaq"
-    ],
-    "MACIW": [
-      "nasdaq"
-    ],
     "MAGH": [
       "nasdaq"
     ],
@@ -15405,9 +13006,6 @@
     "MARA": [
       "nasdaq",
       "russell2000"
-    ],
-    "MARPS": [
-      "nasdaq"
     ],
     "MAS": [
       "sp500"
@@ -15464,22 +13062,10 @@
       "nasdaq",
       "russell2000"
     ],
-    "MBINL": [
-      "nasdaq"
-    ],
-    "MBINM": [
-      "nasdaq"
-    ],
-    "MBINN": [
-      "nasdaq"
-    ],
     "MBIO": [
       "nasdaq"
     ],
     "MBLY": [
-      "nasdaq"
-    ],
-    "MBNKO": [
       "nasdaq"
     ],
     "MBOT": [
@@ -15495,12 +13081,6 @@
     "MBVI": [
       "nasdaq"
     ],
-    "MBVIU": [
-      "nasdaq"
-    ],
-    "MBVIW": [
-      "nasdaq"
-    ],
     "MBWM": [
       "nasdaq",
       "russell2000"
@@ -15513,12 +13093,6 @@
       "russell2000"
     ],
     "MCAH": [
-      "nasdaq"
-    ],
-    "MCAHR": [
-      "nasdaq"
-    ],
-    "MCAHU": [
       "nasdaq"
     ],
     "MCB": [
@@ -15538,21 +13112,12 @@
     "MCGA": [
       "nasdaq"
     ],
-    "MCGAU": [
-      "nasdaq"
-    ],
-    "MCGAW": [
-      "nasdaq"
-    ],
     "MCHB": [
       "nasdaq",
       "russell2000"
     ],
     "MCHP": [
       "sp500",
-      "nasdaq"
-    ],
-    "MCHPP": [
       "nasdaq"
     ],
     "MCHX": [
@@ -15586,9 +13151,6 @@
     "MDAI": [
       "nasdaq"
     ],
-    "MDAIW": [
-      "nasdaq"
-    ],
     "MDB": [
       "nasdaq"
     ],
@@ -15596,9 +13158,6 @@
       "nasdaq"
     ],
     "MDCX": [
-      "nasdaq"
-    ],
-    "MDCXW": [
       "nasdaq"
     ],
     "MDGL": [
@@ -15664,12 +13223,6 @@
     "MESH": [
       "nasdaq"
     ],
-    "MESHU": [
-      "nasdaq"
-    ],
-    "MESHW": [
-      "nasdaq"
-    ],
     "MESO": [
       "nasdaq"
     ],
@@ -15688,19 +13241,7 @@
       "nasdaq",
       "russell2000"
     ],
-    "METCI": [
-      "nasdaq"
-    ],
-    "METCZ": [
-      "nasdaq"
-    ],
     "MEVO": [
-      "nasdaq"
-    ],
-    "MEVOU": [
-      "nasdaq"
-    ],
-    "MEVOW": [
       "nasdaq"
     ],
     "MF": [
@@ -15713,9 +13254,6 @@
       "nasdaq"
     ],
     "MFIC": [
-      "nasdaq"
-    ],
-    "MFICL": [
       "nasdaq"
     ],
     "MFIN": [
@@ -15785,12 +13323,6 @@
     "MIAC": [
       "nasdaq"
     ],
-    "MIACU": [
-      "nasdaq"
-    ],
-    "MIACW": [
-      "nasdaq"
-    ],
     "MIAX": [
       "russell2000"
     ],
@@ -15829,16 +13361,7 @@
     "MKDW": [
       "nasdaq"
     ],
-    "MKDWW": [
-      "nasdaq"
-    ],
     "MKLY": [
-      "nasdaq"
-    ],
-    "MKLYR": [
-      "nasdaq"
-    ],
-    "MKLYU": [
       "nasdaq"
     ],
     "MKSI": [
@@ -15857,12 +13380,6 @@
     "MLAA": [
       "nasdaq"
     ],
-    "MLAAU": [
-      "nasdaq"
-    ],
-    "MLAAW": [
-      "nasdaq"
-    ],
     "MLAB": [
       "nasdaq",
       "russell2000"
@@ -15870,16 +13387,10 @@
     "MLCI": [
       "nasdaq"
     ],
-    "MLCIL": [
-      "nasdaq"
-    ],
     "MLCO": [
       "nasdaq"
     ],
     "MLEC": [
-      "nasdaq"
-    ],
-    "MLECW": [
       "nasdaq"
     ],
     "MLGO": [
@@ -15912,9 +13423,6 @@
     "MMI": [
       "russell2000"
     ],
-    "MMLP": [
-      "nasdaq"
-    ],
     "MMM": [
       "sp500"
     ],
@@ -15926,12 +13434,6 @@
       "russell2000"
     ],
     "MMTX": [
-      "nasdaq"
-    ],
-    "MMTXU": [
-      "nasdaq"
-    ],
-    "MMTXW": [
       "nasdaq"
     ],
     "MMYT": [
@@ -15985,16 +13487,10 @@
     "MNY": [
       "nasdaq"
     ],
-    "MNYWW": [
-      "nasdaq"
-    ],
     "MO": [
       "sp500"
     ],
     "MOB": [
-      "nasdaq"
-    ],
-    "MOBBW": [
       "nasdaq"
     ],
     "MOBI": [
@@ -16002,9 +13498,6 @@
       "russell2000"
     ],
     "MOBX": [
-      "nasdaq"
-    ],
-    "MOBXW": [
       "nasdaq"
     ],
     "MODD": [
@@ -16068,12 +13561,6 @@
     "MRCO": [
       "nasdaq"
     ],
-    "MRCOU": [
-      "nasdaq"
-    ],
-    "MRCOW": [
-      "nasdaq"
-    ],
     "MRCY": [
       "nasdaq",
       "russell2000"
@@ -16103,9 +13590,6 @@
     "MRNO": [
       "nasdaq"
     ],
-    "MRNOW": [
-      "nasdaq"
-    ],
     "MRSH": [
       "sp500"
     ],
@@ -16131,15 +13615,9 @@
     "MSAI": [
       "nasdaq"
     ],
-    "MSAIW": [
-      "nasdaq"
-    ],
     "MSBI": [
       "nasdaq",
       "russell2000"
-    ],
-    "MSBIP": [
-      "nasdaq"
     ],
     "MSCI": [
       "sp500"
@@ -16173,9 +13651,6 @@
     "MSTR": [
       "nasdaq"
     ],
-    "MTAKU": [
-      "nasdaq"
-    ],
     "MTB": [
       "sp500"
     ],
@@ -16189,9 +13664,6 @@
       "sp500"
     ],
     "MTEK": [
-      "nasdaq"
-    ],
-    "MTEKW": [
       "nasdaq"
     ],
     "MTEN": [
@@ -16239,12 +13711,6 @@
       "russell2000"
     ],
     "MUZE": [
-      "nasdaq"
-    ],
-    "MUZEU": [
-      "nasdaq"
-    ],
-    "MUZEW": [
       "nasdaq"
     ],
     "MVBF": [
@@ -16304,15 +13770,6 @@
     "MYX": [
       "nasdaq"
     ],
-    "MYXXR": [
-      "nasdaq"
-    ],
-    "MYXXU": [
-      "nasdaq"
-    ],
-    "MYXXW": [
-      "nasdaq"
-    ],
     "MZTI": [
       "nasdaq",
       "russell2000"
@@ -16342,13 +13799,7 @@
     "NAMM": [
       "nasdaq"
     ],
-    "NAMMW": [
-      "nasdaq"
-    ],
     "NAMS": [
-      "nasdaq"
-    ],
-    "NAMSW": [
       "nasdaq"
     ],
     "NAT": [
@@ -16407,12 +13858,6 @@
     "NBRG": [
       "nasdaq"
     ],
-    "NBRGR": [
-      "nasdaq"
-    ],
-    "NBRGU": [
-      "nasdaq"
-    ],
     "NBTB": [
       "nasdaq",
       "russell2000"
@@ -16449,19 +13894,7 @@
     "NCO": [
       "nasdaq"
     ],
-    "NCOOR": [
-      "nasdaq"
-    ],
-    "NCOOU": [
-      "nasdaq"
-    ],
-    "NCOOW": [
-      "nasdaq"
-    ],
     "NCPL": [
-      "nasdaq"
-    ],
-    "NCPLW": [
       "nasdaq"
     ],
     "NCRA": [
@@ -16520,9 +13953,6 @@
     "NEOV": [
       "nasdaq"
     ],
-    "NEOVW": [
-      "nasdaq"
-    ],
     "NEPH": [
       "nasdaq"
     ],
@@ -16541,21 +13971,6 @@
       "nasdaq",
       "russell2000"
     ],
-    "NEWTG": [
-      "nasdaq"
-    ],
-    "NEWTH": [
-      "nasdaq"
-    ],
-    "NEWTI": [
-      "nasdaq"
-    ],
-    "NEWTO": [
-      "nasdaq"
-    ],
-    "NEWTP": [
-      "nasdaq"
-    ],
     "NEXM": [
       "nasdaq"
     ],
@@ -16564,9 +13979,6 @@
       "russell2000"
     ],
     "NEXR": [
-      "nasdaq"
-    ],
-    "NEXRW": [
       "nasdaq"
     ],
     "NEXT": [
@@ -16608,30 +14020,12 @@
     "NHIC": [
       "nasdaq"
     ],
-    "NHICU": [
-      "nasdaq"
-    ],
-    "NHICW": [
-      "nasdaq"
-    ],
     "NHIV": [
-      "nasdaq"
-    ],
-    "NHIVU": [
-      "nasdaq"
-    ],
-    "NHIVW": [
       "nasdaq"
     ],
     "NHP": [
       "nasdaq",
       "russell2000"
-    ],
-    "NHPAP": [
-      "nasdaq"
-    ],
-    "NHPBP": [
-      "nasdaq"
     ],
     "NHTC": [
       "nasdaq"
@@ -16651,9 +14045,6 @@
     "NIKI": [
       "nasdaq"
     ],
-    "NIOBW": [
-      "nasdaq"
-    ],
     "NIPG": [
       "nasdaq"
     ],
@@ -16661,9 +14052,6 @@
       "nasdaq"
     ],
     "NIVF": [
-      "nasdaq"
-    ],
-    "NIVFW": [
       "nasdaq"
     ],
     "NIXX": [
@@ -16705,20 +14093,11 @@
     "NMFC": [
       "nasdaq"
     ],
-    "NMFCZ": [
-      "nasdaq"
-    ],
     "NMIH": [
       "nasdaq",
       "russell2000"
     ],
     "NMP": [
-      "nasdaq"
-    ],
-    "NMPAR": [
-      "nasdaq"
-    ],
-    "NMPAU": [
       "nasdaq"
     ],
     "NMRA": [
@@ -16765,15 +14144,6 @@
     "NOEM": [
       "nasdaq"
     ],
-    "NOEMR": [
-      "nasdaq"
-    ],
-    "NOEMU": [
-      "nasdaq"
-    ],
-    "NOEMW": [
-      "nasdaq"
-    ],
     "NOG": [
       "russell2000"
     ],
@@ -16784,9 +14154,6 @@
       "nasdaq",
       "russell2000"
     ],
-    "NOVTU": [
-      "nasdaq"
-    ],
     "NOW": [
       "sp500"
     ],
@@ -16794,12 +14161,6 @@
       "russell2000"
     ],
     "NPAC": [
-      "nasdaq"
-    ],
-    "NPACU": [
-      "nasdaq"
-    ],
-    "NPACW": [
       "nasdaq"
     ],
     "NPB": [
@@ -16852,13 +14213,7 @@
     "NRSN": [
       "nasdaq"
     ],
-    "NRSNW": [
-      "nasdaq"
-    ],
     "NRXP": [
-      "nasdaq"
-    ],
-    "NSAIU": [
       "nasdaq"
     ],
     "NSC": [
@@ -16869,9 +14224,6 @@
       "russell2000"
     ],
     "NSLR": [
-      "nasdaq"
-    ],
-    "NSLRL": [
       "nasdaq"
     ],
     "NSP": [
@@ -16930,17 +14282,11 @@
     "NTRB": [
       "nasdaq"
     ],
-    "NTRBW": [
-      "nasdaq"
-    ],
     "NTRP": [
       "nasdaq"
     ],
     "NTRS": [
       "sp500",
-      "nasdaq"
-    ],
-    "NTRSO": [
       "nasdaq"
     ],
     "NTSK": [
@@ -16955,23 +14301,11 @@
     "NTWO": [
       "nasdaq"
     ],
-    "NTWOU": [
-      "nasdaq"
-    ],
-    "NTWOW": [
-      "nasdaq"
-    ],
     "NUAI": [
       "nasdaq",
       "russell2000"
     ],
-    "NUAIW": [
-      "nasdaq"
-    ],
     "NUCL": [
-      "nasdaq"
-    ],
-    "NUCLW": [
       "nasdaq"
     ],
     "NUE": [
@@ -17020,9 +14354,6 @@
       "nasdaq"
     ],
     "NVNI": [
-      "nasdaq"
-    ],
-    "NVNIW": [
       "nasdaq"
     ],
     "NVNO": [
@@ -17090,9 +14421,6 @@
     "NXGL": [
       "nasdaq"
     ],
-    "NXGLW": [
-      "nasdaq"
-    ],
     "NXH": [
       "nasdaq"
     ],
@@ -17140,28 +14468,13 @@
       "nasdaq",
       "russell2000"
     ],
-    "OABIW": [
-      "nasdaq"
-    ],
     "OACC": [
-      "nasdaq"
-    ],
-    "OACCU": [
-      "nasdaq"
-    ],
-    "OACCW": [
       "nasdaq"
     ],
     "OBA": [
       "nasdaq"
     ],
     "OBAI": [
-      "nasdaq"
-    ],
-    "OBAWU": [
-      "nasdaq"
-    ],
-    "OBAWW": [
       "nasdaq"
     ],
     "OBIO": [
@@ -17184,12 +14497,6 @@
     "OCCI": [
       "nasdaq"
     ],
-    "OCCIM": [
-      "nasdaq"
-    ],
-    "OCCIN": [
-      "nasdaq"
-    ],
     "OCFC": [
       "nasdaq",
       "russell2000"
@@ -17201,13 +14508,7 @@
       "nasdaq",
       "russell2000"
     ],
-    "OCLTU": [
-      "nasdaq"
-    ],
     "OCS": [
-      "nasdaq"
-    ],
-    "OCSAW": [
       "nasdaq"
     ],
     "OCSL": [
@@ -17264,15 +14565,6 @@
     "OFS": [
       "nasdaq"
     ],
-    "OFSSH": [
-      "nasdaq"
-    ],
-    "OFSSO": [
-      "nasdaq"
-    ],
-    "OGGWZ": [
-      "nasdaq"
-    ],
     "OGI": [
       "nasdaq"
     ],
@@ -17280,12 +14572,6 @@
       "russell2000"
     ],
     "OHAC": [
-      "nasdaq"
-    ],
-    "OHACR": [
-      "nasdaq"
-    ],
-    "OHACU": [
       "nasdaq"
     ],
     "OI": [
@@ -17297,16 +14583,7 @@
     "OIM": [
       "nasdaq"
     ],
-    "OIMAU": [
-      "nasdaq"
-    ],
-    "OIMAW": [
-      "nasdaq"
-    ],
     "OIO": [
-      "nasdaq"
-    ],
-    "OIOWW": [
       "nasdaq"
     ],
     "OIS": [
@@ -17381,22 +14658,10 @@
       "nasdaq",
       "russell2000"
     ],
-    "ONBPO": [
-      "nasdaq"
-    ],
-    "ONBPP": [
-      "nasdaq"
-    ],
     "ONC": [
       "nasdaq"
     ],
     "ONCH": [
-      "nasdaq"
-    ],
-    "ONCHU": [
-      "nasdaq"
-    ],
-    "ONCHW": [
       "nasdaq"
     ],
     "ONCO": [
@@ -17419,9 +14684,6 @@
     "ONFO": [
       "nasdaq"
     ],
-    "ONFOW": [
-      "nasdaq"
-    ],
     "ONIT": [
       "russell2000"
     ],
@@ -17429,9 +14691,6 @@
       "russell2000"
     ],
     "ONMD": [
-      "nasdaq"
-    ],
-    "ONMDW": [
       "nasdaq"
     ],
     "ONT": [
@@ -17455,15 +14714,6 @@
     "OPEN": [
       "nasdaq",
       "russell2000"
-    ],
-    "OPENL": [
-      "nasdaq"
-    ],
-    "OPENW": [
-      "nasdaq"
-    ],
-    "OPENZ": [
-      "nasdaq"
     ],
     "OPFI": [
       "russell2000"
@@ -17498,9 +14748,6 @@
       "nasdaq",
       "russell2000"
     ],
-    "OPTXW": [
-      "nasdaq"
-    ],
     "OPXS": [
       "nasdaq"
     ],
@@ -17528,12 +14775,6 @@
       "nasdaq"
     ],
     "ORIQ": [
-      "nasdaq"
-    ],
-    "ORIQU": [
-      "nasdaq"
-    ],
-    "ORIQW": [
       "nasdaq"
     ],
     "ORKA": [
@@ -17579,16 +14820,7 @@
     "OSPR": [
       "nasdaq"
     ],
-    "OSPRU": [
-      "nasdaq"
-    ],
-    "OSPRW": [
-      "nasdaq"
-    ],
     "OSRH": [
-      "nasdaq"
-    ],
-    "OSRHW": [
       "nasdaq"
     ],
     "OSS": [
@@ -17610,12 +14842,6 @@
       "nasdaq"
     ],
     "OTGA": [
-      "nasdaq"
-    ],
-    "OTGAU": [
-      "nasdaq"
-    ],
-    "OTGAW": [
       "nasdaq"
     ],
     "OTIS": [
@@ -17656,31 +14882,7 @@
     "OXBR": [
       "nasdaq"
     ],
-    "OXBRW": [
-      "nasdaq"
-    ],
     "OXLC": [
-      "nasdaq"
-    ],
-    "OXLCG": [
-      "nasdaq"
-    ],
-    "OXLCI": [
-      "nasdaq"
-    ],
-    "OXLCL": [
-      "nasdaq"
-    ],
-    "OXLCM": [
-      "nasdaq"
-    ],
-    "OXLCN": [
-      "nasdaq"
-    ],
-    "OXLCO": [
-      "nasdaq"
-    ],
-    "OXLCZ": [
       "nasdaq"
     ],
     "OXM": [
@@ -17689,40 +14891,16 @@
     "OXSQ": [
       "nasdaq"
     ],
-    "OXSQG": [
-      "nasdaq"
-    ],
-    "OXSQH": [
-      "nasdaq"
-    ],
     "OXY": [
       "sp500"
     ],
     "OYSE": [
       "nasdaq"
     ],
-    "OYSER": [
-      "nasdaq"
-    ],
-    "OYSEU": [
-      "nasdaq"
-    ],
     "OZK": [
       "nasdaq"
     ],
-    "OZKAP": [
-      "nasdaq"
-    ],
-    "PAA": [
-      "nasdaq"
-    ],
     "PAAC": [
-      "nasdaq"
-    ],
-    "PAACU": [
-      "nasdaq"
-    ],
-    "PAACW": [
       "nasdaq"
     ],
     "PACB": [
@@ -17730,12 +14908,6 @@
       "russell2000"
     ],
     "PACH": [
-      "nasdaq"
-    ],
-    "PACHU": [
-      "nasdaq"
-    ],
-    "PACHW": [
       "nasdaq"
     ],
     "PACK": [
@@ -17765,12 +14937,6 @@
     "PALO": [
       "nasdaq"
     ],
-    "PALOU": [
-      "nasdaq"
-    ],
-    "PALOW": [
-      "nasdaq"
-    ],
     "PAMT": [
       "nasdaq",
       "russell2000"
@@ -17787,9 +14953,6 @@
       "russell2000"
     ],
     "PARA": [
-      "nasdaq"
-    ],
-    "PARAW": [
       "nasdaq"
     ],
     "PARK": [
@@ -17864,9 +15027,6 @@
     "PBM": [
       "nasdaq"
     ],
-    "PBMWW": [
-      "nasdaq"
-    ],
     "PBYI": [
       "nasdaq",
       "russell2000"
@@ -17875,12 +15035,6 @@
       "nasdaq"
     ],
     "PCAP": [
-      "nasdaq"
-    ],
-    "PCAPU": [
-      "nasdaq"
-    ],
-    "PCAPW": [
       "nasdaq"
     ],
     "PCAR": [
@@ -17907,12 +15061,6 @@
     "PCT": [
       "nasdaq",
       "russell2000"
-    ],
-    "PCTTU": [
-      "nasdaq"
-    ],
-    "PCTTW": [
-      "nasdaq"
     ],
     "PCTY": [
       "nasdaq"
@@ -17956,9 +15104,6 @@
       "nasdaq",
       "russell2000"
     ],
-    "PDYNW": [
-      "nasdaq"
-    ],
     "PEB": [
       "russell2000"
     ],
@@ -17971,15 +15116,6 @@
       "russell2000"
     ],
     "PECE": [
-      "nasdaq"
-    ],
-    "PECER": [
-      "nasdaq"
-    ],
-    "PECEU": [
-      "nasdaq"
-    ],
-    "PECEW": [
       "nasdaq"
     ],
     "PECO": [
@@ -18053,19 +15189,10 @@
     "PFX": [
       "nasdaq"
     ],
-    "PFXNZ": [
-      "nasdaq"
-    ],
     "PG": [
       "sp500"
     ],
     "PGAC": [
-      "nasdaq"
-    ],
-    "PGACR": [
-      "nasdaq"
-    ],
-    "PGACU": [
       "nasdaq"
     ],
     "PGC": [
@@ -18084,9 +15211,6 @@
       "sp500"
     ],
     "PGY": [
-      "nasdaq"
-    ],
-    "PGYWW": [
       "nasdaq"
     ],
     "PH": [
@@ -18134,9 +15258,6 @@
       "russell2000"
     ],
     "PIII": [
-      "nasdaq"
-    ],
-    "PIIIW": [
       "nasdaq"
     ],
     "PINE": [
@@ -18190,12 +15311,6 @@
     "PLCI": [
       "nasdaq"
     ],
-    "PLCIR": [
-      "nasdaq"
-    ],
-    "PLCIU": [
-      "nasdaq"
-    ],
     "PLD": [
       "sp500"
     ],
@@ -18203,12 +15318,6 @@
       "russell2000"
     ],
     "PLMK": [
-      "nasdaq"
-    ],
-    "PLMKU": [
-      "nasdaq"
-    ],
-    "PLMKW": [
       "nasdaq"
     ],
     "PLMR": [
@@ -18294,12 +15403,6 @@
     "PMTR": [
       "nasdaq"
     ],
-    "PMTRU": [
-      "nasdaq"
-    ],
-    "PMTRW": [
-      "nasdaq"
-    ],
     "PMTS": [
       "nasdaq",
       "russell2000"
@@ -18349,22 +15452,10 @@
     "POLE": [
       "nasdaq"
     ],
-    "POLEU": [
-      "nasdaq"
-    ],
-    "POLEW": [
-      "nasdaq"
-    ],
     "POM": [
       "nasdaq"
     ],
     "PONO": [
-      "nasdaq"
-    ],
-    "PONOR": [
-      "nasdaq"
-    ],
-    "PONOU": [
       "nasdaq"
     ],
     "PONY": [
@@ -18386,9 +15477,6 @@
     "POWW": [
       "nasdaq",
       "russell2000"
-    ],
-    "POWWP": [
-      "nasdaq"
     ],
     "PPBT": [
       "nasdaq"
@@ -18446,9 +15534,6 @@
     "PRE": [
       "nasdaq"
     ],
-    "PRENW": [
-      "nasdaq"
-    ],
     "PRFX": [
       "nasdaq"
     ],
@@ -18463,9 +15548,6 @@
       "russell2000"
     ],
     "PRHI": [
-      "nasdaq"
-    ],
-    "PRHIZ": [
       "nasdaq"
     ],
     "PRK": [
@@ -18583,12 +15665,6 @@
     "PTAC": [
       "nasdaq"
     ],
-    "PTACU": [
-      "nasdaq"
-    ],
-    "PTACW": [
-      "nasdaq"
-    ],
     "PTC": [
       "sp500",
       "nasdaq"
@@ -18620,12 +15696,6 @@
       "russell2000"
     ],
     "PTOR": [
-      "nasdaq"
-    ],
-    "PTORU": [
-      "nasdaq"
-    ],
-    "PTORW": [
       "nasdaq"
     ],
     "PTRN": [
@@ -18695,12 +15765,6 @@
     "QADR": [
       "nasdaq"
     ],
-    "QADRU": [
-      "nasdaq"
-    ],
-    "QADRW": [
-      "nasdaq"
-    ],
     "QBTS": [
       "nasdaq",
       "russell2000"
@@ -18721,12 +15785,6 @@
       "russell2000"
     ],
     "QETA": [
-      "nasdaq"
-    ],
-    "QETAR": [
-      "nasdaq"
-    ],
-    "QETAU": [
       "nasdaq"
     ],
     "QFIN": [
@@ -18782,12 +15840,6 @@
     "QSEA": [
       "nasdaq"
     ],
-    "QSEAR": [
-      "nasdaq"
-    ],
-    "QSEAU": [
-      "nasdaq"
-    ],
     "QSI": [
       "nasdaq"
     ],
@@ -18824,12 +15876,6 @@
     "QUMS": [
       "nasdaq"
     ],
-    "QUMSR": [
-      "nasdaq"
-    ],
-    "QUMSU": [
-      "nasdaq"
-    ],
     "QURE": [
       "nasdaq"
     ],
@@ -18855,9 +15901,6 @@
     "RAIN": [
       "nasdaq"
     ],
-    "RAINW": [
-      "nasdaq"
-    ],
     "RAMP": [
       "russell2000"
     ],
@@ -18865,12 +15908,6 @@
       "nasdaq"
     ],
     "RANG": [
-      "nasdaq"
-    ],
-    "RANGR": [
-      "nasdaq"
-    ],
-    "RANGU": [
       "nasdaq"
     ],
     "RANI": [
@@ -18929,9 +15966,6 @@
       "nasdaq",
       "russell2000"
     ],
-    "RCKTW": [
-      "nasdaq"
-    ],
     "RCKY": [
       "nasdaq",
       "russell2000"
@@ -18955,19 +15989,7 @@
     "RDAC": [
       "nasdaq"
     ],
-    "RDACR": [
-      "nasdaq"
-    ],
-    "RDACU": [
-      "nasdaq"
-    ],
     "RDAG": [
-      "nasdaq"
-    ],
-    "RDAGU": [
-      "nasdaq"
-    ],
-    "RDAGW": [
       "nasdaq"
     ],
     "RDCM": [
@@ -19013,9 +16035,6 @@
       "nasdaq",
       "russell2000"
     ],
-    "RDZNW": [
-      "nasdaq"
-    ],
     "REA": [
       "russell2000"
     ],
@@ -19045,12 +16064,6 @@
     ],
     "REG": [
       "sp500",
-      "nasdaq"
-    ],
-    "REGCO": [
-      "nasdaq"
-    ],
-    "REGCP": [
       "nasdaq"
     ],
     "REGN": [
@@ -19094,9 +16107,6 @@
     "REVB": [
       "nasdaq"
     ],
-    "REVBW": [
-      "nasdaq"
-    ],
     "REX": [
       "russell2000"
     ],
@@ -19112,19 +16122,7 @@
     "RFAI": [
       "nasdaq"
     ],
-    "RFAIR": [
-      "nasdaq"
-    ],
-    "RFAIU": [
-      "nasdaq"
-    ],
     "RFAM": [
-      "nasdaq"
-    ],
-    "RFAMR": [
-      "nasdaq"
-    ],
-    "RFAMU": [
       "nasdaq"
     ],
     "RFIL": [
@@ -19161,9 +16159,6 @@
       "nasdaq",
       "russell2000"
     ],
-    "RGTIW": [
-      "nasdaq"
-    ],
     "RH": [
       "russell2000"
     ],
@@ -19174,12 +16169,6 @@
       "russell2000"
     ],
     "RIBB": [
-      "nasdaq"
-    ],
-    "RIBBR": [
-      "nasdaq"
-    ],
-    "RIBBU": [
       "nasdaq"
     ],
     "RICK": [
@@ -19196,24 +16185,6 @@
     "RILY": [
       "nasdaq",
       "russell2000"
-    ],
-    "RILYG": [
-      "nasdaq"
-    ],
-    "RILYL": [
-      "nasdaq"
-    ],
-    "RILYN": [
-      "nasdaq"
-    ],
-    "RILYP": [
-      "nasdaq"
-    ],
-    "RILYT": [
-      "nasdaq"
-    ],
-    "RILYZ": [
-      "nasdaq"
     ],
     "RIME": [
       "nasdaq"
@@ -19283,9 +16254,6 @@
     "RMCO": [
       "nasdaq"
     ],
-    "RMCOW": [
-      "nasdaq"
-    ],
     "RMD": [
       "sp500"
     ],
@@ -19301,9 +16269,6 @@
       "russell2000"
     ],
     "RMSG": [
-      "nasdaq"
-    ],
-    "RMSGW": [
       "nasdaq"
     ],
     "RMTI": [
@@ -19324,12 +16289,6 @@
       "russell2000"
     ],
     "RNGT": [
-      "nasdaq"
-    ],
-    "RNGTU": [
-      "nasdaq"
-    ],
-    "RNGTW": [
       "nasdaq"
     ],
     "RNST": [
@@ -19419,12 +16378,6 @@
     "RREV": [
       "nasdaq"
     ],
-    "RREVU": [
-      "nasdaq"
-    ],
-    "RREVW": [
-      "nasdaq"
-    ],
     "RRGB": [
       "nasdaq"
     ],
@@ -19448,12 +16401,6 @@
     "RTAC": [
       "nasdaq"
     ],
-    "RTACU": [
-      "nasdaq"
-    ],
-    "RTACW": [
-      "nasdaq"
-    ],
     "RTB": [
       "nasdaq"
     ],
@@ -19466,9 +16413,6 @@
     "RUM": [
       "nasdaq",
       "russell2000"
-    ],
-    "RUMBW": [
-      "nasdaq"
     ],
     "RUN": [
       "nasdaq",
@@ -19488,28 +16432,16 @@
     "RVMD": [
       "nasdaq"
     ],
-    "RVMDW": [
-      "nasdaq"
-    ],
     "RVSB": [
       "nasdaq"
     ],
     "RVSN": [
       "nasdaq"
     ],
-    "RVSNW": [
-      "nasdaq"
-    ],
     "RVTY": [
       "sp500"
     ],
     "RWAY": [
-      "nasdaq"
-    ],
-    "RWAYI": [
-      "nasdaq"
-    ],
-    "RWAYL": [
       "nasdaq"
     ],
     "RWT": [
@@ -19559,16 +16491,7 @@
     "RZLV": [
       "nasdaq"
     ],
-    "RZLVW": [
-      "nasdaq"
-    ],
     "SAAQ": [
-      "nasdaq"
-    ],
-    "SAAQU": [
-      "nasdaq"
-    ],
-    "SAAQW": [
       "nasdaq"
     ],
     "SABR": [
@@ -19578,9 +16501,6 @@
     "SABS": [
       "nasdaq",
       "russell2000"
-    ],
-    "SABSW": [
-      "nasdaq"
     ],
     "SAFE": [
       "russell2000"
@@ -19607,9 +16527,6 @@
     "SAIH": [
       "nasdaq"
     ],
-    "SAIHW": [
-      "nasdaq"
-    ],
     "SAIL": [
       "nasdaq"
     ],
@@ -19630,15 +16547,9 @@
     "SANM": [
       "nasdaq"
     ],
-    "SATA": [
-      "nasdaq"
-    ],
     "SATL": [
       "nasdaq",
       "russell2000"
-    ],
-    "SATLW": [
-      "nasdaq"
     ],
     "SB": [
       "russell2000"
@@ -19655,9 +16566,6 @@
       "nasdaq",
       "russell2000"
     ],
-    "SBCWW": [
-      "nasdaq"
-    ],
     "SBET": [
       "nasdaq",
       "russell2000"
@@ -19666,9 +16574,6 @@
       "nasdaq"
     ],
     "SBFM": [
-      "nasdaq"
-    ],
-    "SBFMW": [
       "nasdaq"
     ],
     "SBGI": [
@@ -19701,9 +16606,6 @@
     "SCAG": [
       "nasdaq"
     ],
-    "SCAGW": [
-      "nasdaq"
-    ],
     "SCHL": [
       "nasdaq",
       "russell2000"
@@ -19714,12 +16616,6 @@
     "SCII": [
       "nasdaq"
     ],
-    "SCIIR": [
-      "nasdaq"
-    ],
-    "SCIIU": [
-      "nasdaq"
-    ],
     "SCKT": [
       "nasdaq"
     ],
@@ -19727,9 +16623,6 @@
       "russell2000"
     ],
     "SCLX": [
-      "nasdaq"
-    ],
-    "SCLXW": [
       "nasdaq"
     ],
     "SCNI": [
@@ -19742,12 +16635,6 @@
       "nasdaq"
     ],
     "SCPQ": [
-      "nasdaq"
-    ],
-    "SCPQU": [
-      "nasdaq"
-    ],
-    "SCPQW": [
       "nasdaq"
     ],
     "SCSC": [
@@ -19773,20 +16660,11 @@
     "SDA": [
       "nasdaq"
     ],
-    "SDAWW": [
-      "nasdaq"
-    ],
     "SDGR": [
       "nasdaq",
       "russell2000"
     ],
     "SDHI": [
-      "nasdaq"
-    ],
-    "SDHIR": [
-      "nasdaq"
-    ],
-    "SDHIU": [
       "nasdaq"
     ],
     "SDOT": [
@@ -19798,13 +16676,7 @@
     "SDST": [
       "nasdaq"
     ],
-    "SDSTW": [
-      "nasdaq"
-    ],
     "SEAT": [
-      "nasdaq"
-    ],
-    "SEATW": [
       "nasdaq"
     ],
     "SEDG": [
@@ -19956,9 +16828,6 @@
     "SHFS": [
       "nasdaq"
     ],
-    "SHFSW": [
-      "nasdaq"
-    ],
     "SHIM": [
       "nasdaq",
       "russell2000"
@@ -19971,9 +16840,6 @@
       "russell2000"
     ],
     "SHMD": [
-      "nasdaq"
-    ],
-    "SHMDW": [
       "nasdaq"
     ],
     "SHO": [
@@ -19991,12 +16857,6 @@
       "nasdaq"
     ],
     "SHOT": [
-      "nasdaq"
-    ],
-    "SHOTR": [
-      "nasdaq"
-    ],
-    "SHOTU": [
       "nasdaq"
     ],
     "SHPH": [
@@ -20033,9 +16893,6 @@
       "nasdaq",
       "russell2000"
     ],
-    "SIGIP": [
-      "nasdaq"
-    ],
     "SILC": [
       "nasdaq"
     ],
@@ -20043,12 +16900,6 @@
       "nasdaq"
     ],
     "SIMA": [
-      "nasdaq"
-    ],
-    "SIMAU": [
-      "nasdaq"
-    ],
-    "SIMAW": [
       "nasdaq"
     ],
     "SIMO": [
@@ -20098,9 +16949,6 @@
     "SKYA": [
       "nasdaq"
     ],
-    "SKYAW": [
-      "nasdaq"
-    ],
     "SKYE": [
       "nasdaq"
     ],
@@ -20142,9 +16990,6 @@
       "nasdaq",
       "russell2000"
     ],
-    "SLDPW": [
-      "nasdaq"
-    ],
     "SLE": [
       "nasdaq"
     ],
@@ -20160,9 +17005,6 @@
     "SLM": [
       "nasdaq"
     ],
-    "SLMBP": [
-      "nasdaq"
-    ],
     "SLMT": [
       "nasdaq"
     ],
@@ -20175,9 +17017,6 @@
     "SLNH": [
       "nasdaq",
       "russell2000"
-    ],
-    "SLNHP": [
-      "nasdaq"
     ],
     "SLP": [
       "nasdaq",
@@ -20199,9 +17038,6 @@
     "SLXN": [
       "nasdaq"
     ],
-    "SLXNW": [
-      "nasdaq"
-    ],
     "SM": [
       "russell2000"
     ],
@@ -20220,9 +17056,6 @@
     ],
     "SMCI": [
       "sp500",
-      "nasdaq"
-    ],
-    "SMCIP": [
       "nasdaq"
     ],
     "SMHI": [
@@ -20265,9 +17098,6 @@
       "nasdaq"
     ],
     "SMXT": [
-      "nasdaq"
-    ],
-    "SMXWW": [
       "nasdaq"
     ],
     "SNA": [
@@ -20345,12 +17175,6 @@
     "SOCA": [
       "nasdaq"
     ],
-    "SOCAU": [
-      "nasdaq"
-    ],
-    "SOCAW": [
-      "nasdaq"
-    ],
     "SOFI": [
       "nasdaq"
     ],
@@ -20382,21 +17206,12 @@
     "SORN": [
       "nasdaq"
     ],
-    "SORNU": [
-      "nasdaq"
-    ],
-    "SORNW": [
-      "nasdaq"
-    ],
     "SOTK": [
       "nasdaq"
     ],
     "SOUN": [
       "nasdaq",
       "russell2000"
-    ],
-    "SOUNW": [
-      "nasdaq"
     ],
     "SOWG": [
       "nasdaq"
@@ -20419,12 +17234,6 @@
     "SPEG": [
       "nasdaq"
     ],
-    "SPEGR": [
-      "nasdaq"
-    ],
-    "SPEGU": [
-      "nasdaq"
-    ],
     "SPFI": [
       "nasdaq",
       "russell2000"
@@ -20445,12 +17254,6 @@
       "russell2000"
     ],
     "SPKL": [
-      "nasdaq"
-    ],
-    "SPKLU": [
-      "nasdaq"
-    ],
-    "SPKLW": [
       "nasdaq"
     ],
     "SPNT": [
@@ -20495,16 +17298,7 @@
     "SPWR": [
       "nasdaq"
     ],
-    "SPWRW": [
-      "nasdaq"
-    ],
     "SQFT": [
-      "nasdaq"
-    ],
-    "SQFTP": [
-      "nasdaq"
-    ],
-    "SQFTW": [
       "nasdaq"
     ],
     "SR": [
@@ -20549,25 +17343,10 @@
     "SSAC": [
       "nasdaq"
     ],
-    "SSACR": [
-      "nasdaq"
-    ],
-    "SSACU": [
-      "nasdaq"
-    ],
-    "SSACW": [
-      "nasdaq"
-    ],
     "SSBI": [
       "nasdaq"
     ],
     "SSEA": [
-      "nasdaq"
-    ],
-    "SSEAR": [
-      "nasdaq"
-    ],
-    "SSEAU": [
       "nasdaq"
     ],
     "SSII": [
@@ -20655,9 +17434,6 @@
     "STLN": [
       "nasdaq"
     ],
-    "STLNW": [
-      "nasdaq"
-    ],
     "STNE": [
       "nasdaq",
       "russell2000"
@@ -20673,18 +17449,6 @@
       "nasdaq",
       "russell2000"
     ],
-    "STRC": [
-      "nasdaq"
-    ],
-    "STRD": [
-      "nasdaq"
-    ],
-    "STRF": [
-      "nasdaq"
-    ],
-    "STRK": [
-      "nasdaq"
-    ],
     "STRL": [
       "nasdaq"
     ],
@@ -20693,9 +17457,6 @@
       "russell2000"
     ],
     "STRR": [
-      "nasdaq"
-    ],
-    "STRRP": [
       "nasdaq"
     ],
     "STRT": [
@@ -20742,12 +17503,6 @@
     "SUMA": [
       "nasdaq"
     ],
-    "SUMAR": [
-      "nasdaq"
-    ],
-    "SUMAU": [
-      "nasdaq"
-    ],
     "SUNE": [
       "nasdaq"
     ],
@@ -20764,16 +17519,7 @@
     "SURG": [
       "nasdaq"
     ],
-    "SVA": [
-      "nasdaq"
-    ],
     "SVAQ": [
-      "nasdaq"
-    ],
-    "SVAQU": [
-      "nasdaq"
-    ],
-    "SVAQW": [
       "nasdaq"
     ],
     "SVC": [
@@ -20783,12 +17529,6 @@
     "SVCC": [
       "nasdaq"
     ],
-    "SVCCU": [
-      "nasdaq"
-    ],
-    "SVCCW": [
-      "nasdaq"
-    ],
     "SVCO": [
       "nasdaq",
       "russell2000"
@@ -20796,20 +17536,11 @@
     "SVIV": [
       "nasdaq"
     ],
-    "SVIVU": [
-      "nasdaq"
-    ],
-    "SVIVW": [
-      "nasdaq"
-    ],
     "SVRA": [
       "nasdaq",
       "russell2000"
     ],
     "SVRE": [
-      "nasdaq"
-    ],
-    "SVREW": [
       "nasdaq"
     ],
     "SVRN": [
@@ -20824,9 +17555,6 @@
     "SWAG": [
       "nasdaq"
     ],
-    "SWAGW": [
-      "nasdaq"
-    ],
     "SWBI": [
       "nasdaq",
       "russell2000"
@@ -20838,9 +17566,6 @@
     "SWK": [
       "sp500"
     ],
-    "SWKHL": [
-      "nasdaq"
-    ],
     "SWKS": [
       "sp500",
       "nasdaq"
@@ -20850,9 +17575,6 @@
       "russell2000"
     ],
     "SWVL": [
-      "nasdaq"
-    ],
-    "SWVLW": [
       "nasdaq"
     ],
     "SWX": [
@@ -20871,9 +17593,6 @@
       "nasdaq"
     ],
     "SXTP": [
-      "nasdaq"
-    ],
-    "SXTPW": [
       "nasdaq"
     ],
     "SY": [
@@ -20909,31 +17628,13 @@
     "SZZL": [
       "nasdaq"
     ],
-    "SZZLR": [
-      "nasdaq"
-    ],
-    "SZZLU": [
-      "nasdaq"
-    ],
     "T": [
       "sp500"
     ],
     "TACH": [
       "nasdaq"
     ],
-    "TACHU": [
-      "nasdaq"
-    ],
-    "TACHW": [
-      "nasdaq"
-    ],
     "TACO": [
-      "nasdaq"
-    ],
-    "TACOU": [
-      "nasdaq"
-    ],
-    "TACOW": [
       "nasdaq"
     ],
     "TACT": [
@@ -20975,12 +17676,6 @@
     "TAVI": [
       "nasdaq"
     ],
-    "TAVIR": [
-      "nasdaq"
-    ],
-    "TAVIU": [
-      "nasdaq"
-    ],
     "TAYD": [
       "nasdaq",
       "russell2000"
@@ -20992,9 +17687,6 @@
     "TBCH": [
       "nasdaq",
       "russell2000"
-    ],
-    "TBCVU": [
-      "nasdaq"
     ],
     "TBI": [
       "russell2000"
@@ -21016,9 +17708,6 @@
     "TCBI": [
       "nasdaq",
       "russell2000"
-    ],
-    "TCBIO": [
-      "nasdaq"
     ],
     "TCBK": [
       "nasdaq",
@@ -21059,12 +17748,6 @@
     "TDAC": [
       "nasdaq"
     ],
-    "TDACU": [
-      "nasdaq"
-    ],
-    "TDACW": [
-      "nasdaq"
-    ],
     "TDAY": [
       "russell2000"
     ],
@@ -21094,12 +17777,6 @@
       "russell2000"
     ],
     "TDWD": [
-      "nasdaq"
-    ],
-    "TDWDR": [
-      "nasdaq"
-    ],
-    "TDWDU": [
       "nasdaq"
     ],
     "TDY": [
@@ -21187,12 +17864,6 @@
     "THEO": [
       "nasdaq"
     ],
-    "THEOR": [
-      "nasdaq"
-    ],
-    "THEOU": [
-      "nasdaq"
-    ],
     "THFF": [
       "nasdaq",
       "russell2000"
@@ -21266,12 +17937,6 @@
     "TLNC": [
       "nasdaq"
     ],
-    "TLNCU": [
-      "nasdaq"
-    ],
-    "TLNCW": [
-      "nasdaq"
-    ],
     "TLPH": [
       "nasdaq"
     ],
@@ -21289,9 +17954,6 @@
       "nasdaq",
       "russell2000"
     ],
-    "TLSIW": [
-      "nasdaq"
-    ],
     "TLX": [
       "nasdaq"
     ],
@@ -21302,9 +17964,6 @@
       "nasdaq"
     ],
     "TMCR": [
-      "nasdaq"
-    ],
-    "TMCWW": [
       "nasdaq"
     ],
     "TMDX": [
@@ -21320,29 +17979,11 @@
     "TMS": [
       "nasdaq"
     ],
-    "TMSWW": [
-      "nasdaq"
-    ],
     "TMTS": [
-      "nasdaq"
-    ],
-    "TMTSU": [
-      "nasdaq"
-    ],
-    "TMTSW": [
       "nasdaq"
     ],
     "TMUS": [
       "sp500",
-      "nasdaq"
-    ],
-    "TMUSI": [
-      "nasdaq"
-    ],
-    "TMUSL": [
-      "nasdaq"
-    ],
-    "TMUSZ": [
       "nasdaq"
     ],
     "TNC": [
@@ -21366,9 +18007,6 @@
       "nasdaq"
     ],
     "TNON": [
-      "nasdaq"
-    ],
-    "TNONW": [
       "nasdaq"
     ],
     "TNXP": [
@@ -21416,9 +18054,6 @@
     "TPG": [
       "nasdaq"
     ],
-    "TPGXL": [
-      "nasdaq"
-    ],
     "TPL": [
       "sp500"
     ],
@@ -21456,12 +18091,6 @@
       "sp500"
     ],
     "TRGS": [
-      "nasdaq"
-    ],
-    "TRGSR": [
-      "nasdaq"
-    ],
-    "TRGSU": [
       "nasdaq"
     ],
     "TRI": [
@@ -21624,34 +18253,13 @@
     "TVA": [
       "nasdaq"
     ],
-    "TVACU": [
-      "nasdaq"
-    ],
-    "TVACW": [
-      "nasdaq"
-    ],
     "TVAI": [
-      "nasdaq"
-    ],
-    "TVAIR": [
-      "nasdaq"
-    ],
-    "TVAIU": [
       "nasdaq"
     ],
     "TVGN": [
       "nasdaq"
     ],
-    "TVGNW": [
-      "nasdaq"
-    ],
     "TVIV": [
-      "nasdaq"
-    ],
-    "TVIVU": [
-      "nasdaq"
-    ],
-    "TVIVW": [
       "nasdaq"
     ],
     "TVRD": [
@@ -21681,12 +18289,6 @@
       "russell2000"
     ],
     "TWLV": [
-      "nasdaq"
-    ],
-    "TWLVR": [
-      "nasdaq"
-    ],
-    "TWLVU": [
       "nasdaq"
     ],
     "TWO": [
@@ -21762,9 +18364,6 @@
     "UCFI": [
       "nasdaq"
     ],
-    "UCFIW": [
-      "nasdaq"
-    ],
     "UCL": [
       "nasdaq"
     ],
@@ -21835,9 +18434,6 @@
     "UMBF": [
       "nasdaq",
       "russell2000"
-    ],
-    "UMBFO": [
-      "nasdaq"
     ],
     "UMH": [
       "russell2000"
@@ -21941,9 +18537,6 @@
     "USDE": [
       "nasdaq"
     ],
-    "USDEW": [
-      "nasdaq"
-    ],
     "USEA": [
       "nasdaq"
     ],
@@ -22000,12 +18593,6 @@
       "nasdaq"
     ],
     "UYSC": [
-      "nasdaq"
-    ],
-    "UYSCR": [
-      "nasdaq"
-    ],
-    "UYSCU": [
       "nasdaq"
     ],
     "UZX": [
@@ -22072,9 +18659,6 @@
     "VEEA": [
       "nasdaq"
     ],
-    "VEEAW": [
-      "nasdaq"
-    ],
     "VEEE": [
       "nasdaq"
     ],
@@ -22115,13 +18699,7 @@
     "VFS": [
       "nasdaq"
     ],
-    "VFSWW": [
-      "nasdaq"
-    ],
     "VGAS": [
-      "nasdaq"
-    ],
-    "VGASW": [
       "nasdaq"
     ],
     "VGNT": [
@@ -22134,12 +18712,6 @@
       "nasdaq"
     ],
     "VHCP": [
-      "nasdaq"
-    ],
-    "VHCPU": [
-      "nasdaq"
-    ],
-    "VHCPW": [
       "nasdaq"
     ],
     "VHI": [
@@ -22206,27 +18778,12 @@
     "VLOS": [
       "nasdaq"
     ],
-    "VLOSU": [
-      "nasdaq"
-    ],
-    "VLOSW": [
-      "nasdaq"
-    ],
     "VLTO": [
       "sp500"
     ],
     "VLY": [
       "nasdaq",
       "russell2000"
-    ],
-    "VLYPN": [
-      "nasdaq"
-    ],
-    "VLYPO": [
-      "nasdaq"
-    ],
-    "VLYPP": [
-      "nasdaq"
     ],
     "VMAR": [
       "nasdaq"
@@ -22255,12 +18812,6 @@
       "nasdaq"
     ],
     "VNME": [
-      "nasdaq"
-    ],
-    "VNMEU": [
-      "nasdaq"
-    ],
-    "VNMEW": [
       "nasdaq"
     ],
     "VNOM": [
@@ -22338,9 +18889,6 @@
     "VRXA": [
       "nasdaq"
     ],
-    "VRXAW": [
-      "nasdaq"
-    ],
     "VS": [
       "nasdaq"
     ],
@@ -22354,9 +18902,6 @@
     "VSEC": [
       "nasdaq",
       "russell2000"
-    ],
-    "VSECU": [
-      "nasdaq"
     ],
     "VSH": [
       "russell2000"
@@ -22418,9 +18963,6 @@
     "VWAV": [
       "nasdaq"
     ],
-    "VWAVW": [
-      "nasdaq"
-    ],
     "VYGR": [
       "nasdaq",
       "russell2000"
@@ -22449,9 +18991,6 @@
       "nasdaq"
     ],
     "WALD": [
-      "nasdaq"
-    ],
-    "WALDW": [
       "nasdaq"
     ],
     "WASH": [
@@ -22523,12 +19062,6 @@
     "WENN": [
       "nasdaq"
     ],
-    "WENNU": [
-      "nasdaq"
-    ],
-    "WENNW": [
-      "nasdaq"
-    ],
     "WERN": [
       "nasdaq",
       "russell2000"
@@ -22572,9 +19105,6 @@
     "WHF": [
       "nasdaq"
     ],
-    "WHFCL": [
-      "nasdaq"
-    ],
     "WHG": [
       "russell2000"
     ],
@@ -22582,15 +19112,6 @@
       "russell2000"
     ],
     "WHLR": [
-      "nasdaq"
-    ],
-    "WHLRD": [
-      "nasdaq"
-    ],
-    "WHLRL": [
-      "nasdaq"
-    ],
-    "WHLRP": [
       "nasdaq"
     ],
     "WHWK": [
@@ -22631,12 +19152,6 @@
     "WLCO": [
       "nasdaq"
     ],
-    "WLCOU": [
-      "nasdaq"
-    ],
-    "WLCOW": [
-      "nasdaq"
-    ],
     "WLDN": [
       "nasdaq",
       "russell2000"
@@ -22644,20 +19159,11 @@
     "WLDS": [
       "nasdaq"
     ],
-    "WLDSW": [
-      "nasdaq"
-    ],
     "WLFC": [
       "nasdaq",
       "russell2000"
     ],
     "WLII": [
-      "nasdaq"
-    ],
-    "WLIIU": [
-      "nasdaq"
-    ],
-    "WLIIW": [
       "nasdaq"
     ],
     "WLTH": [
@@ -22732,9 +19238,6 @@
       "nasdaq",
       "russell2000"
     ],
-    "WSBCO": [
-      "nasdaq"
-    ],
     "WSBF": [
       "nasdaq",
       "russell2000"
@@ -22765,12 +19268,6 @@
     "WSTN": [
       "nasdaq"
     ],
-    "WSTNR": [
-      "nasdaq"
-    ],
-    "WSTNU": [
-      "nasdaq"
-    ],
     "WT": [
       "russell2000"
     ],
@@ -22784,16 +19281,7 @@
     "WTFC": [
       "nasdaq"
     ],
-    "WTFCN": [
-      "nasdaq"
-    ],
     "WTG": [
-      "nasdaq"
-    ],
-    "WTGUR": [
-      "nasdaq"
-    ],
-    "WTGUU": [
       "nasdaq"
     ],
     "WTI": [
@@ -22814,9 +19302,6 @@
       "russell2000"
     ],
     "WVVI": [
-      "nasdaq"
-    ],
-    "WVVIP": [
       "nasdaq"
     ],
     "WW": [
@@ -22857,16 +19342,7 @@
     "XBP": [
       "nasdaq"
     ],
-    "XBPEW": [
-      "nasdaq"
-    ],
     "XCBE": [
-      "nasdaq"
-    ],
-    "XCBEU": [
-      "nasdaq"
-    ],
-    "XCBEW": [
       "nasdaq"
     ],
     "XCH": [
@@ -22883,9 +19359,6 @@
       "nasdaq"
     ],
     "XELB": [
-      "nasdaq"
-    ],
-    "XELLL": [
       "nasdaq"
     ],
     "XENE": [
@@ -22911,9 +19384,6 @@
     ],
     "XHR": [
       "russell2000"
-    ],
-    "XIIIU": [
-      "nasdaq"
     ],
     "XLO": [
       "nasdaq"
@@ -22971,12 +19441,6 @@
     "XRPN": [
       "nasdaq"
     ],
-    "XRPNU": [
-      "nasdaq"
-    ],
-    "XRPNW": [
-      "nasdaq"
-    ],
     "XRTX": [
       "nasdaq"
     ],
@@ -22984,19 +19448,7 @@
       "nasdaq",
       "russell2000"
     ],
-    "XRXDW": [
-      "nasdaq"
-    ],
     "XSLL": [
-      "nasdaq"
-    ],
-    "XSLLU": [
-      "nasdaq"
-    ],
-    "XSLLW": [
-      "nasdaq"
-    ],
-    "XTERU": [
       "nasdaq"
     ],
     "XTIA": [
@@ -23035,9 +19487,6 @@
     "YDES": [
       "nasdaq"
     ],
-    "YDESW": [
-      "nasdaq"
-    ],
     "YDKG": [
       "nasdaq"
     ],
@@ -23056,12 +19505,6 @@
     "YHNA": [
       "nasdaq"
     ],
-    "YHNAR": [
-      "nasdaq"
-    ],
-    "YHNAU": [
-      "nasdaq"
-    ],
     "YI": [
       "nasdaq"
     ],
@@ -23069,12 +19512,6 @@
       "nasdaq"
     ],
     "YICC": [
-      "nasdaq"
-    ],
-    "YICCU": [
-      "nasdaq"
-    ],
-    "YICCW": [
       "nasdaq"
     ],
     "YJ": [
@@ -23158,9 +19595,6 @@
     "ZEO": [
       "nasdaq"
     ],
-    "ZEOWW": [
-      "nasdaq"
-    ],
     "ZETA": [
       "russell2000"
     ],
@@ -23171,9 +19605,6 @@
       "russell2000"
     ],
     "ZION": [
-      "nasdaq"
-    ],
-    "ZIONP": [
       "nasdaq"
     ],
     "ZIP": [
@@ -23191,12 +19622,6 @@
     "ZKP": [
       "nasdaq"
     ],
-    "ZKPU": [
-      "nasdaq"
-    ],
-    "ZKPW": [
-      "nasdaq"
-    ],
     "ZLAB": [
       "nasdaq"
     ],
@@ -23211,9 +19636,6 @@
       "russell2000"
     ],
     "ZOOZ": [
-      "nasdaq"
-    ],
-    "ZOOZW": [
       "nasdaq"
     ],
     "ZS": [
@@ -23260,507 +19682,3781 @@
   },
   "deep": [
     "A",
+    "AACG",
+    "AACI",
+    "AACO",
+    "AACP",
+    "AAL",
+    "AAME",
+    "AAOI",
+    "AAON",
+    "AAPG",
     "AAPL",
+    "AARD",
+    "ABAT",
     "ABBV",
+    "ABCL",
+    "ABEO",
+    "ABLV",
     "ABNB",
+    "ABOS",
+    "ABSI",
     "ABT",
+    "ABTC",
+    "ABTS",
+    "ABUS",
+    "ABVC",
+    "ABVX",
+    "ACAA",
+    "ACAD",
+    "ACB",
+    "ACCL",
+    "ACDC",
+    "ACET",
+    "ACFN",
+    "ACGC",
     "ACGL",
+    "ACHC",
+    "ACHV",
+    "ACIC",
+    "ACIU",
+    "ACIW",
+    "ACLS",
+    "ACMR",
     "ACN",
+    "ACNB",
+    "ACNT",
+    "ACOG",
+    "ACON",
+    "ACRS",
+    "ACRV",
+    "ACT",
+    "ACTG",
+    "ACTU",
+    "ACXP",
+    "ADAC",
+    "ADAG",
+    "ADAM",
     "ADBE",
+    "ADEA",
+    "ADGM",
     "ADI",
+    "ADIL",
     "ADM",
+    "ADMA",
     "ADP",
+    "ADPT",
+    "ADSE",
     "ADSK",
+    "ADTN",
+    "ADUR",
+    "ADUS",
+    "ADV",
+    "ADVB",
+    "ADXN",
+    "AEAQ",
+    "AEBI",
+    "AEC",
     "AEE",
+    "AEHL",
+    "AEHR",
+    "AEI",
+    "AEIS",
+    "AEMD",
+    "AENT",
     "AEP",
+    "AERT",
     "AES",
+    "AESP",
+    "AEVA",
+    "AEYE",
+    "AFCG",
+    "AFJK",
     "AFL",
+    "AFRI",
+    "AFRM",
+    "AFYA",
+    "AGCC",
+    "AGEN",
+    "AGIO",
+    "AGMB",
+    "AGMH",
+    "AGNC",
+    "AGNT",
+    "AGPU",
+    "AGRZ",
+    "AGYS",
+    "AHCO",
+    "AHG",
+    "AHMA",
+    "AIAI",
+    "AIBZ",
+    "AIDX",
+    "AIFA",
+    "AIFC",
+    "AIFF",
+    "AIFU",
     "AIG",
+    "AIHS",
+    "AIIO",
+    "AIIR",
+    "AIMD",
+    "AIOS",
+    "AIOT",
+    "AIP",
+    "AIRE",
+    "AIRG",
+    "AIRJ",
+    "AIRO",
+    "AIRS",
+    "AIRT",
+    "AISP",
+    "AIXC",
+    "AIXI",
     "AIZ",
     "AJG",
     "AKAM",
+    "AKAN",
+    "AKBA",
+    "AKTS",
+    "AKTX",
+    "ALAB",
+    "ALAR",
     "ALB",
+    "ALCO",
+    "ALDF",
+    "ALDX",
+    "ALEC",
+    "ALF",
+    "ALGM",
     "ALGN",
+    "ALGS",
+    "ALGT",
+    "ALHC",
+    "ALIS",
+    "ALKS",
+    "ALKT",
     "ALL",
     "ALLE",
+    "ALLO",
+    "ALLR",
+    "ALLT",
+    "ALM",
+    "ALMR",
+    "ALMS",
+    "ALMU",
+    "ALNT",
+    "ALNY",
+    "ALOT",
+    "ALOV",
+    "ALOY",
+    "ALP",
+    "ALPS",
+    "ALPX",
+    "ALRM",
+    "ALRS",
+    "ALT",
+    "ALTI",
+    "ALTO",
+    "ALVO",
+    "ALXO",
+    "ALZN",
+    "AMAL",
+    "AMAN",
     "AMAT",
+    "AMBA",
+    "AMBR",
+    "AMCI",
     "AMCR",
+    "AMCX",
     "AMD",
     "AME",
     "AMGN",
+    "AMIX",
+    "AMKR",
+    "AMLX",
+    "AMOD",
     "AMP",
+    "AMPG",
+    "AMPH",
+    "AMPL",
+    "AMRN",
+    "AMRX",
+    "AMSC",
+    "AMSF",
+    "AMSS",
+    "AMST",
     "AMT",
+    "AMTX",
     "AMZN",
+    "ANAB",
+    "ANDE",
     "ANET",
+    "ANGH",
+    "ANGI",
+    "ANGO",
+    "ANIK",
+    "ANIP",
+    "ANIX",
+    "ANL",
+    "ANNA",
+    "ANNX",
+    "ANPA",
+    "ANTA",
+    "ANTX",
+    "ANY",
     "AON",
     "AOS",
+    "AOSL",
+    "AOUT",
     "APA",
+    "APAC",
+    "APC",
     "APD",
+    "APEI",
+    "APGE",
     "APH",
+    "API",
+    "APLD",
+    "APLM",
+    "APMC",
+    "APMD",
     "APO",
+    "APOG",
     "APP",
+    "APPF",
+    "APPN",
+    "APPS",
+    "APRE",
     "APTV",
+    "APUR",
+    "APVO",
+    "APWC",
+    "APXT",
+    "APYX",
+    "AQB",
+    "AQMS",
+    "AQST",
+    "ARAI",
+    "ARAY",
+    "ARBB",
+    "ARBE",
+    "ARBK",
+    "ARCB",
+    "ARCC",
+    "ARCI",
+    "ARCL",
+    "ARCT",
+    "ARDX",
     "ARE",
+    "AREC",
     "ARES",
+    "ARGX",
+    "ARHS",
+    "ARKO",
+    "ARKR",
+    "ARM",
+    "AROW",
+    "ARQ",
+    "ARQQ",
+    "ARQT",
+    "ARRY",
+    "ARTC",
+    "ARTL",
+    "ARTNA",
+    "ARTV",
+    "ARTW",
+    "ARVN",
+    "ARWR",
+    "ARXS",
+    "ASBP",
+    "ASLE",
+    "ASMB",
+    "ASML",
+    "ASND",
+    "ASO",
+    "ASPC",
+    "ASPI",
+    "ASPS",
+    "ASRV",
+    "ASST",
+    "ASTC",
+    "ASTE",
+    "ASTH",
+    "ASTI",
+    "ASTL",
+    "ASTS",
+    "ASUR",
+    "ASYS",
+    "ATAI",
+    "ATAT",
+    "ATCX",
+    "ATEC",
+    "ATER",
+    "ATEX",
+    "ATGL",
+    "ATHE",
+    "ATHR",
+    "ATII",
+    "ATLC",
+    "ATLO",
+    "ATLX",
+    "ATNI",
     "ATO",
+    "ATOM",
+    "ATOS",
+    "ATPC",
+    "ATRA",
+    "ATRC",
+    "ATRO",
+    "ATTO",
+    "ATXG",
+    "ATYR",
+    "AUBN",
+    "AUC",
+    "AUDC",
+    "AUGO",
+    "AUID",
+    "AUPH",
+    "AUR",
+    "AURA",
+    "AURE",
+    "AUTL",
+    "AUUD",
+    "AVAH",
+    "AVAT",
+    "AVAV",
+    "AVBH",
+    "AVBP",
     "AVGO",
+    "AVIR",
+    "AVLN",
+    "AVNW",
+    "AVO",
+    "AVPT",
+    "AVR",
+    "AVT",
+    "AVTX",
+    "AVX",
+    "AVXL",
     "AVY",
     "AWK",
+    "AWRE",
+    "AXG",
+    "AXGN",
+    "AXIN",
     "AXON",
     "AXP",
+    "AXSM",
+    "AXTI",
+    "AYA",
+    "AYTU",
+    "AZ",
+    "AZI",
+    "AZIO",
     "AZO",
+    "AZTA",
     "BA",
     "BAC",
+    "BACC",
+    "BAER",
+    "BAFN",
     "BALL",
+    "BAND",
+    "BANF",
+    "BANL",
+    "BANR",
+    "BANX",
+    "BAOS",
+    "BATRA",
+    "BATRK",
     "BAX",
+    "BBCP",
+    "BBCQ",
+    "BBGI",
+    "BBIO",
+    "BBLG",
+    "BBNX",
+    "BBOT",
+    "BBSI",
     "BBY",
+    "BCAB",
+    "BCAL",
+    "BCAR",
+    "BCAX",
+    "BCBP",
+    "BCCQ",
+    "BCDA",
+    "BCG",
+    "BCIC",
+    "BCML",
+    "BCPC",
+    "BCRX",
+    "BCTX",
+    "BCYC",
+    "BDCI",
+    "BDMD",
+    "BDRX",
+    "BDSX",
+    "BDTX",
     "BDX",
+    "BEAG",
+    "BEAM",
+    "BEAT",
+    "BEEM",
+    "BEEP",
+    "BELFA",
+    "BELFB",
     "BEN",
+    "BENF",
+    "BETR",
     "BF-B",
+    "BFC",
+    "BFRG",
+    "BFRI",
+    "BFST",
     "BG",
+    "BGC",
+    "BGDE",
+    "BGIN",
+    "BGL",
+    "BGLC",
+    "BGM",
+    "BGMS",
+    "BHAV",
+    "BHF",
+    "BHFAL",
+    "BHRB",
+    "BHST",
+    "BIAF",
+    "BID",
+    "BIDU",
     "BIIB",
+    "BILI",
+    "BIOA",
+    "BIOT",
+    "BIOX",
+    "BIRD",
+    "BIVI",
+    "BIXI",
+    "BIYA",
+    "BJDX",
+    "BJRI",
+    "BKHA",
     "BKNG",
     "BKR",
+    "BKYI",
+    "BL",
+    "BLBD",
+    "BLDP",
     "BLDR",
+    "BLFS",
+    "BLIN",
+    "BLIV",
     "BLK",
+    "BLKB",
+    "BLLN",
+    "BLMN",
+    "BLNE",
+    "BLNK",
+    "BLRK",
+    "BLRX",
+    "BLSM",
+    "BLTE",
+    "BLUW",
+    "BLZE",
+    "BLZR",
+    "BMBL",
+    "BMEA",
+    "BMGL",
+    "BMHL",
+    "BMM",
+    "BMR",
+    "BMRA",
+    "BMRC",
+    "BMRN",
     "BMY",
+    "BNAI",
+    "BNC",
+    "BNGO",
+    "BNKK",
+    "BNR",
+    "BNTC",
+    "BNTX",
     "BNY",
+    "BODI",
+    "BOF",
+    "BOKF",
+    "BOLD",
+    "BOLT",
+    "BON",
+    "BOOM",
+    "BOSC",
+    "BOT",
+    "BOTJ",
+    "BOXL",
+    "BPAC",
+    "BPOP",
+    "BPRN",
     "BR",
+    "BRAG",
+    "BRAI",
+    "BRBI",
+    "BRCB",
+    "BREZ",
+    "BRFH",
+    "BRID",
     "BRK-B",
+    "BRKH",
+    "BRKR",
+    "BRLS",
+    "BRLT",
+    "BRNS",
+    "BRNX",
     "BRO",
+    "BRR",
+    "BRTX",
+    "BRUN",
+    "BRVE",
+    "BRZE",
+    "BSAA",
+    "BSBK",
+    "BSEM",
+    "BSET",
+    "BSIN",
+    "BSP",
+    "BSRR",
+    "BSVN",
     "BSX",
+    "BSY",
+    "BTAI",
+    "BTBD",
+    "BTBT",
+    "BTCS",
+    "BTCT",
+    "BTDR",
+    "BTLN",
+    "BTMD",
+    "BTOC",
+    "BTOG",
+    "BTQ",
+    "BTSG",
+    "BTTC",
+    "BULL",
+    "BUSE",
+    "BUUU",
+    "BVC",
+    "BVFL",
+    "BVS",
+    "BWAY",
+    "BWB",
+    "BWEN",
+    "BWFG",
+    "BWIN",
+    "BWMN",
     "BX",
+    "BXBL",
     "BXP",
+    "BYAH",
+    "BYFC",
+    "BYND",
+    "BYRN",
+    "BYSI",
+    "BZ",
+    "BZAI",
+    "BZFD",
+    "BZUN",
     "C",
+    "CAAS",
+    "CABA",
+    "CABR",
+    "CAC",
+    "CACC",
+    "CADL",
+    "CAE",
+    "CAES",
     "CAH",
+    "CAI",
+    "CAII",
+    "CAKE",
+    "CALC",
+    "CALM",
+    "CAMP",
+    "CAMT",
+    "CAN",
+    "CAPN",
+    "CAPR",
+    "CAPS",
+    "CAQ",
+    "CAR",
+    "CARE",
+    "CARG",
+    "CARL",
     "CARR",
+    "CART",
+    "CASH",
+    "CASS",
+    "CAST",
     "CASY",
     "CAT",
+    "CATY",
     "CB",
+    "CBAT",
+    "CBC",
+    "CBFV",
+    "CBIO",
+    "CBK",
+    "CBLL",
+    "CBNK",
     "CBOE",
     "CBRE",
+    "CBRL",
+    "CBRS",
+    "CBSH",
+    "CBUS",
+    "CCAP",
+    "CCAQ",
+    "CCB",
+    "CCBG",
+    "CCC",
+    "CCCC",
+    "CCCT",
+    "CCD",
+    "CCEC",
+    "CCEP",
+    "CCG",
+    "CCHH",
     "CCI",
+    "CCII",
     "CCL",
+    "CCLD",
+    "CCNE",
+    "CCOI",
+    "CCSI",
+    "CCTG",
+    "CCXI",
+    "CD",
+    "CDIO",
+    "CDLX",
+    "CDNA",
+    "CDNL",
     "CDNS",
+    "CDRO",
+    "CDT",
+    "CDTG",
     "CDW",
+    "CDXS",
+    "CDZI",
+    "CDZIP",
+    "CECO",
     "CEG",
+    "CELC",
+    "CELH",
+    "CELU",
+    "CELZ",
+    "CENN",
+    "CENT",
+    "CENTA",
+    "CENX",
+    "CEPF",
+    "CEPL",
+    "CEPO",
+    "CEPS",
+    "CEPV",
+    "CERS",
+    "CERT",
+    "CETX",
+    "CETY",
+    "CEVA",
     "CF",
+    "CFBK",
+    "CFFI",
+    "CFFN",
     "CFG",
+    "CG",
+    "CGBD",
+    "CGC",
+    "CGCF",
+    "CGEM",
+    "CGEN",
+    "CGNT",
+    "CGNX",
+    "CGO",
+    "CGON",
+    "CGTL",
+    "CGTX",
+    "CHA",
+    "CHAI",
+    "CHAR",
+    "CHCI",
+    "CHCO",
     "CHD",
+    "CHDN",
+    "CHEC",
+    "CHEF",
+    "CHGA",
+    "CHI",
+    "CHKP",
+    "CHMG",
+    "CHNR",
+    "CHPG",
+    "CHR",
+    "CHRD",
+    "CHRN",
+    "CHRS",
     "CHRW",
+    "CHSN",
     "CHTR",
+    "CHW",
+    "CHY",
+    "CHYM",
     "CI",
     "CIEN",
+    "CIFR",
+    "CIGI",
+    "CIGL",
+    "CIIT",
     "CINF",
+    "CING",
+    "CIRC",
+    "CISO",
+    "CISS",
+    "CIVB",
+    "CJMB",
     "CL",
+    "CLAR",
+    "CLBK",
+    "CLBT",
+    "CLDX",
+    "CLFD",
+    "CLGN",
+    "CLIK",
+    "CLIR",
+    "CLLS",
+    "CLMB",
+    "CLMT",
+    "CLNE",
+    "CLNN",
+    "CLOV",
+    "CLPS",
+    "CLPT",
+    "CLRB",
+    "CLRO",
+    "CLSK",
+    "CLST",
+    "CLWT",
     "CLX",
+    "CLYM",
+    "CMCO",
     "CMCSA",
+    "CMCT",
     "CME",
     "CMG",
     "CMI",
+    "CMII",
+    "CMMB",
+    "CMND",
+    "CMPR",
+    "CMPS",
+    "CMPX",
+    "CMRC",
     "CMS",
+    "CMTL",
+    "CMTV",
     "CNC",
+    "CNCK",
+    "CNDT",
+    "CNET",
+    "CNEY",
+    "CNL",
+    "CNOB",
     "CNP",
+    "CNSP",
+    "CNSY",
+    "CNTB",
+    "CNTN",
+    "CNTX",
+    "CNTY",
+    "CNVS",
+    "CNXC",
+    "CNXN",
+    "CNXU",
+    "COAG",
+    "COCH",
+    "COCO",
+    "COCP",
+    "CODA",
+    "CODX",
     "COF",
+    "COFS",
+    "COGT",
     "COHR",
+    "COHU",
     "COIN",
+    "COKE",
+    "COLA",
+    "COLB",
+    "COLL",
+    "COLM",
     "COO",
+    "COOT",
     "COP",
     "COR",
+    "CORT",
+    "CORZ",
+    "COSM",
     "COST",
+    "COYA",
     "CPAY",
+    "CPB",
+    "CPBI",
+    "CPHC",
+    "CPIX",
+    "CPOP",
     "CPRT",
+    "CPSH",
+    "CPSS",
     "CPT",
+    "CPZ",
+    "CRAC",
+    "CRAI",
+    "CRAN",
+    "CRAQ",
+    "CRBP",
+    "CRBU",
+    "CRCT",
+    "CRDF",
+    "CRDL",
+    "CRDO",
+    "CRE",
+    "CRESY",
+    "CREX",
+    "CRGO",
     "CRH",
+    "CRIS",
     "CRL",
     "CRM",
+    "CRMD",
+    "CRML",
+    "CRMT",
+    "CRNC",
+    "CRNT",
+    "CRNX",
+    "CRON",
+    "CROX",
+    "CRSP",
+    "CRSR",
+    "CRTO",
+    "CRUS",
+    "CRVL",
+    "CRVO",
+    "CRVS",
     "CRWD",
+    "CRWS",
+    "CRWV",
+    "CSAI",
+    "CSBR",
     "CSCO",
     "CSGP",
+    "CSHR",
+    "CSIQ",
+    "CSPI",
+    "CSQ",
+    "CSTE",
+    "CSTL",
+    "CSWC",
     "CSX",
+    "CTAA",
     "CTAS",
+    "CTBI",
+    "CTKB",
+    "CTMX",
+    "CTNM",
+    "CTNT",
+    "CTOR",
+    "CTRM",
+    "CTRN",
     "CTSH",
+    "CTSO",
     "CTVA",
+    "CTW",
+    "CTXR",
+    "CUB",
+    "CUE",
+    "CULP",
+    "CUPR",
+    "CURI",
+    "CURR",
+    "CURX",
+    "CUVL",
+    "CV",
+    "CVBF",
+    "CVCO",
+    "CVGI",
+    "CVKD",
+    "CVLT",
     "CVNA",
+    "CVRX",
     "CVS",
+    "CVV",
     "CVX",
+    "CWBC",
+    "CWCO",
+    "CWD",
+    "CWST",
+    "CXAI",
+    "CXDO",
+    "CXII",
+    "CYAB",
+    "CYCN",
+    "CYCU",
+    "CYN",
+    "CYPH",
+    "CYRX",
+    "CYTK",
+    "CZFS",
+    "CZNC",
+    "CZR",
+    "CZWI",
     "D",
+    "DAAQ",
+    "DAIC",
+    "DAIO",
+    "DAKT",
     "DAL",
+    "DARE",
     "DASH",
+    "DAVE",
+    "DBCA",
+    "DBGI",
+    "DBVT",
+    "DBX",
+    "DCBO",
+    "DCGO",
+    "DCOY",
+    "DCTH",
+    "DCX",
     "DD",
+    "DDI",
     "DDOG",
     "DE",
     "DECK",
+    "DEFT",
     "DELL",
+    "DERM",
+    "DETX",
+    "DFDV",
+    "DFLI",
+    "DFNS",
+    "DFSC",
+    "DFTX",
     "DG",
+    "DGICA",
+    "DGICB",
+    "DGII",
+    "DGNX",
     "DGX",
+    "DGXX",
+    "DH",
+    "DHC",
     "DHI",
     "DHR",
+    "DIBS",
+    "DIOD",
     "DIS",
+    "DJCO",
+    "DJT",
+    "DKI",
+    "DKNG",
+    "DLHC",
+    "DLO",
+    "DLPN",
     "DLR",
+    "DLTH",
     "DLTR",
+    "DLXY",
+    "DMAA",
+    "DMAC",
+    "DMII",
+    "DMRA",
+    "DMRC",
+    "DNLI",
+    "DNMX",
+    "DNTH",
+    "DNUT",
     "DOC",
+    "DOCU",
+    "DOGZ",
+    "DOMH",
+    "DOMO",
+    "DOO",
+    "DORM",
     "DOV",
     "DOW",
+    "DOX",
+    "DOYU",
+    "DPRO",
+    "DPU",
     "DPZ",
+    "DRCT",
+    "DRDB",
+    "DRH",
     "DRI",
+    "DRIO",
+    "DRMA",
+    "DRS",
+    "DRTS",
+    "DRUG",
+    "DRVN",
+    "DSAC",
+    "DSC",
+    "DSGN",
+    "DSGR",
+    "DSGX",
+    "DSP",
+    "DSWL",
+    "DSY",
+    "DTCX",
     "DTE",
+    "DTI",
+    "DTIL",
+    "DTSQ",
+    "DTSS",
+    "DTST",
     "DUK",
+    "DUKR",
+    "DUO",
+    "DUOL",
+    "DUOT",
     "DVA",
+    "DVLT",
     "DVN",
+    "DWSN",
+    "DWTX",
     "DXCM",
+    "DXLG",
+    "DXPE",
+    "DXR",
+    "DXST",
+    "DYAI",
+    "DYN",
+    "DYNC",
+    "DYOR",
     "EBAY",
+    "EBC",
+    "EBMT",
+    "EBON",
+    "ECBK",
     "ECHO",
     "ECL",
+    "ECOR",
+    "ECPG",
+    "ECX",
     "ED",
+    "EDBL",
+    "EDHL",
+    "EDIT",
+    "EDRY",
+    "EDSA",
+    "EDTK",
+    "EDUC",
+    "EEFT",
+    "EEIQ",
+    "EFOI",
+    "EFSC",
+    "EFSI",
+    "EFTY",
     "EFX",
     "EG",
+    "EGAN",
+    "EGBN",
+    "EGHA",
+    "EGHT",
+    "EH",
+    "EHGO",
+    "EHLD",
+    "EHTH",
+    "EIKN",
     "EIX",
+    "EJH",
     "EL",
+    "ELAB",
+    "ELBM",
+    "ELDN",
+    "ELE",
+    "ELMT",
+    "ELOG",
+    "ELOX",
+    "ELPW",
+    "ELTK",
+    "ELTX",
+    "ELUT",
     "ELV",
+    "ELVA",
+    "ELVN",
+    "ELVR",
+    "ELWT",
+    "EMAT",
+    "EMBC",
     "EME",
+    "EMIS",
+    "EML",
+    "EMPD",
     "EMR",
+    "ENGN",
+    "ENGS",
+    "ENLT",
+    "ENLV",
+    "ENPH",
+    "ENRD",
+    "ENSC",
+    "ENSG",
+    "ENTA",
+    "ENTG",
+    "ENTX",
+    "ENVB",
+    "ENVX",
     "EOG",
+    "EOLS",
+    "EOSE",
+    "EPOW",
+    "EPRX",
+    "EPSM",
+    "EPSN",
+    "EQ",
     "EQIX",
+    "EQPT",
     "EQT",
+    "ERAS",
+    "ERIC",
     "ERIE",
+    "ERII",
+    "ERNA",
     "ES",
+    "ESCA",
+    "ESEA",
+    "ESLA",
+    "ESLT",
+    "ESOA",
+    "ESQ",
     "ESS",
+    "ESTA",
     "ETN",
+    "ETON",
+    "ETOR",
     "ETR",
+    "ETS",
+    "EU",
+    "EUDA",
+    "EURK",
+    "EVAX",
+    "EVCM",
+    "EVER",
+    "EVGN",
+    "EVGO",
+    "EVLV",
+    "EVO",
+    "EVOX",
     "EVRG",
     "EW",
+    "EWAV",
+    "EWBC",
+    "EWTX",
     "EXC",
     "EXE",
+    "EXEL",
+    "EXFY",
+    "EXLS",
+    "EXOZ",
     "EXPD",
     "EXPE",
+    "EXPO",
     "EXR",
+    "EXTR",
+    "EXYN",
+    "EYE",
+    "EYPT",
+    "EZGO",
+    "EZPW",
+    "EZRA",
     "F",
+    "FA",
+    "FABC",
+    "FAC",
+    "FACT",
+    "FAMI",
     "FANG",
     "FAST",
+    "FATE",
+    "FATN",
+    "FBDT",
+    "FBGL",
+    "FBIO",
+    "FBIZ",
+    "FBLA",
+    "FBLG",
+    "FBNC",
+    "FBRX",
+    "FBYD",
+    "FCAP",
+    "FCBC",
+    "FCCO",
+    "FCEL",
+    "FCFS",
+    "FCHL",
+    "FCNCA",
+    "FCUV",
     "FCX",
+    "FDBC",
+    "FDMM",
+    "FDMT",
     "FDS",
+    "FDSB",
+    "FDUS",
     "FDX",
     "FDXF",
     "FE",
+    "FEAM",
+    "FEBO",
+    "FEED",
+    "FEIM",
+    "FELE",
+    "FEMY",
+    "FENC",
+    "FER",
+    "FERA",
     "FERG",
+    "FFAI",
+    "FFBC",
+    "FFIN",
     "FFIV",
+    "FGBI",
+    "FGI",
+    "FGII",
+    "FGL",
+    "FGNX",
+    "FHB",
+    "FHTX",
+    "FIBK",
     "FICO",
+    "FIEE",
+    "FIGR",
+    "FIGX",
+    "FINW",
+    "FIP",
     "FIS",
+    "FISI",
+    "FISN",
     "FISV",
     "FITB",
+    "FIVE",
+    "FIVN",
     "FIX",
+    "FIZZ",
+    "FKWL",
+    "FLD",
     "FLEX",
+    "FLGT",
+    "FLL",
+    "FLNA",
+    "FLNC",
+    "FLNT",
+    "FLUX",
+    "FLWS",
+    "FLX",
+    "FLXS",
+    "FLY",
+    "FLYE",
+    "FLYW",
+    "FLZH",
+    "FMAC",
+    "FMAO",
+    "FMBH",
+    "FMFC",
+    "FMNB",
+    "FMST",
+    "FNGR",
+    "FNKO",
+    "FNLC",
+    "FNRN",
+    "FNUC",
+    "FNWB",
+    "FNWD",
+    "FOCL",
+    "FOFO",
+    "FORM",
+    "FORR",
+    "FORTY",
+    "FOSL",
     "FOX",
     "FOXA",
+    "FOXF",
+    "FOXX",
+    "FRAF",
+    "FRBA",
+    "FRBT",
+    "FRD",
+    "FRGT",
+    "FRHC",
+    "FRME",
+    "FRMI",
+    "FRMM",
+    "FRNM",
+    "FROG",
+    "FRPH",
+    "FRPT",
+    "FRSH",
+    "FRST",
+    "FRSX",
     "FRT",
+    "FRTT",
+    "FRVO",
+    "FSBC",
+    "FSBW",
+    "FSEA",
+    "FSHP",
     "FSLR",
+    "FSLY",
+    "FSTR",
+    "FSUN",
+    "FSV",
+    "FTAI",
+    "FTCI",
+    "FTDR",
+    "FTEK",
+    "FTFT",
+    "FTH",
+    "FTHA",
+    "FTHM",
+    "FTLF",
     "FTNT",
+    "FTRE",
     "FTV",
+    "FUFU",
+    "FULC",
+    "FULT",
+    "FUNC",
+    "FUND",
+    "FUSB",
+    "FUSE",
+    "FUTU",
+    "FVAV",
+    "FVCB",
+    "FVN",
+    "FWAC",
+    "FWDI",
+    "FWONA",
+    "FWONK",
+    "FWRD",
+    "FWRG",
+    "FXAC",
+    "FXHO",
+    "FXNC",
+    "GABC",
+    "GAIA",
+    "GAIN",
+    "GALT",
+    "GAME",
+    "GANX",
+    "GASS",
+    "GAUZ",
+    "GBDC",
+    "GBFH",
+    "GBLI",
+    "GCBC",
+    "GCGR",
+    "GCL",
+    "GCMG",
+    "GCT",
+    "GCTK",
     "GD",
+    "GDC",
     "GDDY",
+    "GDEV",
+    "GDHG",
+    "GDRX",
+    "GDS",
+    "GDTC",
+    "GDYN",
     "GE",
+    "GECC",
+    "GEG",
     "GEHC",
+    "GELS",
+    "GEMI",
     "GEN",
+    "GENB",
+    "GENK",
+    "GEOS",
+    "GERN",
     "GEV",
+    "GEVO",
+    "GFAI",
+    "GFS",
+    "GFUZ",
+    "GGAL",
+    "GGR",
+    "GH",
+    "GHRS",
+    "GHXI",
+    "GIBO",
+    "GIFT",
+    "GIGM",
+    "GIII",
     "GILD",
+    "GILT",
+    "GIPR",
     "GIS",
+    "GITS",
+    "GIW",
+    "GIX",
     "GL",
+    "GLAD",
+    "GLBE",
+    "GLBS",
+    "GLE",
+    "GLIBA",
+    "GLIBK",
+    "GLMD",
+    "GLND",
+    "GLNG",
+    "GLOO",
+    "GLPI",
+    "GLRE",
+    "GLSI",
+    "GLUE",
     "GLW",
+    "GLXG",
+    "GLXY",
     "GM",
+    "GMAB",
+    "GMEX",
+    "GMHS",
+    "GMM",
+    "GNLN",
+    "GNLX",
+    "GNPX",
     "GNRC",
+    "GNSS",
+    "GNTA",
+    "GNTX",
+    "GO",
+    "GOAI",
+    "GOGO",
+    "GOOD",
     "GOOG",
     "GOOGL",
+    "GOSS",
+    "GOVX",
+    "GP",
+    "GPAC",
+    "GPAT",
     "GPC",
+    "GPCR",
     "GPN",
+    "GPRE",
+    "GPRO",
+    "GRAB",
+    "GRAL",
+    "GRAN",
+    "GRCE",
+    "GRDX",
+    "GRFS",
+    "GRI",
+    "GRML",
     "GRMN",
+    "GRNQ",
+    "GROW",
+    "GRPN",
+    "GRRR",
+    "GRSD",
+    "GRVY",
+    "GRWG",
     "GS",
+    "GSAT",
+    "GSBC",
+    "GSHD",
+    "GSHR",
+    "GSIT",
+    "GSIW",
+    "GSM",
+    "GSRF",
+    "GSRV",
+    "GSUN",
+    "GT",
+    "GTBP",
+    "GTEC",
+    "GTEN",
+    "GTERA",
+    "GTIM",
+    "GTLB",
+    "GTM",
+    "GTX",
+    "GUAC",
+    "GURE",
+    "GUTS",
+    "GVH",
+    "GWAV",
+    "GWRS",
     "GWW",
+    "GXAI",
+    "GYGY",
+    "GYRE",
+    "GYRO",
+    "HACQ",
+    "HAFC",
+    "HAIN",
     "HAL",
+    "HALO",
+    "HAO",
+    "HAPN",
     "HAS",
+    "HAVA",
     "HBAN",
+    "HBCP",
+    "HBIO",
+    "HBNB",
+    "HBNC",
+    "HBT",
     "HCA",
+    "HCAC",
+    "HCAI",
+    "HCAT",
+    "HCHL",
+    "HCIC",
+    "HCKT",
+    "HCM",
+    "HCMA",
+    "HCSG",
+    "HCTI",
+    "HCWB",
     "HD",
+    "HDL",
+    "HDRN",
+    "HDSN",
+    "HELE",
+    "HELP",
+    "HEPS",
+    "HERE",
+    "HERZ",
+    "HFBL",
+    "HFFG",
+    "HFWA",
+    "HGBL",
+    "HHS",
+    "HIFS",
     "HIG",
+    "HIHO",
     "HII",
+    "HIMX",
+    "HIND",
+    "HIT",
+    "HITI",
+    "HIVE",
+    "HKIT",
+    "HKPD",
+    "HLIT",
+    "HLMN",
+    "HLNE",
+    "HLP",
     "HLT",
+    "HLXC",
+    "HMH",
+    "HMR",
+    "HNNA",
+    "HNRG",
+    "HNST",
+    "HNVR",
+    "HODO",
+    "HOFT",
+    "HOLO",
     "HON",
     "HONA",
     "HOOD",
+    "HOPE",
+    "HOUR",
+    "HOVR",
+    "HOWL",
+    "HPAI",
     "HPE",
+    "HPK",
     "HPQ",
+    "HQ",
+    "HQI",
+    "HQY",
     "HRL",
+    "HRMY",
+    "HROW",
+    "HRTX",
+    "HRZN",
+    "HSAI",
+    "HSCS",
+    "HSDT",
     "HSIC",
     "HST",
+    "HSTM",
     "HSY",
+    "HTCO",
+    "HTCR",
+    "HTFL",
+    "HTHT",
+    "HTLD",
+    "HTLM",
+    "HTO",
+    "HTOO",
+    "HTZ",
     "HUBB",
+    "HUBC",
+    "HUBG",
+    "HUDI",
+    "HUHU",
+    "HUIZ",
     "HUM",
+    "HUMA",
+    "HURA",
+    "HURC",
+    "HURN",
+    "HUT",
+    "HVII",
+    "HVMC",
+    "HWBK",
+    "HWC",
+    "HWH",
+    "HWKN",
     "HWM",
+    "HXHX",
+    "HYFM",
+    "HYFT",
+    "HYMC",
+    "HYNE",
+    "HYPD",
+    "HYPR",
+    "IA",
+    "IACO",
+    "IACQ",
+    "IART",
+    "IBAC",
+    "IBCP",
+    "IBEX",
+    "IBG",
+    "IBIO",
     "IBKR",
     "IBM",
+    "IBOC",
+    "IBRX",
+    "ICCC",
+    "ICCM",
     "ICE",
+    "ICFI",
+    "ICG",
+    "ICHR",
+    "ICLR",
+    "ICMB",
+    "ICON",
+    "ICU",
+    "ICUI",
+    "IDAC",
+    "IDAI",
+    "IDCC",
+    "IDN",
     "IDXX",
+    "IDYA",
+    "IEAG",
+    "IESC",
     "IEX",
+    "IFBD",
     "IFF",
+    "IFRX",
+    "IGAC",
+    "IGIC",
+    "IHRT",
+    "III",
+    "IIIV",
+    "IKT",
+    "ILAG",
+    "ILLR",
+    "ILLU",
+    "ILMN",
+    "ILPT",
+    "IMA",
+    "IMCC",
+    "IMCR",
+    "IMDX",
+    "IMKTA",
+    "IMMP",
+    "IMMR",
+    "IMMX",
+    "IMNM",
+    "IMNN",
+    "IMOS",
+    "IMPP",
+    "IMRN",
+    "IMRX",
+    "IMSR",
+    "IMTE",
+    "IMTX",
+    "IMUX",
+    "IMVT",
+    "IMXI",
+    "INAB",
+    "INAC",
+    "INBK",
+    "INBS",
+    "INBX",
+    "INCR",
     "INCY",
+    "INDB",
+    "INDI",
+    "INDP",
+    "INDV",
+    "INEO",
+    "INGN",
+    "INHD",
+    "INIO",
+    "INKT",
+    "INLF",
+    "INM",
+    "INMB",
+    "INMD",
+    "INNV",
+    "INO",
+    "INOD",
+    "INSE",
+    "INSG",
+    "INSM",
+    "INTA",
     "INTC",
+    "INTG",
+    "INTJ",
+    "INTR",
+    "INTS",
     "INTU",
+    "INTZ",
+    "INV",
+    "INVA",
+    "INVE",
     "INVH",
+    "INVZ",
+    "IOND",
+    "IONR",
+    "IONS",
+    "IOSP",
+    "IOTR",
+    "IOVA",
     "IP",
+    "IPAR",
+    "IPDN",
+    "IPEX",
+    "IPFX",
+    "IPGP",
+    "IPHA",
+    "IPM",
+    "IPSC",
+    "IPST",
+    "IPVV",
+    "IPW",
+    "IPWR",
+    "IPX",
+    "IQ",
+    "IQMX",
+    "IQST",
     "IQV",
     "IR",
+    "IRD",
+    "IRDM",
+    "IREN",
+    "IRHO",
+    "IRIX",
     "IRM",
+    "IRMD",
+    "IRON",
+    "IRTC",
+    "IRWD",
+    "ISBA",
+    "ISNR",
+    "ISPC",
+    "ISPR",
     "ISRG",
+    "ISTR",
     "IT",
+    "ITG",
+    "ITHA",
+    "ITIC",
+    "ITOC",
+    "ITRI",
+    "ITRN",
     "ITW",
+    "IVA",
+    "IVDA",
+    "IVF",
+    "IVVD",
     "IVZ",
+    "IXHL",
+    "IZEA",
+    "IZM",
     "J",
+    "JAB",
+    "JACK",
+    "JAGX",
+    "JAKK",
+    "JANX",
+    "JATT",
+    "JAZZ",
+    "JBDI",
     "JBHT",
+    "JBIO",
     "JBL",
+    "JBLU",
+    "JBSS",
+    "JCAP",
     "JCI",
+    "JCSE",
+    "JCTC",
+    "JD",
+    "JDZG",
+    "JEM",
+    "JF",
+    "JFB",
+    "JFIN",
+    "JFU",
+    "JG",
+    "JJSF",
     "JKHY",
+    "JL",
+    "JLHL",
+    "JMSB",
     "JNJ",
+    "JOUT",
+    "JOYY",
     "JPM",
+    "JRSH",
+    "JRVR",
+    "JSPR",
+    "JTAI",
+    "JUNS",
+    "JVA",
+    "JWEL",
+    "JXG",
+    "JYD",
+    "JYNT",
+    "JZ",
+    "JZXN",
+    "KALA",
+    "KALU",
+    "KARD",
+    "KARO",
+    "KAZR",
+    "KBON",
+    "KBSX",
+    "KC",
+    "KCHV",
+    "KDK",
     "KDP",
+    "KE",
+    "KEEL",
+    "KELYA",
+    "KELYB",
+    "KEQU",
     "KEY",
     "KEYS",
+    "KEYY",
+    "KFFB",
+    "KFII",
+    "KG",
+    "KGEI",
     "KHC",
+    "KIDS",
+    "KIDZ",
     "KIM",
+    "KINS",
+    "KITT",
     "KKR",
     "KLAC",
+    "KLIC",
+    "KLRA",
+    "KLRS",
+    "KLTR",
+    "KLXE",
     "KMB",
+    "KMDA",
     "KMI",
+    "KMRK",
+    "KMTS",
+    "KNDI",
+    "KNSA",
     "KO",
+    "KOD",
+    "KOPN",
+    "KOSS",
+    "KOYN",
+    "KPLT",
+    "KPRX",
+    "KPTI",
     "KR",
+    "KRAQ",
+    "KRKR",
+    "KRMD",
+    "KRNT",
+    "KRNY",
+    "KROS",
+    "KRRO",
+    "KRT",
+    "KRUS",
+    "KRYS",
+    "KSCP",
+    "KSPI",
+    "KTCC",
+    "KTOS",
+    "KTTA",
+    "KTWO",
+    "KURA",
+    "KUST",
+    "KVHI",
     "KVUE",
+    "KWM",
+    "KXIN",
+    "KYIV",
+    "KYMR",
+    "KYNB",
+    "KYTX",
+    "KZIA",
     "L",
+    "LAB",
+    "LABT",
+    "LAES",
+    "LAFA",
+    "LAKE",
+    "LAMR",
+    "LAND",
+    "LARK",
+    "LASE",
+    "LASR",
+    "LATA",
+    "LAUR",
+    "LAWR",
+    "LBGJ",
+    "LBRX",
+    "LBTYA",
+    "LBTYB",
+    "LBTYK",
+    "LCCC",
+    "LCFY",
+    "LCID",
+    "LCNB",
+    "LCUT",
     "LDOS",
+    "LE",
+    "LECO",
+    "LEDS",
+    "LEE",
+    "LEGH",
+    "LEGN",
     "LEN",
+    "LENZ",
+    "LESL",
+    "LEXX",
+    "LFAC",
+    "LFCR",
+    "LFMD",
+    "LFS",
+    "LFST",
+    "LFTO",
+    "LFUS",
+    "LFVN",
+    "LFWD",
+    "LGCL",
+    "LGHL",
+    "LGIH",
+    "LGN",
+    "LGND",
+    "LGO",
+    "LGVN",
     "LH",
+    "LHAI",
+    "LHSW",
     "LHX",
+    "LI",
+    "LICN",
+    "LIDR",
+    "LIEN",
+    "LIF",
+    "LIFE",
     "LII",
+    "LILA",
+    "LILAK",
+    "LILAP",
+    "LIME",
+    "LIMN",
     "LIN",
+    "LINC",
+    "LIND",
+    "LINE",
+    "LINK",
+    "LIQT",
     "LITE",
+    "LITS",
+    "LIVE",
+    "LIVN",
+    "LKFN",
+    "LKFT",
+    "LKQ",
+    "LKSP",
     "LLY",
+    "LLYVA",
+    "LLYVK",
+    "LMAT",
+    "LMB",
+    "LMNR",
+    "LMRI",
     "LMT",
+    "LNAI",
+    "LNKS",
+    "LNSR",
     "LNT",
+    "LNTH",
+    "LNZA",
+    "LOAN",
+    "LOBO",
+    "LOCO",
+    "LOGI",
+    "LONA",
+    "LOOP",
+    "LOPE",
+    "LOT",
+    "LOVE",
     "LOW",
+    "LPAA",
+    "LPBB",
+    "LPCN",
+    "LPCV",
+    "LPLA",
+    "LPSN",
+    "LPTH",
+    "LQDA",
+    "LQDT",
     "LRCX",
+    "LRE",
+    "LRHC",
+    "LRMR",
+    "LSAK",
+    "LSBK",
+    "LSCC",
+    "LSE",
+    "LSTA",
+    "LSTR",
+    "LTBR",
+    "LTGO",
+    "LTGR",
+    "LTRN",
+    "LTRX",
+    "LUCD",
+    "LUCY",
     "LULU",
+    "LUNG",
+    "LUNR",
     "LUV",
+    "LVLU",
+    "LVO",
     "LVS",
+    "LWAC",
+    "LWAY",
+    "LWLG",
+    "LX",
+    "LXEH",
+    "LXEO",
+    "LXRX",
     "LYB",
+    "LYEL",
+    "LYFT",
+    "LYTS",
     "LYV",
+    "LZ",
+    "LZMH",
     "MA",
     "MAA",
+    "MAAS",
+    "MACI",
+    "MAGH",
+    "MAKO",
+    "MAMA",
+    "MAMK",
+    "MAMO",
+    "MANH",
     "MAR",
+    "MARA",
     "MAS",
+    "MASK",
+    "MASS",
+    "MAT",
+    "MATH",
+    "MATW",
+    "MAYS",
+    "MAZE",
+    "MB",
+    "MBAI",
+    "MBBC",
+    "MBIN",
+    "MBIO",
+    "MBLY",
+    "MBOT",
+    "MBRX",
+    "MBUU",
+    "MBVI",
+    "MBWM",
+    "MBX",
+    "MCAH",
+    "MCBS",
     "MCD",
+    "MCFT",
+    "MCGA",
+    "MCHB",
     "MCHP",
+    "MCHX",
     "MCK",
     "MCO",
+    "MCRB",
+    "MCRI",
+    "MCTA",
+    "MDAI",
+    "MDB",
+    "MDBH",
+    "MDCX",
+    "MDGL",
+    "MDIA",
+    "MDLN",
     "MDLZ",
+    "MDRR",
     "MDT",
+    "MDWD",
+    "MDXG",
+    "MDXH",
+    "MEDP",
+    "MEDS",
+    "MEGL",
+    "MELI",
+    "MENS",
+    "MEOH",
+    "MERC",
+    "MESH",
+    "MESO",
     "MET",
     "META",
+    "METC",
+    "METCB",
+    "MEVO",
+    "MF",
+    "MFI",
+    "MFIC",
+    "MFIN",
+    "MFP",
+    "MGEE",
+    "MGIH",
     "MGM",
+    "MGN",
+    "MGNI",
+    "MGNX",
+    "MGPI",
+    "MGRC",
+    "MGRT",
+    "MGRX",
+    "MGTX",
+    "MGX",
+    "MGYR",
+    "MIAC",
+    "MIDD",
+    "MIMI",
+    "MIND",
+    "MIRA",
+    "MIRM",
+    "MIST",
+    "MITK",
     "MKC",
+    "MKDW",
+    "MKLY",
+    "MKSI",
+    "MKTW",
+    "MKTX",
+    "MKZR",
+    "MLAA",
+    "MLAB",
+    "MLCI",
+    "MLCO",
+    "MLEC",
+    "MLGO",
+    "MLKN",
     "MLM",
+    "MLTX",
+    "MLYS",
+    "MMED",
     "MMM",
+    "MMSI",
+    "MMTX",
+    "MMYT",
+    "MNDO",
+    "MNDR",
+    "MNDY",
+    "MNKD",
+    "MNOV",
+    "MNPR",
+    "MNRO",
+    "MNSB",
+    "MNSBP",
     "MNST",
+    "MNTK",
+    "MNTS",
+    "MNY",
     "MO",
+    "MOB",
+    "MOBI",
+    "MOBX",
+    "MODD",
+    "MOLN",
+    "MOMO",
+    "MORN",
     "MOS",
+    "MOVE",
+    "MPAA",
+    "MPB",
     "MPC",
+    "MPLT",
     "MPWR",
+    "MQ",
+    "MRAM",
+    "MRBK",
+    "MRCO",
+    "MRCY",
+    "MRDN",
+    "MREO",
     "MRK",
+    "MRKR",
+    "MRLN",
+    "MRM",
     "MRNA",
+    "MRNO",
     "MRSH",
+    "MRTN",
+    "MRVI",
     "MRVL",
+    "MRX",
     "MS",
+    "MSAI",
+    "MSBI",
     "MSCI",
+    "MSEX",
     "MSFT",
+    "MSGM",
+    "MSGY",
     "MSI",
+    "MSLE",
+    "MSS",
+    "MSTR",
     "MTB",
+    "MTC",
+    "MTCH",
     "MTD",
+    "MTEK",
+    "MTEN",
+    "MTEX",
+    "MTLS",
+    "MTRX",
+    "MTSI",
+    "MTVA",
     "MU",
+    "MUZE",
+    "MVBF",
+    "MVIS",
+    "MVST",
+    "MWC",
+    "MWH",
+    "MWYN",
+    "MXCT",
+    "MXL",
+    "MYFW",
+    "MYGN",
+    "MYPS",
+    "MYRG",
+    "MYSE",
+    "MYSZ",
+    "MYX",
+    "MZTI",
+    "NA",
+    "NAAS",
+    "NAGE",
+    "NAII",
+    "NAKA",
+    "NAMI",
+    "NAMM",
+    "NAMS",
+    "NATH",
+    "NATR",
+    "NAUT",
+    "NAVI",
+    "NAVN",
+    "NB",
+    "NBBK",
+    "NBIS",
+    "NBIX",
+    "NBN",
+    "NBP",
+    "NBRG",
+    "NBTB",
+    "NBTX",
+    "NCEL",
+    "NCEW",
+    "NCI",
     "NCLH",
+    "NCMI",
+    "NCNA",
+    "NCNO",
+    "NCO",
+    "NCPL",
+    "NCRA",
+    "NCSM",
+    "NCT",
+    "NCTY",
     "NDAQ",
+    "NDLS",
+    "NDRA",
     "NDSN",
+    "NECB",
     "NEE",
+    "NEGG",
     "NEM",
+    "NEO",
+    "NEOG",
+    "NEON",
+    "NEOV",
+    "NEPH",
+    "NERV",
+    "NESR",
+    "NEUP",
+    "NEWT",
+    "NEXM",
+    "NEXN",
+    "NEXR",
+    "NEXT",
+    "NFE",
     "NFLX",
+    "NGEN",
+    "NGNE",
+    "NHIC",
+    "NHIV",
+    "NHP",
+    "NHTC",
     "NI",
+    "NICE",
+    "NICM",
+    "NIKI",
+    "NIPG",
+    "NIU",
+    "NIVF",
+    "NIXX",
     "NKE",
+    "NKLR",
+    "NKSH",
+    "NKTR",
+    "NKTX",
+    "NMAD",
+    "NMFC",
+    "NMIH",
+    "NMP",
+    "NMRA",
+    "NMRK",
+    "NMTC",
+    "NN",
+    "NNBR",
+    "NNDM",
+    "NNE",
+    "NNNN",
+    "NNOX",
     "NOC",
+    "NODK",
+    "NOEM",
+    "NOMA",
+    "NOVT",
     "NOW",
+    "NPAC",
+    "NPCE",
+    "NPT",
+    "NRC",
+    "NRDS",
     "NRG",
+    "NRIM",
+    "NRIX",
+    "NRSN",
+    "NRXP",
     "NSC",
+    "NSIT",
+    "NSLR",
+    "NSPR",
+    "NSSC",
+    "NSTS",
+    "NSYS",
     "NTAP",
+    "NTCL",
+    "NTCT",
+    "NTES",
+    "NTGR",
+    "NTHI",
+    "NTIC",
+    "NTLA",
+    "NTNX",
+    "NTRA",
+    "NTRB",
+    "NTRP",
     "NTRS",
+    "NTSK",
+    "NTWK",
+    "NTWO",
+    "NUAI",
+    "NUCL",
     "NUE",
+    "NUR",
+    "NUTX",
+    "NUWE",
+    "NVAX",
+    "NVCR",
+    "NVCT",
     "NVDA",
+    "NVEC",
+    "NVMI",
+    "NVNI",
+    "NVNO",
     "NVR",
+    "NVTS",
+    "NVX",
+    "NWBI",
+    "NWE",
+    "NWFL",
+    "NWGL",
+    "NWL",
+    "NWPX",
     "NWS",
     "NWSA",
+    "NWTG",
+    "NXGL",
+    "NXH",
+    "NXL",
     "NXPI",
+    "NXPL",
+    "NXST",
+    "NXT",
+    "NXTC",
+    "NXTS",
+    "NXTT",
+    "NXXT",
+    "NYAX",
+    "NYXH",
     "O",
+    "OABI",
+    "OACC",
+    "OBA",
+    "OBAI",
+    "OBIO",
+    "OBT",
+    "OBX",
+    "OCC",
+    "OCCI",
+    "OCFC",
+    "OCG",
+    "OCGN",
+    "OCS",
+    "OCSL",
+    "OCTV",
+    "OCUL",
+    "ODD",
     "ODFL",
+    "ODTX",
+    "ODYS",
+    "OESX",
+    "OFAL",
+    "OFIX",
+    "OFLX",
+    "OFS",
+    "OGI",
+    "OHAC",
+    "OIM",
+    "OIO",
     "OKE",
+    "OKTA",
+    "OKUR",
+    "OKYO",
+    "OLB",
+    "OLED",
+    "OLLI",
+    "OLMA",
+    "OLOX",
+    "OM",
+    "OMAB",
     "OMC",
+    "OMCL",
+    "OMDA",
+    "OMER",
+    "OMEX",
+    "OMH",
+    "OMSE",
     "ON",
+    "ONB",
+    "ONC",
+    "ONCH",
+    "ONCO",
+    "ONCY",
+    "ONDS",
+    "ONEG",
+    "ONEW",
+    "ONFO",
+    "ONMD",
+    "OPAL",
+    "OPBK",
+    "OPCH",
+    "OPEN",
+    "OPI",
+    "OPK",
+    "OPRA",
+    "OPRT",
+    "OPRX",
+    "OPTH",
+    "OPTX",
+    "OPXS",
+    "ORBS",
     "ORCL",
+    "ORGO",
+    "ORIC",
+    "ORIO",
+    "ORIQ",
+    "ORKA",
+    "ORKT",
     "ORLY",
+    "ORMP",
+    "ORRF",
+    "OSBC",
+    "OSIS",
+    "OSPN",
+    "OSPR",
+    "OSRH",
+    "OSS",
+    "OST",
+    "OSUR",
+    "OSW",
+    "OTEX",
+    "OTGA",
     "OTIS",
+    "OTLK",
+    "OTLY",
+    "OTTR",
+    "OUST",
+    "OVBC",
+    "OVID",
+    "OVLY",
+    "OWLS",
+    "OXBR",
+    "OXLC",
+    "OXSQ",
     "OXY",
+    "OYSE",
+    "OZK",
+    "PAAC",
+    "PACB",
+    "PACH",
+    "PAGP",
+    "PAHC",
+    "PAL",
+    "PALI",
+    "PALO",
+    "PAMT",
+    "PANL",
     "PANW",
+    "PARA",
+    "PARK",
+    "PASG",
+    "PASW",
+    "PATK",
+    "PAVM",
+    "PAVS",
+    "PAX",
+    "PAYO",
+    "PAYP",
+    "PAYS",
     "PAYX",
+    "PBAM",
+    "PBFS",
+    "PBHC",
+    "PBK",
+    "PBLS",
+    "PBM",
+    "PBYI",
+    "PC",
+    "PCAP",
     "PCAR",
+    "PCB",
     "PCG",
+    "PCLA",
+    "PCRX",
+    "PCSA",
+    "PCT",
+    "PCTY",
+    "PCVX",
+    "PCYO",
+    "PDC",
+    "PDD",
+    "PDEX",
+    "PDFS",
+    "PDLB",
+    "PDSB",
+    "PDYN",
+    "PEBK",
+    "PEBO",
+    "PECE",
+    "PECO",
     "PEG",
+    "PEGA",
+    "PENG",
+    "PENN",
     "PEP",
+    "PEPG",
+    "PERI",
+    "PESI",
+    "PETS",
+    "PETZ",
+    "PFAI",
+    "PFBC",
     "PFE",
     "PFG",
+    "PFIS",
+    "PFSA",
+    "PFX",
     "PG",
+    "PGAC",
+    "PGC",
+    "PGEN",
+    "PGNY",
     "PGR",
+    "PGY",
     "PH",
+    "PHAR",
+    "PHAT",
+    "PHIO",
     "PHM",
+    "PHOE",
+    "PHOS",
+    "PHUN",
+    "PHVS",
+    "PI",
+    "PICS",
+    "PIII",
+    "PKBK",
     "PKG",
+    "PKOH",
+    "PLAB",
+    "PLAY",
+    "PLBC",
+    "PLBL",
+    "PLBY",
+    "PLCE",
+    "PLCI",
     "PLD",
+    "PLMK",
+    "PLMR",
+    "PLPC",
+    "PLRX",
+    "PLRZ",
+    "PLSE",
+    "PLSM",
+    "PLTK",
     "PLTR",
+    "PLTS",
+    "PLUG",
+    "PLUR",
+    "PLUS",
+    "PLUT",
+    "PLXS",
+    "PLYX",
     "PM",
+    "PMA",
+    "PMAX",
+    "PMCB",
+    "PMEC",
+    "PMN",
+    "PMTR",
+    "PMTS",
+    "PMVP",
+    "PN",
+    "PNBK",
     "PNC",
     "PNR",
+    "PNRG",
+    "PNTG",
     "PNW",
+    "POCI",
+    "PODC",
     "PODD",
+    "POET",
+    "POLA",
+    "POLE",
+    "POM",
+    "PONO",
+    "PONY",
+    "POOL",
+    "POWI",
+    "POWL",
+    "POWW",
+    "PPBT",
+    "PPC",
+    "PPCB",
     "PPG",
+    "PPHC",
+    "PPIH",
     "PPL",
+    "PPLI",
+    "PPSI",
+    "PPTA",
+    "PRAA",
+    "PRAX",
+    "PRCH",
+    "PRCT",
+    "PRDO",
+    "PRE",
+    "PRFX",
+    "PRGS",
+    "PRHI",
+    "PRLD",
+    "PRME",
+    "PROF",
+    "PROK",
+    "PROP",
+    "PROV",
+    "PRPL",
+    "PRPO",
+    "PRQR",
+    "PRSO",
+    "PRTA",
+    "PRTH",
+    "PRTS",
     "PRU",
+    "PRVA",
+    "PRZO",
     "PSA",
+    "PSEC",
+    "PSHG",
+    "PSIG",
+    "PSIX",
     "PSKY",
+    "PSMT",
+    "PSNL",
+    "PSNY",
+    "PSNYW",
     "PSX",
+    "PTAC",
     "PTC",
+    "PTCT",
+    "PTEN",
+    "PTGX",
+    "PTLE",
+    "PTLO",
+    "PTN",
+    "PTON",
+    "PTOR",
+    "PTRN",
+    "PUBM",
+    "PULM",
+    "PURR",
+    "PUSA",
+    "PVLA",
+    "PWCM",
+    "PWP",
     "PWR",
+    "PWRL",
+    "PXLW",
+    "PXS",
+    "PYPD",
     "PYPL",
+    "PYXS",
+    "PZZA",
     "Q",
+    "QADR",
+    "QBTS",
+    "QCLS",
     "QCOM",
+    "QCRH",
+    "QDEL",
+    "QETA",
+    "QFIN",
+    "QH",
+    "QLYS",
+    "QMCO",
+    "QMLS",
+    "QNBC",
+    "QNCX",
+    "QNME",
+    "QNRX",
+    "QNST",
+    "QNT",
+    "QNTM",
+    "QQQX",
+    "QRHC",
+    "QRVO",
+    "QS",
+    "QSEA",
+    "QSI",
+    "QTEX",
+    "QTI",
+    "QTRX",
+    "QTTB",
+    "QUBT",
+    "QUCY",
+    "QUIK",
+    "QUMS",
+    "QURE",
+    "QVCG",
+    "QXL",
+    "RACC",
+    "RACD",
+    "RADX",
+    "RAIL",
+    "RAIN",
+    "RAND",
+    "RANG",
+    "RANI",
+    "RAPP",
+    "RARE",
+    "RAVE",
+    "RAY",
+    "RAYA",
+    "RBB",
+    "RBBN",
+    "RBCAA",
+    "RBKB",
+    "RBNE",
+    "RCAT",
+    "RCBC",
+    "RCEL",
+    "RCKT",
+    "RCKY",
     "RCL",
+    "RCMT",
+    "RCON",
+    "RCT",
+    "RDAC",
+    "RDAG",
+    "RDCM",
     "RDDT",
+    "RDGT",
+    "RDHL",
+    "RDI",
+    "RDIB",
+    "RDNT",
+    "RDNW",
+    "RDVT",
+    "RDWR",
+    "RDZN",
+    "REAL",
+    "REAX",
+    "REBN",
+    "RECT",
+    "REFI",
+    "REFR",
     "REG",
     "REGN",
+    "REKR",
+    "RELL",
+    "RELY",
+    "RENT",
+    "RENX",
+    "REPL",
+    "RETO",
+    "REVB",
+    "REYN",
     "RF",
+    "RFAI",
+    "RFAM",
+    "RFIL",
+    "RGC",
+    "RGCO",
+    "RGEN",
+    "RGLD",
+    "RGNX",
+    "RGP",
+    "RGS",
+    "RGTI",
+    "RIBB",
+    "RICK",
+    "RIGL",
+    "RILY",
+    "RIME",
+    "RIOT",
+    "RITR",
+    "RIVN",
+    "RJET",
     "RJF",
+    "RKDA",
+    "RKLB",
+    "RKTO",
     "RL",
+    "RLAY",
+    "RLMD",
+    "RLYB",
+    "RMBI",
+    "RMBS",
+    "RMCF",
+    "RMCO",
     "RMD",
+    "RMIX",
+    "RMNI",
+    "RMR",
+    "RMSG",
+    "RMTI",
+    "RNA",
+    "RNAC",
+    "RNAZ",
+    "RNGT",
+    "RNTX",
+    "RNW",
+    "RNXT",
+    "ROAD",
+    "ROC",
+    "ROCK",
+    "ROIV",
     "ROK",
+    "ROKU",
     "ROL",
+    "ROMA",
+    "ROOT",
     "ROP",
     "ROST",
+    "RPAY",
+    "RPD",
+    "RPGL",
+    "RPID",
+    "RPRX",
+    "RR",
+    "RRBI",
+    "RREV",
+    "RRGB",
+    "RRR",
     "RSG",
+    "RSSS",
+    "RSVR",
+    "RTAC",
+    "RTB",
     "RTX",
+    "RUBI",
+    "RUM",
+    "RUN",
+    "RUSHA",
+    "RUSHB",
+    "RVMD",
+    "RVSB",
+    "RVSN",
     "RVTY",
+    "RWAY",
+    "RXRX",
+    "RXST",
+    "RXT",
+    "RYAAY",
+    "RYET",
+    "RYM",
+    "RYOJ",
+    "RYTM",
+    "RZLT",
+    "RZLV",
+    "SAAQ",
+    "SABR",
+    "SABS",
+    "SAFT",
+    "SAFX",
+    "SAGT",
+    "SAIA",
+    "SAIC",
+    "SAIH",
+    "SAIL",
+    "SAMG",
+    "SANA",
+    "SANG",
+    "SANM",
+    "SATL",
     "SBAC",
+    "SBC",
+    "SBCF",
+    "SBET",
+    "SBFG",
+    "SBFM",
+    "SBGI",
+    "SBLK",
+    "SBRA",
     "SBUX",
+    "SCAG",
+    "SCHL",
     "SCHW",
+    "SCII",
+    "SCKT",
+    "SCLX",
+    "SCNI",
+    "SCNX",
+    "SCOR",
+    "SCPQ",
+    "SCSC",
+    "SCTX",
+    "SCWO",
+    "SCYX",
+    "SCZM",
+    "SDA",
+    "SDGR",
+    "SDHI",
+    "SDOT",
+    "SDST",
+    "SEAT",
+    "SEDG",
+    "SEED",
+    "SEER",
+    "SEGG",
+    "SEIC",
+    "SELF",
+    "SENEA",
+    "SENEB",
+    "SENS",
+    "SEPN",
+    "SERA",
+    "SERV",
+    "SEV",
+    "SEVN",
+    "SEZL",
+    "SFBC",
+    "SFD",
+    "SFHG",
+    "SFIX",
+    "SFM",
+    "SFNC",
+    "SFST",
+    "SFWL",
+    "SGA",
+    "SGC",
+    "SGHT",
+    "SGLY",
+    "SGML",
+    "SGMT",
+    "SGP",
+    "SGRY",
+    "SHAZ",
+    "SHBI",
+    "SHC",
+    "SHEN",
+    "SHFS",
+    "SHIM",
+    "SHIP",
+    "SHLS",
+    "SHMD",
+    "SHOE",
+    "SHOO",
+    "SHOP",
+    "SHOT",
+    "SHPH",
     "SHW",
+    "SIBN",
+    "SIDU",
+    "SIEB",
+    "SIFY",
+    "SIGA",
+    "SIGI",
+    "SILC",
+    "SILO",
+    "SIMA",
+    "SIMO",
+    "SINT",
+    "SION",
+    "SIRI",
+    "SITM",
+    "SJ",
     "SJM",
+    "SKHY",
+    "SKIN",
+    "SKK",
+    "SKWD",
+    "SKYA",
+    "SKYE",
+    "SKYQ",
+    "SKYW",
+    "SKYX",
+    "SLAB",
     "SLB",
+    "SLBT",
+    "SLDB",
+    "SLDE",
+    "SLDP",
+    "SLE",
+    "SLGB",
+    "SLGL",
+    "SLM",
+    "SLMT",
+    "SLN",
+    "SLNG",
+    "SLNH",
+    "SLP",
+    "SLRC",
+    "SLS",
+    "SLSN",
+    "SLXN",
+    "SMBC",
     "SMCI",
+    "SMID",
+    "SMMT",
+    "SMPL",
+    "SMSI",
+    "SMTC",
+    "SMTI",
+    "SMTK",
+    "SMX",
+    "SMXT",
     "SNA",
+    "SNAL",
+    "SND",
     "SNDK",
+    "SNDL",
+    "SNDX",
+    "SNES",
+    "SNEX",
+    "SNFCA",
+    "SNGX",
+    "SNOA",
     "SNPS",
+    "SNT",
+    "SNTG",
+    "SNTI",
+    "SNWV",
+    "SNY",
+    "SNYR",
     "SO",
+    "SOBR",
+    "SOCA",
+    "SOFI",
+    "SOGP",
+    "SOHU",
+    "SOLS",
     "SOLV",
+    "SONM",
+    "SONO",
+    "SOPH",
+    "SORA",
+    "SORN",
+    "SOTK",
+    "SOUN",
+    "SOWG",
+    "SPAI",
+    "SPCB",
+    "SPCX",
+    "SPEG",
+    "SPFI",
     "SPG",
     "SPGI",
+    "SPHL",
+    "SPKL",
+    "SPOK",
+    "SPPL",
+    "SPRB",
+    "SPRC",
+    "SPRO",
+    "SPRY",
+    "SPSC",
+    "SPT",
+    "SPTX",
+    "SPWH",
+    "SPWR",
+    "SQFT",
+    "SRAD",
+    "SRBK",
+    "SRCE",
     "SRE",
+    "SRPT",
+    "SRRK",
+    "SRTA",
+    "SRTS",
+    "SRZN",
+    "SSAC",
+    "SSBI",
+    "SSEA",
+    "SSII",
+    "SSM",
+    "SSNC",
+    "SSP",
+    "SSRM",
+    "SSTI",
+    "SSYS",
+    "STAA",
+    "STAK",
+    "STBA",
     "STE",
+    "STEP",
+    "STEX",
+    "STFS",
+    "STGW",
+    "STHO",
+    "STI",
+    "STIM",
+    "STKE",
+    "STKH",
+    "STKS",
     "STLD",
+    "STLN",
+    "STNE",
+    "STOK",
+    "STRA",
+    "STRL",
+    "STRO",
+    "STRR",
+    "STRT",
+    "STRZ",
     "STT",
+    "STTK",
     "STX",
     "STZ",
+    "SUGP",
+    "SUIG",
+    "SUJA",
+    "SUMA",
+    "SUNE",
+    "SUNS",
+    "SUPN",
+    "SUPX",
+    "SURG",
+    "SVAQ",
+    "SVC",
+    "SVCC",
+    "SVCO",
+    "SVIV",
+    "SVRA",
+    "SVRE",
+    "SVRN",
     "SW",
+    "SWAG",
+    "SWBI",
+    "SWIM",
     "SWK",
     "SWKS",
+    "SWMR",
+    "SWVL",
+    "SXTC",
+    "SXTP",
+    "SY",
+    "SYBT",
     "SYF",
     "SYK",
+    "SYM",
+    "SYNA",
+    "SYPR",
+    "SYRE",
     "SYY",
+    "SZZL",
     "T",
+    "TACH",
+    "TACO",
+    "TACT",
+    "TANH",
+    "TAOP",
+    "TAOX",
     "TAP",
+    "TARA",
+    "TARS",
+    "TASK",
+    "TATT",
+    "TAVI",
+    "TAYD",
+    "TBBK",
+    "TBCH",
+    "TBLA",
+    "TBLD",
+    "TBPH",
+    "TC",
+    "TCBI",
+    "TCBK",
+    "TCBS",
+    "TCGX",
+    "TCMD",
+    "TCOM",
+    "TCPC",
+    "TCRT",
+    "TCRX",
+    "TCX",
+    "TDAC",
     "TDG",
+    "TDIC",
+    "TDTH",
+    "TDUP",
+    "TDWD",
     "TDY",
+    "TEAD",
+    "TEAM",
     "TECH",
+    "TECX",
     "TEL",
+    "TELA",
+    "TELO",
+    "TEM",
+    "TENB",
+    "TENX",
     "TER",
     "TFC",
+    "TFSL",
+    "TGHL",
+    "TGL",
     "TGT",
+    "TGTX",
+    "TH",
+    "THCH",
+    "THEO",
+    "THFF",
+    "THH",
+    "THRM",
+    "THRY",
+    "TIGO",
+    "TIGR",
+    "TIL",
+    "TILE",
+    "TIPT",
+    "TITN",
+    "TJGC",
     "TJX",
+    "TKLF",
+    "TKNO",
     "TKO",
+    "TLF",
+    "TLIH",
+    "TLN",
+    "TLNC",
+    "TLPH",
+    "TLRY",
+    "TLS",
+    "TLSA",
+    "TLSI",
+    "TLX",
+    "TMC",
+    "TMCI",
+    "TMCR",
+    "TMDX",
     "TMO",
+    "TMS",
+    "TMTS",
     "TMUS",
+    "TNDM",
+    "TNGX",
+    "TNMG",
+    "TNON",
+    "TNXP",
+    "TNYA",
+    "TOMZ",
+    "TONX",
+    "TOP",
+    "TORO",
+    "TOUR",
+    "TOWN",
+    "TOYO",
+    "TPCS",
+    "TPG",
     "TPL",
     "TPR",
+    "TPST",
+    "TRAW",
+    "TRAX",
+    "TRDA",
+    "TREE",
+    "TREO",
     "TRGP",
+    "TRGS",
+    "TRI",
+    "TRIB",
+    "TRIP",
     "TRMB",
+    "TRMD",
+    "TRMK",
+    "TRNR",
+    "TRNS",
+    "TRON",
+    "TROO",
     "TROW",
+    "TRS",
+    "TRSG",
+    "TRST",
+    "TRUG",
+    "TRUP",
     "TRV",
+    "TRVG",
+    "TRVI",
+    "TSAT",
+    "TSBK",
     "TSCO",
+    "TSEM",
+    "TSHA",
     "TSLA",
     "TSN",
+    "TSSI",
     "TT",
+    "TTAN",
     "TTD",
+    "TTEC",
+    "TTEK",
+    "TTGT",
+    "TTMI",
+    "TTRX",
     "TTWO",
+    "TULP",
+    "TURB",
+    "TUSK",
+    "TVA",
+    "TVAI",
+    "TVGN",
+    "TVIV",
+    "TVRD",
+    "TVTX",
+    "TW",
+    "TWAV",
+    "TWFG",
+    "TWG",
+    "TWIN",
+    "TWLV",
+    "TWST",
+    "TXG",
+    "TXMD",
     "TXN",
+    "TXRH",
     "TXT",
+    "TYGO",
     "TYL",
+    "TYRA",
+    "TZOO",
     "UAL",
+    "UBCP",
     "UBER",
+    "UBSI",
+    "UCAR",
+    "UCFI",
+    "UCL",
+    "UCTT",
     "UDR",
+    "UEIC",
+    "UFCS",
+    "UFG",
+    "UFPI",
+    "UFPT",
+    "UG",
     "UHS",
+    "UK",
+    "ULBI",
+    "ULCC",
+    "ULH",
     "ULTA",
+    "UMBF",
+    "UNB",
+    "UNCY",
     "UNH",
+    "UNIT",
     "UNP",
+    "UNTY",
+    "UONE",
+    "UONEK",
+    "UPB",
+    "UPBD",
+    "UPC",
+    "UPLD",
     "UPS",
+    "UPST",
+    "UPWK",
+    "UPXI",
+    "URBN",
+    "URGN",
     "URI",
+    "UROY",
+    "USAR",
+    "USAU",
     "USB",
+    "USCB",
+    "USDE",
+    "USEA",
+    "USGO",
+    "USIO",
+    "USLM",
+    "UTHR",
+    "UTMD",
+    "UTSI",
+    "UVSP",
+    "UXIN",
+    "UYSC",
+    "UZX",
     "V",
+    "VABK",
+    "VALN",
+    "VALU",
+    "VANI",
+    "VBIO",
+    "VBNK",
+    "VC",
+    "VCEL",
+    "VCIG",
+    "VCRE",
+    "VCTR",
+    "VCYT",
+    "VECO",
+    "VEEA",
+    "VEEE",
     "VEEV",
+    "VELO",
+    "VEON",
+    "VERA",
+    "VERI",
+    "VERU",
+    "VERX",
+    "VFF",
+    "VFS",
+    "VGAS",
+    "VHC",
+    "VHCP",
+    "VHUB",
+    "VIAV",
     "VICI",
+    "VICR",
+    "VINP",
+    "VIOT",
+    "VIP",
+    "VIR",
+    "VIRC",
+    "VISN",
+    "VITL",
+    "VIVK",
+    "VIVO",
+    "VIVS",
+    "VKTX",
+    "VLGEA",
     "VLO",
+    "VLOS",
     "VLTO",
+    "VLY",
+    "VMAR",
     "VMC",
+    "VMD",
+    "VMET",
     "VMRK",
+    "VNCE",
+    "VNDA",
+    "VNET",
+    "VNME",
+    "VNOM",
+    "VOD",
+    "VOGX",
+    "VOR",
+    "VOXR",
+    "VRA",
+    "VRAX",
+    "VRCA",
+    "VRDN",
+    "VREX",
+    "VRM",
+    "VRME",
+    "VRNS",
+    "VRRM",
     "VRSK",
     "VRSN",
     "VRT",
     "VRTX",
+    "VRXA",
+    "VS",
+    "VSA",
+    "VSAT",
+    "VSEC",
+    "VSME",
+    "VSNT",
     "VST",
+    "VSTM",
+    "VTGN",
+    "VTIX",
     "VTR",
     "VTRS",
+    "VTSI",
+    "VTVT",
+    "VUZI",
+    "VVOS",
+    "VWAV",
+    "VYGR",
     "VZ",
     "WAB",
+    "WABC",
+    "WAFD",
+    "WAFDP",
+    "WAFU",
+    "WALD",
+    "WASH",
     "WAT",
+    "WATR",
+    "WATT",
+    "WAVE",
+    "WAY",
+    "WB",
     "WBD",
+    "WBTN",
+    "WBUY",
+    "WCT",
     "WDAY",
     "WDC",
+    "WDFC",
     "WEC",
     "WELL",
+    "WEN",
+    "WENN",
+    "WERN",
+    "WEST",
+    "WETH",
+    "WETO",
+    "WEYS",
     "WFC",
+    "WFCF",
+    "WFF",
+    "WFRD",
+    "WGS",
+    "WHF",
+    "WHLR",
+    "WHWK",
+    "WILC",
+    "WIMI",
+    "WINA",
+    "WING",
+    "WIX",
+    "WKEY",
+    "WKHS",
+    "WKSP",
+    "WLCO",
+    "WLDN",
+    "WLDS",
+    "WLFC",
+    "WLII",
+    "WLTH",
     "WM",
     "WMB",
+    "WMG",
     "WMT",
+    "WNEB",
+    "WNW",
+    "WOK",
+    "WOOF",
+    "WPRT",
+    "WRAP",
     "WRB",
+    "WRD",
+    "WRLD",
+    "WSBC",
+    "WSBF",
+    "WSBK",
+    "WSC",
+    "WSE",
+    "WSFS",
+    "WSHP",
     "WSM",
     "WST",
+    "WSTN",
+    "WTBA",
+    "WTF",
+    "WTFC",
+    "WTG",
     "WTW",
+    "WULF",
+    "WVE",
+    "WVVI",
+    "WW",
+    "WWD",
+    "WXM",
     "WY",
+    "WYFI",
+    "WYHG",
     "WYNN",
+    "XAIR",
+    "XBIO",
+    "XBIT",
+    "XBP",
+    "XCBE",
+    "XCH",
+    "XCUR",
+    "XE",
     "XEL",
+    "XELB",
+    "XENE",
+    "XERS",
+    "XFOR",
+    "XGN",
+    "XHG",
+    "XHLD",
+    "XLO",
+    "XMAX",
+    "XMTR",
+    "XNCR",
+    "XNDU",
+    "XNET",
     "XOM",
+    "XOS",
+    "XP",
+    "XPEL",
+    "XPON",
+    "XRAY",
+    "XRPN",
+    "XRTX",
+    "XRX",
+    "XSLL",
+    "XTIA",
+    "XTLB",
+    "XWEL",
+    "XXII",
     "XYL",
     "XYZ",
+    "YAAS",
+    "YARW",
+    "YB",
+    "YDDL",
+    "YDES",
+    "YDKG",
+    "YHC",
+    "YHGJ",
+    "YHNA",
+    "YI",
+    "YIBO",
+    "YICC",
+    "YJ",
+    "YMAT",
+    "YMT",
+    "YORW",
+    "YOUL",
+    "YQ",
+    "YSWY",
+    "YSXT",
+    "YTRA",
     "YUM",
+    "YXT",
+    "YYAI",
+    "YYGH",
+    "Z",
+    "ZBAO",
     "ZBH",
+    "ZBIO",
     "ZBRA",
-    "ZTS"
+    "ZCMD",
+    "ZD",
+    "ZDAI",
+    "ZENA",
+    "ZEO",
+    "ZG",
+    "ZION",
+    "ZJK",
+    "ZJYL",
+    "ZKIN",
+    "ZKP",
+    "ZLAB",
+    "ZM",
+    "ZNB",
+    "ZNTL",
+    "ZOOZ",
+    "ZS",
+    "ZSQR",
+    "ZSTK",
+    "ZTEK",
+    "ZTG",
+    "ZTS",
+    "ZUMZ",
+    "ZURA",
+    "ZVRA",
+    "ZYBT",
+    "ZYME"
   ]
 }

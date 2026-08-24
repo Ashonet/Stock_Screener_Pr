@@ -66,14 +66,19 @@ const INDEX_LABEL = { sp500: 'S&P 500', nasdaq: 'Nasdaq', russell2000: 'Russell 
  * What share of the chosen index can actually be screened.
  *
  * Only the deep tier carries financial statements, and a company without
- * statements has no score and nothing to rank on. So the Nasdaq screens on the
- * 160 of its 4,328 companies that also sit in the S&P 500, and the Russell 2000
- * on none at all.
+ * statements has no score and nothing to rank on. So an index is screened on
+ * the part of it that has been extracted in full, which is not the whole thing.
  *
  * Saying so is the difference between a filtered list and a misleading one.
- * Someone who asks for the Nasdaq and gets 160 rows will otherwise take those
- * rows for the Nasdaq, and the ranking within them is real while the universe
- * they were drawn from is not what the label says.
+ * Someone who asks for the Nasdaq and gets a fraction of it will otherwise take
+ * those rows for the Nasdaq: the ranking within them is real, while the
+ * universe they were drawn from is not what the label says.
+ *
+ * The wording deliberately names no index as the deep one. It used to read
+ * "only the S&P 500 is extracted in full", which was true when it was written
+ * and became false the moment the Nasdaq was extracted too, while the numbers
+ * beside it kept updating. A sentence that explains the gap has to be derived
+ * from the same source as the gap, or it turns into a confident lie.
  */
 function coverageNote(coverage) {
   if (!coverage || coverage.members == null) return null;
@@ -85,8 +90,8 @@ function coverageNote(coverage) {
     class: 'banner-inline',
     style: { marginBottom: '14px' },
     text: coverage.scored
-      ? `Screening ${coverage.scored} of the ${coverage.members.toLocaleString()} companies in the ${label}. Scoring needs financial statements, and only the S&P 500 is extracted in full, so these are the ${label} names that also sit in it. The rest carry prices but no score.`
-      : `None of the ${coverage.members.toLocaleString()} companies in the ${label} can be scored yet. Scoring needs financial statements and only the S&P 500 is extracted in full; the rest carry prices only.`,
+      ? `Screening ${coverage.scored.toLocaleString()} of the ${coverage.members.toLocaleString()} companies in the ${label}. Scoring needs financial statements, and the other ${(coverage.members - coverage.scored).toLocaleString()} carry prices without them.`
+      : `None of the ${coverage.members.toLocaleString()} companies in the ${label} can be scored yet. Scoring needs financial statements, and these carry prices without them.`,
   });
 }
 
