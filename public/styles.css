@@ -2241,3 +2241,9 @@ table.screener thead th:first-child {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* The one line that outlived the fundamentals header: what this data source
+   cannot supply, kept under the grid rather than in a box above it. */
+.fundamental-gap {
+  margin: 16px 0 0;
+}

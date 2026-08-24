@@ -299,48 +299,32 @@ function renderFundamentals(stock) {
   const { charts, unavailable } = fundamentalCharts(rows, basis);
 
   if (!charts.length) {
-    render(
-      dom.fundamentalsCard,
-      el(
-        'div',
-        { class: 'card' },
-        el('div', { class: 'card-head' }, el('h3', { class: 'card-title', text: 'Fundamentals' })),
-        el('p', { class: 'empty', text: 'No reported statements to chart for this security.' }),
-      ),
-    );
+    render(dom.fundamentalsCard, el('p', { class: 'empty', text: 'No reported statements to chart for this security.' }));
     return;
   }
 
-  const head = el(
-    'div',
-    { class: 'card' },
-    el(
-      'div',
-      { class: 'card-head' },
-      el('h3', { class: 'card-title', text: 'Fundamentals' }),
-      el('span', { class: 'tag', text: basis === 'reit' ? 'REIT basis' : 'Standard basis' }),
-    ),
-    el('p', {
-      class: 'card-sub',
-      style: { marginBottom: 0 },
-      text:
-        basis === 'reit'
-          ? `${charts.length} ${period} series. Charted on FFO and cash flow rather than earnings: depreciation on property that is holding its value pushes a REIT's reported earnings and EPS far below the cash it produces, so both misread.`
-          : `${charts.length} ${period} series, from the reported statements.`,
-    }),
-    // Naming what cannot be drawn, rather than leaving the reader to wonder
-    // whether the company simply does not report it.
+  /*
+   * No header card. The tab is already labelled Fundamentals, the basis is on
+   * the quality score beside it, and a count of the charts is answered by
+   * looking at them, so the box carried nothing the page did not already say.
+   *
+   * What it also carried, for a REIT, was the list of metrics this data source
+   * cannot supply. That is not redundant, so it survives as a line under the
+   * grid rather than a box above it: a reader looking for occupancy should be
+   * told it is unobtainable here, not left to conclude the company does not
+   * report it.
+   */
+  const grid = el('div', { class: 'fundamental-grid' });
+  render(
+    dom.fundamentalsCard,
+    grid,
     unavailable.length
       ? el('p', {
-          class: 'card-sub',
-          style: { marginTop: '8px', marginBottom: 0 },
+          class: 'card-sub fundamental-gap',
           text: `Not available from this data source: ${unavailable.join(', ').toLowerCase()}. Those live in REIT supplementals and earnings decks, not in the financial statements this is built from.`,
         })
       : null,
   );
-
-  const grid = el('div', { class: 'fundamental-grid' });
-  render(dom.fundamentalsCard, head, grid);
 
   for (const spec of charts) {
     const host = el('div', { class: 'card card-chart' });
