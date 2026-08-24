@@ -23,6 +23,7 @@ import { buildComparison } from './lib/compare.js';
 import { buildScoreHistory } from './lib/scoreHistory.js';
 import { gradePortfolios, gradesAsOf, GRADE_ORDER } from './lib/gradeStudy.js';
 import { buildPortfolioScoreHistory } from './lib/portfolioScore.js';
+import { findDips } from './lib/dips.js';
 import { cached, stats as cacheStats } from './lib/cache.js';
 import * as warehouse from './lib/warehouse.js';
 
@@ -674,6 +675,46 @@ const routes = {
       // universe has no sector here, and the breakdown says so.
       unknown: symbols.filter((symbol) => !facets.has(symbol)),
     };
+  },
+
+  /**
+   * Which holdings are trading well below their own recent range.
+   *
+   * Answered entirely from the warehouse: a 52-week high is a scan over stored
+   * closes, and doing it live would be one chart request per holding on every
+   * page load for a number that changes once a day.
+   */
+  async '/api/portfolio/dips'(url) {
+    const holdings = parseHoldings(url.searchParams.get('holdings'));
+    if (!holdings.length) throw new UpstreamError('At least one holding is required', 400);
+    if (!warehouse.isReady()) {
+      throw new UpstreamError('The warehouse has not been built yet, run the pipeline first.', 503);
+    }
+
+    const days = Math.min(1825, Math.max(30, Math.round(Number(url.searchParams.get('days')) || 365)));
+    const symbols = holdings.map((h) => h.symbol);
+
+    const [ranges, facets] = await Promise.all([
+      warehouse.priceRange(symbols, { days }),
+      warehouse.securityFacets(symbols),
+    ]);
+
+    // The yield fields live on the security dimension beside the sector, so the
+    // same read answers both the quality column and the income signal.
+    const facts = new Map(
+      [...facets.entries()].map(([symbol, fact]) => [
+        symbol,
+        {
+          name: fact.name,
+          grade: fact.grade,
+          score: fact.score,
+          yieldPct: fact.dividendYieldPct ?? null,
+          avgYieldPct: fact.fiveYearAvgDividendYieldPct ?? null,
+        },
+      ]),
+    );
+
+    return findDips(holdings, ranges, facts, { windowDays: days });
   },
 
   async '/api/market'() {

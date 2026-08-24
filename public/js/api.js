@@ -30,5 +30,6 @@ export const fetchMap = (opts) => get('/api/map', {}, opts);
 export const fetchIncome = (holdings, years, opts) => get('/api/portfolio/income', { holdings, years }, opts);
 export const fetchPortfolioScore = (holdings, opts) => get('/api/portfolio/score-history', { holdings }, opts);
 export const fetchFacets = (symbols, opts) => get('/api/portfolio/facets', { symbols }, opts);
+export const fetchDips = (holdings, opts) => get('/api/portfolio/dips', { holdings }, opts);
 export const fetchCompare = (symbols, years, opts) => get('/api/compare', { symbols, years }, opts);
 export const fetchGradeStudy = (basis, opts) => get('/api/compare/grades', { basis }, opts);

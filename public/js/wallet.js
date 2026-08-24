@@ -1716,6 +1716,184 @@ function renderMix(node, wallet, data, facets, state, handlers, mountChart) {
   }
 }
 
+/* ------------------------------------------------------------------- dips */
+
+/**
+ * Which holdings are trading well below their own recent range.
+ *
+ * Two readings of the same fall, because one alone is easy to misread: where
+ * the price sits in its 52-week band, and what the yield is doing against its
+ * own history. For a payer those are the same fact from opposite sides, and the
+ * yield one goes quiet on a token dividend, where the ratio is noise.
+ *
+ * **A dip is not an opportunity and this cannot tell you which it is.** A
+ * company 40% off its high may be 40% worse than it was. That is why the grade
+ * travels with every row and why the ordering is by depth alone: blending
+ * cheapness and quality into one rank would hide which of the two produced it.
+ */
+function renderDips(node, wallet, data, dips) {
+  const code = data?.currency ?? 'USD';
+
+  const head = (extra) =>
+    el(
+      'div',
+      { class: 'card-head' },
+      el('h3', { class: 'card-title', text: 'Dips' }),
+      extra ? el('span', { class: 'card-sub', style: { marginBottom: 0 }, text: extra }) : null,
+    );
+
+  if (!dips) {
+    render(node, head(), el('p', { class: 'empty', text: 'Looking at where each holding sits in its range.' }));
+    return;
+  }
+
+  node.hidden = false;
+  const { rows = [], excluded = [], dipping = 0, windowDays = 365 } = dips;
+
+  const notes = excluded.length
+    ? el(
+        'p',
+        { class: 'card-sub', style: { marginBottom: 0 } },
+        'No price history for ',
+        ...excluded.flatMap((entry, i) => [i ? ', ' : '', el('strong', { text: entry.symbol })]),
+        '. Only companies in the tracked universe carry stored prices.',
+      )
+    : null;
+
+  if (!rows.length) {
+    render(node, head(), el('p', { class: 'empty', text: 'Nothing in this wallet has enough price history to place in a range.' }), notes);
+    return;
+  }
+
+  const months = Math.round(windowDays / 30);
+  const deepest = rows[0];
+
+  const stat = (label, value, hint) =>
+    el(
+      'div',
+      { class: 'income-stat' },
+      el('span', { class: 'income-stat-label', text: label }),
+      el('span', { class: 'income-stat-value', text: value }),
+      hint ? el('span', { class: 'income-stat-hint', text: hint }) : null,
+    );
+
+  render(
+    node,
+    head(`against each holding's own ${months}-month range`),
+    el(
+      'div',
+      { class: 'income-summary' },
+      stat('Ten percent or more off', `${dipping} of ${rows.length}`, 'holdings'),
+      stat('Furthest off', deepest.symbol, `${percent(deepest.offHigh, { digits: 1 })} from its high`),
+      stat(
+        'Yielding above average',
+        String(rows.filter((row) => row.yieldVsAverage > 1).length),
+        'of the payers that can be judged',
+      ),
+    ),
+    notes,
+  );
+
+  /* --------------------------------------------------------------- table */
+
+  const rangeCell = (row) => {
+    if (row.rangePosition == null) return el('span', { class: 'muted', text: DASH });
+    return el(
+      'div',
+      { class: 'dip-range' },
+      el(
+        'div',
+        {
+          class: 'dip-track',
+          role: 'img',
+          'aria-label': `${Math.round(row.rangePosition)}% of the way from the low to the high`,
+        },
+        el('div', { class: 'dip-marker', style: { left: `${Math.min(100, Math.max(0, row.rangePosition))}%` } }),
+      ),
+      el(
+        'div',
+        { class: 'dip-scale' },
+        el('span', { text: currency(row.low, code) }),
+        el('span', { text: currency(row.high, code) }),
+      ),
+    );
+  };
+
+  const table = el(
+    'table',
+    { class: 'data dip-table' },
+    el(
+      'thead',
+      {},
+      el(
+        'tr',
+        {},
+        ...['Symbol', 'Grade', 'Price', 'Off high', `${months}-month range`, 'Yield', 'vs its average', 'vs your cost'].map(
+          (label) => el('th', { scope: 'col', text: label }),
+        ),
+      ),
+    ),
+    el(
+      'tbody',
+      {},
+      ...rows.map((row) =>
+        el(
+          'tr',
+          {},
+          el(
+            'th',
+            { scope: 'row' },
+            el('span', { class: 'dip-symbol', text: row.symbol }),
+            row.name ? el('div', { class: 'card-sub', style: { margin: 0 }, text: row.name }) : null,
+          ),
+          el('td', { style: { color: scoreTone(row.score) }, text: row.grade ?? DASH }),
+          el('td', { text: currency(row.price, code) }),
+          el('td', {}, delta(row.offHigh, percent(row.offHigh, { digits: 1 }))),
+          el('td', {}, rangeCell(row)),
+          el('td', { text: row.yieldPct == null ? DASH : percent(row.yieldPct, { digits: 2 }) }),
+          el(
+            'td',
+            {},
+            row.yieldVsAverage == null
+              ? el('abbr', {
+                  class: 'muted',
+                  title:
+                    'Below a 1% yield this ratio is noise rather than signal: both numbers round to nothing, and NVIDIA once read 8.8 times its own average for exactly that reason.',
+                  text: DASH,
+                })
+              : el('span', {
+                  // Above its own average means it yields more than it usually
+                  // has, which is the income side of a price that has fallen.
+                  class: row.yieldVsAverage > 1 ? 'delta-up' : 'delta-flat',
+                  text: `${ratio(row.yieldVsAverage, { digits: 2 })}×`,
+                }),
+          ),
+          el('td', {}, row.vsCost == null ? el('span', { class: 'muted', text: DASH }) : delta(row.vsCost, percent(row.vsCost, { digits: 1 }))),
+        ),
+      ),
+    ),
+  );
+
+  node.append(
+    el(
+      'div',
+      { style: { marginTop: '20px' } },
+      el('div', { class: 'table-scroll' }, table),
+      el(
+        'details',
+        { class: 'forecast-assumptions' },
+        el('summary', { text: 'How to read this' }),
+        el('p', {
+          text:
+            'A dip is not an opportunity, and nothing here can tell you which it is: a company 40% off its high may be 40% worse than it was. That is why the grade sits beside every row and why the ordering is by depth alone, since blending cheapness and quality into one rank would hide which of the two produced it. ' +
+            'Yield against its own five-year average is the same fall read from the income side, and it is withheld below a 1% yield, where the ratio is noise. ' +
+            '"Versus your cost" is a different question from the rest of the row: a holding can be well off its high and still up on what you paid.',
+        }),
+      ),
+    ),
+  );
+}
+
 /* --------------------------------------------------------------------- api */
 
 /** The income panel's own empty state, so the tab is never blank. */
@@ -1736,7 +1914,7 @@ function hide(node) {
   node.hidden = true;
 }
 
-export function renderWallet({ nodes, wallet, data, income, score, facets, mix, rangeBlurb, handlers, editing, mountChart, forecastYears, goal }) {
+export function renderWallet({ nodes, wallet, data, income, score, facets, mix, dips, rangeBlurb, handlers, editing, mountChart, forecastYears, goal }) {
   if (!wallet) {
     render(nodes.hero, el('p', { class: 'empty', text: 'Create a wallet from the sidebar to track a portfolio.' }));
     clear(nodes.chart);
@@ -1750,6 +1928,7 @@ export function renderWallet({ nodes, wallet, data, income, score, facets, mix, 
     hide(nodes.score);
     hide(nodes.scoreChart);
     hide(nodes.mix);
+    hide(nodes.dips);
     return;
 
   }
@@ -1767,6 +1946,7 @@ export function renderWallet({ nodes, wallet, data, income, score, facets, mix, 
     renderIncomeEmpty(nodes.score, 'Add a holding and its quality grade is tracked here.', 'Quality over time');
     hide(nodes.scoreChart);
     renderIncomeEmpty(nodes.mix, 'Add a holding to see what this wallet is made of.', 'Breakdown');
+    renderIncomeEmpty(nodes.dips, 'Add a holding to see where it sits in its own range.', 'Dips');
     renderHoldings(nodes.holdings, wallet, data, handlers, editing);
     return;
   }
@@ -1778,4 +1958,5 @@ export function renderWallet({ nodes, wallet, data, income, score, facets, mix, 
   renderGoal(nodes.goal, nodes.goalChart, wallet, data, income, mountChart, handlers, goal);
   renderScoreTab(nodes.score, nodes.scoreChart, wallet, data, score, mountChart);
   renderMix(nodes.mix, wallet, data, facets, mix, handlers, mountChart);
+  renderDips(nodes.dips, wallet, data, dips);
 }

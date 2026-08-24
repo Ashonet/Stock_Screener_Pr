@@ -468,6 +468,22 @@ substitutes a different number without saying so. NVIDIA's dividend has grown
 77% a year from almost nothing, which compounds $2.80 into $49 over five years;
 the row carries a warning rather than a quietly adjusted figure.
 
+**Dips**: where each holding sits in its own 52-week range, deepest fall first.
+Two readings of the same thing, because one alone is easy to misread: how far
+under the high the price is, and what the yield is doing against its own
+five-year average. For a payer those are the same fall seen from opposite
+sides, and the yield reading is withheld below a 1% yield, where the ratio is
+noise: NVIDIA once read 8.8 times its own average purely because both numbers
+round to nothing.
+
+**A dip is not an opportunity and the screen cannot tell you which it is.** A
+company 40% off its high may be 40% worse than it was, so the quality grade sits
+beside every row and the ordering is by depth alone: blending cheapness and
+quality into one rank would hide which of the two produced it. On the demo
+wallet it puts VICI first, an A+ sitting on its 52-week low at 1.33 times its
+usual yield, which is either the best thing on the page or a warning, and
+nothing here decides that.
+
 **Breakdown**: what the wallet is made of, as a donut over holding, sector,
 industry, quality grade, type (REIT against operating company) or country.
 Concentration is the thing worth seeing and it hides well in a holdings table:

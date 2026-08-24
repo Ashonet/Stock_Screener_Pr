@@ -262,7 +262,68 @@ const comparison = {
   ],
 };
 
-const PANELS = ['hero', 'chart', 'holdings', 'income', 'incomeChart', 'forecast', 'forecastChart', 'goal', 'goalChart', 'score', 'scoreChart', 'mix'];
+const dips = {
+  windowDays: 365,
+  dipping: 1,
+  excluded: [],
+  rows: [
+    {
+      symbol: 'VICI',
+      name: 'VICI Properties',
+      grade: 'A+',
+      score: 89,
+      price: 25.96,
+      high: 33.78,
+      low: 25.93,
+      asOf: '2026-08-25',
+      offHigh: -23.15,
+      offLow: 0.12,
+      rangePosition: 0.4,
+      yieldPct: 6.83,
+      avgYieldPct: 5.15,
+      yieldVsAverage: 1.326,
+      vsCost: -19.7,
+    },
+    {
+      // A token payer: no yield ratio, and no cost basis on record either.
+      symbol: 'MSFT',
+      name: 'Microsoft',
+      grade: 'A+',
+      score: 88,
+      price: 480.35,
+      high: 542.07,
+      low: 352.83,
+      asOf: '2026-08-25',
+      offHigh: -11.39,
+      offLow: 36.14,
+      rangePosition: 67.3,
+      yieldPct: 0.73,
+      avgYieldPct: 0.79,
+      yieldVsAverage: null,
+      vsCost: null,
+    },
+    {
+      // Listed inside the window, so it has no band to sit in.
+      symbol: 'NEW',
+      name: null,
+      grade: null,
+      score: null,
+      price: 50,
+      high: 50,
+      low: null,
+      asOf: '2026-08-25',
+      offHigh: 0,
+      offLow: null,
+      rangePosition: null,
+      yieldPct: null,
+      avgYieldPct: null,
+      yieldVsAverage: null,
+      vsCost: null,
+    },
+  ],
+};
+
+const PANELS = ['hero', 'chart', 'holdings', 'income', 'incomeChart', 'forecast', 'forecastChart', 'goal', 'goalChart', 'score', 'scoreChart', 'mix', 'dips'];
 
 let renderWallet;
 let renderCompare;
@@ -286,6 +347,7 @@ const draw = (over = {}) => {
     income,
     score,
     facets,
+    dips,
     mix: { facet: 'sector' },
     rangeBlurb: '1 year',
     handlers: new Proxy({}, { get: () => () => {} }),
@@ -325,6 +387,13 @@ describe('the wallet view runs', () => {
     assert.equal(panes.hero.children.length, 2, 'falls back to two columns');
   });
 
+  test('the dip finder renders, including the rows that have nothing to show', () => {
+    // Three shapes in one table: a full row, a token payer with no yield ratio
+    // and no cost basis, and a symbol with no band to sit in.
+    const panes = draw();
+    assert.ok(panes.dips.children.length > 0);
+  });
+
   test('every breakdown facet renders', () => {
     for (const facet of ['symbol', 'sector', 'industry', 'grade', 'basis', 'country']) {
       const panes = draw({ mix: { facet } });
@@ -333,14 +402,14 @@ describe('the wallet view runs', () => {
   });
 
   test('an empty wallet renders rather than throwing', () => {
-    const panes = draw({ wallet: { id: 'w2', name: 'Empty', holdings: [] }, data: null, income: null, score: null });
+    const panes = draw({ wallet: { id: 'w2', name: 'Empty', holdings: [] }, data: null, income: null, score: null, dips: null });
     assert.ok(panes.hero.children.length > 0);
   });
 
   test('a wallet whose side data has not arrived yet still renders', () => {
     // The first paint after selecting a wallet: prices are in, everything else
     // is still in flight.
-    const panes = draw({ income: null, score: null, facets: null });
+    const panes = draw({ income: null, score: null, facets: null, dips: null });
     assert.ok(panes.chart.children.length > 0);
     assert.ok(panes.holdings.children.length > 0);
   });

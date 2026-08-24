@@ -2247,3 +2247,42 @@ table.screener thead th:first-child {
 .fundamental-gap {
   margin: 16px 0 0;
 }
+
+/* -------------------------------------------------------------- dip finder */
+
+.dip-symbol {
+  font-weight: 650;
+}
+.dip-range {
+  min-width: 140px;
+}
+/* Where the price sits between the low and the high. A track and a marker
+   rather than a bar, because the value is a position in a band and not a
+   quantity growing from zero. */
+.dip-track {
+  position: relative;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--down), var(--wash) 45%, var(--wash) 55%, var(--up));
+  opacity: 0.55;
+}
+.dip-marker {
+  position: absolute;
+  top: -3px;
+  width: 3px;
+  height: 12px;
+  margin-left: -1.5px;
+  border-radius: 2px;
+  background: var(--text-primary);
+}
+.dip-scale {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+.dip-table td {
+  vertical-align: middle;
+}

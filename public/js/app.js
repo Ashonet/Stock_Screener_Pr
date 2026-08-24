@@ -99,6 +99,7 @@ const WALLET_TABS = [
   { id: 'goal', label: 'Goal' },
   { id: 'score', label: 'Quality over time' },
   { id: 'mix', label: 'Breakdown' },
+  { id: 'dips', label: 'Dips' },
 ];
 
 const TABS = [
@@ -170,6 +171,7 @@ const state = {
   walletIncome: null,
   walletScore: null,
   walletFacets: null,
+  walletDips: null,
   mix: { facet: 'sector' },
   screenerData: null,
   screener: { sortKey: 'overall_score', sortDir: 'desc', basis: 'all', sector: 'all' },
@@ -222,6 +224,7 @@ const dom = {
     goal: document.getElementById('wpanel-goal'),
     score: document.getElementById('wpanel-score'),
     mix: document.getElementById('wpanel-mix'),
+    dips: document.getElementById('wpanel-dips'),
   },
   walletIncomeChart: document.getElementById('wallet-income-chart'),
   walletForecast: document.getElementById('wallet-forecast'),
@@ -231,6 +234,7 @@ const dom = {
   walletScore: document.getElementById('wallet-score'),
   walletScoreChart: document.getElementById('wallet-score-chart'),
   walletMix: document.getElementById('wallet-mix'),
+  walletDips: document.getElementById('wallet-dips'),
   compareView: document.getElementById('compare-view'),
   compareCard: document.getElementById('compare-card'),
   mapView: document.getElementById('map-view'),
@@ -1000,6 +1004,7 @@ function renderWalletView() {
       score: dom.walletScore,
       scoreChart: dom.walletScoreChart,
       mix: dom.walletMix,
+      dips: dom.walletDips,
     },
     wallet: activeWallet(),
     data: state.walletData,
@@ -1007,6 +1012,7 @@ function renderWalletView() {
     score: state.walletScore,
     facets: state.walletFacets,
     mix: state.mix,
+    dips: state.walletDips,
     forecastYears: state.forecastYears,
     goal: state.goal,
     rangeBlurb: RANGES.find((r) => r.key === state.range)?.blurb ?? '',
@@ -1023,6 +1029,7 @@ async function loadWalletData() {
     state.walletIncome = null;
     state.walletScore = null;
     state.walletFacets = null;
+    state.walletDips = null;
     renderWalletView();
     return;
   }
@@ -1035,6 +1042,7 @@ async function loadWalletData() {
   loadWalletIncome(wallet, token);
   loadWalletScore(wallet, token);
   loadWalletFacets(wallet, token);
+  loadWalletDips(wallet, token);
   try {
     const data = await api.fetchPortfolio(holdingsParam(wallet), state.range);
     if (token !== state.walletToken) return;
@@ -1088,6 +1096,26 @@ function setForecastYears(years) {
  * same basket twice invites the two to disagree over which minute they were
  * priced in.
  */
+/**
+ * Where each holding sits in its own 52-week range.
+ *
+ * Its own request because it is a scan over stored closes rather than anything
+ * the valuation already knows, and because a 52-week high changes once a day.
+ */
+async function loadWalletDips(wallet, token) {
+  state.walletDips = null;
+  try {
+    const dips = await api.fetchDips(holdingsParam(wallet));
+    if (token !== state.walletToken) return;
+    state.walletDips = dips;
+  } catch {
+    if (token !== state.walletToken) return;
+    // A failed lookup leaves an empty finder rather than blanking the wallet.
+    state.walletDips = { rows: [], excluded: [], dipping: 0, windowDays: 365 };
+  }
+  renderWalletView();
+}
+
 async function loadWalletFacets(wallet, token) {
   state.walletFacets = null;
   try {
@@ -1143,6 +1171,7 @@ function selectWallet(id) {
   state.walletIncome = null;
   state.walletScore = null;
   state.walletFacets = null;
+  state.walletDips = null;
   saveWallets();
   saveView();
   setVisibleView('wallet');
