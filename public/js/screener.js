@@ -60,6 +60,36 @@ function formatCell(value, kind) {
   }
 }
 
+const INDEX_LABEL = { sp500: 'S&P 500', nasdaq: 'Nasdaq', russell2000: 'Russell 2000' };
+
+/**
+ * What share of the chosen index can actually be screened.
+ *
+ * Only the deep tier carries financial statements, and a company without
+ * statements has no score and nothing to rank on. So the Nasdaq screens on the
+ * 160 of its 4,328 companies that also sit in the S&P 500, and the Russell 2000
+ * on none at all.
+ *
+ * Saying so is the difference between a filtered list and a misleading one.
+ * Someone who asks for the Nasdaq and gets 160 rows will otherwise take those
+ * rows for the Nasdaq, and the ranking within them is real while the universe
+ * they were drawn from is not what the label says.
+ */
+function coverageNote(coverage) {
+  if (!coverage || coverage.members == null) return null;
+  const label = INDEX_LABEL[coverage.index] ?? coverage.index;
+  const complete = coverage.scored >= coverage.members;
+  if (complete) return null;
+
+  return el('p', {
+    class: 'banner-inline',
+    style: { marginBottom: '14px' },
+    text: coverage.scored
+      ? `Screening ${coverage.scored} of the ${coverage.members.toLocaleString()} companies in the ${label}. Scoring needs financial statements, and only the S&P 500 is extracted in full, so these are the ${label} names that also sit in it. The rest carry prices but no score.`
+      : `None of the ${coverage.members.toLocaleString()} companies in the ${label} can be scored yet. Scoring needs financial statements and only the S&P 500 is extracted in full; the rest carry prices only.`,
+  });
+}
+
 export function renderScreener({ node, data, state, handlers }) {
   if (!data) {
     render(
@@ -172,6 +202,28 @@ export function renderScreener({ node, data, state, handlers }) {
       el(
         'div',
         { class: 'filter-group' },
+        el('span', { class: 'filter-label', text: 'Index' }),
+        el(
+          'div',
+          { class: 'segmented' },
+          ...[
+            ['all', 'All'],
+            ['sp500', 'S&P 500'],
+            ['nasdaq', 'Nasdaq'],
+            ['russell2000', 'Russell 2000'],
+          ].map(([value, label]) =>
+            el('button', {
+              type: 'button',
+              text: label,
+              'aria-pressed': String(state.index === value),
+              onclick: () => handlers.onFilter({ index: value }),
+            }),
+          ),
+        ),
+      ),
+      el(
+        'div',
+        { class: 'filter-group' },
         el('span', { class: 'filter-label', text: 'Basis' }),
         el(
           'div',
@@ -209,6 +261,7 @@ export function renderScreener({ node, data, state, handlers }) {
         ),
       ),
     ),
+    coverageNote(data.coverage),
     el('div', { class: 'table-scroll screener-scroll' }, el('table', { class: 'data screener' }, el('thead', {}, header), body)),
     el('p', {
       class: 'card-sub',

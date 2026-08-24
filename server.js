@@ -154,16 +154,36 @@ const routes = {
     const rows = await warehouse.screener();
     const basis = url.searchParams.get('basis');
     const sector = url.searchParams.get('sector');
+    const index = url.searchParams.get('index');
 
     const filtered = rows.filter(
       (row) =>
         (!basis || basis === 'all' || row.scoring_basis === basis) &&
-        (!sector || sector === 'all' || row.sector === sector),
+        (!sector || sector === 'all' || row.sector === sector) &&
+        (!index || index === 'all' || (row.indexes ?? []).includes(index)),
     );
+
+    /*
+     * How much of the chosen index the screener can actually cover.
+     *
+     * Only the deep tier carries financial statements, and without statements
+     * there is no score and nothing to rank. So the Nasdaq screens on the 160
+     * of its 4,328 companies that are also in the S&P 500, and the Russell 2000
+     * screens on none at all. Reporting both numbers is the difference between
+     * a filtered list and a misleading one: a reader who asked for the Nasdaq
+     * and got 160 rows should be told why, not left to assume that is the
+     * Nasdaq.
+     */
+    const membership = await warehouse.indexSizes();
+    const coverage = index && index !== 'all'
+      ? { index, scored: filtered.length, members: membership.get(index) ?? null }
+      : null;
 
     return {
       rows: filtered,
       sectors: [...new Set(rows.map((r) => r.sector).filter(Boolean))].sort(),
+      indexes: [...membership.keys()].sort(),
+      coverage,
       total: rows.length,
     };
   },

@@ -420,8 +420,16 @@ Stored data is labelled with its date rather than passed off as current, and a
 a symbol outside the tracked universe still degrades honestly: there is nothing
 stored to serve, and saying so beats inventing it.
 
-**Screener**: all 505 tracked securities ranked by score, sortable on any
-column, filterable by sector and by scoring basis. REIT rows show P/FFO and operating
+**Screener**: every scored security ranked, sortable on any column, filterable
+by index, sector and scoring basis.
+
+The index filter says what it can and cannot cover. Scoring needs financial
+statements and only the deep tier carries them, so the Nasdaq screens on the
+160 of its 4,328 companies that also sit in the S&P 500, and the Russell 2000
+on none at all. The card says so rather than presenting 160 rows as the Nasdaq:
+the ranking within them is real, and the universe they were drawn from is not
+what the label alone would suggest. Running the deep extract over a wider tier
+fills it in without another change. REIT rows show P/FFO and operating
 companies show P/E in the same column, since that is the comparable measure for
 each.
 

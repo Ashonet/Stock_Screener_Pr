@@ -174,7 +174,7 @@ const state = {
   walletDips: null,
   mix: { facet: 'sector' },
   screenerData: null,
-  screener: { sortKey: 'overall_score', sortDir: 'desc', basis: 'all', sector: 'all' },
+  screener: { sortKey: 'overall_score', sortDir: 'desc', basis: 'all', sector: 'all', index: 'all' },
   mapData: null,
   map: { mode: 'change' },
   compareData: null,
@@ -1409,7 +1409,7 @@ function renderScreenerView() {
 
 async function loadScreener() {
   try {
-    state.screenerData = await api.fetchScreener(state.screener.basis, state.screener.sector);
+    state.screenerData = await api.fetchScreener(state.screener.basis, state.screener.sector, state.screener.index);
     dom.screenerCount.textContent = String(state.screenerData.total ?? '');
   } catch (err) {
     state.screenerData = { error: err.message };
