@@ -66,7 +66,6 @@ const PERIODS = [
 ];
 
 const STORE = {
-  theme: 'sd:theme',
   range: 'sd:range',
   symbol: 'sd:active',
   tab: 'sd:tab',
@@ -254,7 +253,6 @@ const dom = {
   search: document.getElementById('search-input'),
   searchResults: document.getElementById('search-results'),
   refreshStatus: document.getElementById('refresh-status'),
-  themeToggle: document.getElementById('theme-toggle'),
 };
 
 /** Chart cards install resize observers; drop the old ones before re-rendering. */
@@ -2557,36 +2555,6 @@ function setupSearch() {
   });
 }
 
-/* --------------------------------------------------------------------- theme */
-
-function currentTheme() {
-  return (
-    document.documentElement.dataset.theme ||
-    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-  );
-}
-
-function setupTheme() {
-  const sync = () => {
-    const next = currentTheme() === 'dark' ? 'light' : 'dark';
-    dom.themeToggle.setAttribute('aria-label', `Switch to ${next} theme`);
-  };
-  sync();
-
-  dom.themeToggle.addEventListener('click', () => {
-    const next = currentTheme() === 'dark' ? 'light' : 'dark';
-    document.documentElement.dataset.theme = next;
-    writeStore(STORE.theme, next);
-    sync();
-    // Charts re-read their colors from CSS variables via a MutationObserver.
-    renderWatchlist();
-    if (state.stock) {
-      renderTargets(state.stock);
-      renderScore(state.stock);
-    }
-  });
-}
-
 /* ---------------------------------------------------------------------- init */
 
 function startAutoRefresh() {
@@ -2667,7 +2635,6 @@ function init() {
     dom.navScreener.addEventListener('click', showScreenerView);
   });
   step('search', setupSearch);
-  step('theme', setupTheme);
 
   loadMarket();
   // Cheap: the health endpoint already reports how many securities are scored,

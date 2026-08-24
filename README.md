@@ -590,7 +590,8 @@ the Bruls/Huizing/van Wijk algorithm in `public/js/treemap.js`, kept free of any
 DOM or colour knowledge so it is unit-testable on geometry alone.
 
 Charts are hand-rolled SVG with no chart library, on a palette validated for
-colourblind separation and contrast in both themes. Direction is always carried
+colourblind separation and contrast in both themes, which follow the operating
+system rather than an in-app switch. Direction is always carried
 by an arrow and a signed number as well as colour, every chart has a table-view
 twin, and hit targets are the band rather than the painted mark.
 

@@ -283,5 +283,7 @@ export function renderMap({ node, data, state, handlers }) {
   paint();
   new ResizeObserver(paint).observe(frame);
   // Tile fills are mixed from CSS variables, so a theme change has to repaint.
-  new MutationObserver(paint).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  // Watched through the media query rather than an attribute: the theme follows
+  // the operating system now, and nothing sets an attribute to observe.
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', paint);
 }

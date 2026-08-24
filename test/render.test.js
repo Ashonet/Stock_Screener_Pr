@@ -87,7 +87,13 @@ function installDom() {
     observe() {}
     disconnect() {}
   };
-  globalThis.window = { innerWidth: 1200, innerHeight: 800 };
+  globalThis.window = {
+    innerWidth: 1200,
+    innerHeight: 800,
+    // Charts repaint when the system flips between light and dark, which they
+    // learn from the media query rather than an attribute.
+    matchMedia: () => ({ matches: false, addEventListener() {}, removeEventListener() {} }),
+  };
 }
 
 /* ----------------------------------------------------------------- fixtures */

@@ -167,13 +167,22 @@ export function chartCard(container, config) {
   paint();
   const observer = new ResizeObserver(debounce(paint, 90));
   observer.observe(frame);
-  // Re-paint on theme change so marks pick up the new mode's steps.
-  const themeWatcher = new MutationObserver(paint);
-  themeWatcher.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  /*
+   * Re-paint when the system flips between light and dark, so marks pick up the
+   * new mode's steps.
+   *
+   * This used to watch a `data-theme` attribute, which the removed toggle set.
+   * With the theme following the operating system there is no attribute to
+   * watch and the media query is the only source of truth, so an observer left
+   * pointed at the old attribute would simply never fire and charts would keep
+   * yesterday's colours until something else forced a repaint.
+   */
+  const scheme = window.matchMedia('(prefers-color-scheme: dark)');
+  scheme.addEventListener('change', paint);
 
   return () => {
     observer.disconnect();
-    themeWatcher.disconnect();
+    scheme.removeEventListener('change', paint);
   };
 }
 
