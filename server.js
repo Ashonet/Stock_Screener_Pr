@@ -17,6 +17,7 @@ import * as yahoo from './lib/yahoo.js';
 import { UpstreamError } from './lib/yahoo.js';
 import { buildProfile, dividendsByYear, quoteFromChart } from './lib/profile.js';
 import { buildScore } from './lib/score.js';
+import { multipleSeries, valuationContext } from './lib/valuation.js';
 import { parseHoldings, buildValueSeries, priceHoldings } from './lib/portfolio.js';
 import { buildIncome, buildIncomeProjection } from './lib/income.js';
 import { buildComparison } from './lib/compare.js';
@@ -334,10 +335,42 @@ const routes = {
     const profile = buildProfile(symbol, summary, chart);
     const dividends = dividendsByYear(dividendPayments);
 
+    /*
+     * Where this company's multiple sits against its own past and its peers.
+     *
+     * Best-effort on purpose. It needs stored price history and a peer pool,
+     * so a symbol outside the tracked universe has neither, and the valuation
+     * pillar falls back to the absolute band rather than the page failing.
+     */
+    const valuation = warehouse.isReady()
+      ? await warehouse
+          .valuationInputs(symbol)
+          .then((inputs) => {
+            const series = multipleSeries(inputs.prices, inputs.earnings);
+            // The latest close, not the last month-end: "is it expensive today"
+            // wants today's price. The peer pool is built the same way, so the
+            // company and the group it is measured against are on one basis.
+            const current = inputs.peers.find((p) => p.symbol === symbol)?.multiple ?? null;
+            return valuationContext({
+              series,
+              current,
+              self: {
+                symbol,
+                multiple: current,
+                industry: inputs.self?.industry ?? null,
+                sector: inputs.self?.sector ?? null,
+                isReit: Boolean(inputs.self?.is_reit),
+              },
+              peers: inputs.peers,
+            });
+          })
+          .catch(() => null)
+      : null;
+
     // Scoring needs the statements; without them there is nothing to grade.
     const score =
       Object.keys(summary).length && annual.length
-        ? buildScore({ summary, financials: annual, dividendPayments })
+        ? buildScore({ summary, financials: annual, dividendPayments, valuation })
         : null;
 
     /*
