@@ -402,7 +402,14 @@ export function renderCompare({ node, data, state, handlers, grades }) {
         formatValue: (v) => `$${compact(v)}`,
         ariaLabel: `${totalReturn ? 'Total return' : 'Price return'} of ${series.map((s) => s.symbol).join(', ')}`,
       }),
-    note: data.unavailable?.length ? `No history available for ${data.unavailable.join(', ')}.` : null,
+    note: [
+      data.outsideIndex?.length
+        ? `${data.outsideIndex.join(', ')} ${data.outsideIndex.length === 1 ? 'is' : 'are'} not in the S&P 500, so ${data.outsideIndex.length === 1 ? 'it was' : 'they were'} left out.`
+        : null,
+      data.unavailable?.length ? `No history available for ${data.unavailable.join(', ')}.` : null,
+    ]
+      .filter(Boolean)
+      .join(' ') || null,
     table: {
       columns: ['Date', ...series.map((s) => s.symbol)],
       // The spine is the first series' dates; every series shares a calendar
@@ -567,8 +574,8 @@ function buildForm(state, handlers) {
     type: 'text',
     class: 'field compare-field',
     value: state.symbols.join(', '),
-    placeholder: 'Up to six tickers, comma separated',
-    'aria-label': 'Tickers to compare',
+    placeholder: 'Up to six S&P 500 tickers, comma separated',
+    'aria-label': 'S&P 500 tickers to compare',
     spellcheck: 'false',
     autocomplete: 'off',
   });

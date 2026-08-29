@@ -575,10 +575,36 @@ const routes = {
 
     if (symbols.length < 2) throw new UpstreamError('Give at least two tickers to compare', 400);
 
-    const years = Math.min(20, Math.max(1, Number(url.searchParams.get('years')) || 10));
-    const stored = warehouse.isReady() ? await warehouse.monthlyHistory(symbols, { years }) : new Map();
+    /*
+     * Held to the S&P 500, like the market map and the grade study.
+     *
+     * A ticker outside the index used to fall through to a live Yahoo call for
+     * its history, which made this the one comparison that could be slow, could
+     * fail upstream and could put a company beside five it is not comparable
+     * to. Dropping those symbols instead keeps the view inside one universe and
+     * takes the upstream out of the path entirely.
+     *
+     * They are named in the response rather than silently discarded: a chart
+     * that quietly drops a ticker the reader asked for is worse than one that
+     * says why it will not draw it.
+     */
+    const members = warehouse.isReady() ? await warehouse.indexMembers().catch(() => null) : null;
+    const outsideIndex = members ? symbols.filter((symbol) => !members.has(symbol)) : [];
+    const inIndex = members ? symbols.filter((symbol) => members.has(symbol)) : symbols;
 
-    const missing = symbols.filter((symbol) => !stored.has(symbol));
+    if (inIndex.length < 2) {
+      throw new UpstreamError(
+        outsideIndex.length
+          ? `This compares S&P 500 companies, and ${outsideIndex.join(', ')} ${outsideIndex.length === 1 ? 'is not one' : 'are not in it'}. Give at least two S&P 500 tickers.`
+          : 'Give at least two tickers to compare',
+        400,
+      );
+    }
+
+    const years = Math.min(20, Math.max(1, Number(url.searchParams.get('years')) || 10));
+    const stored = warehouse.isReady() ? await warehouse.monthlyHistory(inIndex, { years }) : new Map();
+
+    const missing = inIndex.filter((symbol) => !stored.has(symbol));
     const fetched = await Promise.allSettled(
       missing.map((symbol) => cached(`longhistory:${symbol}`, TTL.financials, () => yahoo.getLongHistory(symbol, years))),
     );
@@ -593,8 +619,8 @@ const routes = {
     // Names carried alongside the maths so the legend reads as companies rather
     // than tickers. The warehouse answers first because it needs no upstream
     // call at all; quotes only fill the gaps for symbols outside the universe.
-    const names = warehouse.isReady() ? await warehouse.namesFor(symbols).catch(() => new Map()) : new Map();
-    const unnamed = symbols.filter((symbol) => !names.has(symbol));
+    const names = warehouse.isReady() ? await warehouse.namesFor(inIndex).catch(() => new Map()) : new Map();
+    const unnamed = inIndex.filter((symbol) => !names.has(symbol));
     if (unnamed.length) {
       const quotes = await cached(`quotes:${unnamed.join(',')}`, TTL.quotes, () => yahoo.getQuotes(unnamed)).catch(() => []);
       for (const q of quotes) if (q.name) names.set(q.symbol, q.name);
@@ -608,7 +634,7 @@ const routes = {
       entry.name = name && name !== entry.symbol ? name : null;
     }
 
-    return { ...comparison, years, unavailable, requested: symbols };
+    return { ...comparison, years, unavailable, outsideIndex, requested: inIndex };
   },
 
   /**

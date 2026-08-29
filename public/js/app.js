@@ -1306,6 +1306,9 @@ async function loadGradeStudy() {
   renderCompareView();
 }
 
+/** All S&P 500, so the view always has something it is allowed to draw. */
+const COMPARE_DEFAULTS = ['O', 'KO', 'NVDA', 'UNP'];
+
 async function loadCompare() {
   const token = ++state.compareToken;
   state.compareData = null;
@@ -1316,6 +1319,14 @@ async function loadCompare() {
     state.compareData = data;
   } catch (err) {
     if (token !== state.compareToken) return;
+    // A seeded watchlist that happens to sit outside the index is not a
+    // failure to show the reader; fall back to something drawable, once.
+    if (state.compare.autoSeeded) {
+      state.compare.autoSeeded = false;
+      state.compare.symbols = COMPARE_DEFAULTS;
+      renderCompareView();
+      return loadCompare();
+    }
     state.compareData = { error: err.message };
   }
   renderCompareView();
@@ -1332,7 +1343,11 @@ function showCompareView() {
   // to look at rather than an empty form.
   if (!state.compare.symbols.length) {
     const seed = (activeList()?.symbols ?? []).slice(0, 4);
-    state.compare.symbols = seed.length >= 2 ? seed : ['O', 'KO', 'NVDA', 'UNP'];
+    state.compare.symbols = seed.length >= 2 ? seed : COMPARE_DEFAULTS;
+    // Remember that we chose these rather than the reader. The watchlist can
+    // hold anything, the comparison only draws S&P 500 companies, and a view
+    // that opens on an error nobody asked for is our mistake to recover from.
+    state.compare.autoSeeded = state.compare.symbols !== COMPARE_DEFAULTS;
   }
   renderCompareView();
   if (!state.compareData) loadCompare();
