@@ -18,6 +18,7 @@ import { UpstreamError } from './lib/yahoo.js';
 import { buildProfile, dividendsByYear, quoteFromChart } from './lib/profile.js';
 import { buildScore } from './lib/score.js';
 import { multipleSeries, valuationContext } from './lib/valuation.js';
+import { storedAsOf } from './lib/freshness.js';
 import { parseHoldings, buildValueSeries, priceHoldings } from './lib/portfolio.js';
 import { buildIncome, buildIncomeProjection } from './lib/income.js';
 import { buildComparison } from './lib/compare.js';
@@ -427,7 +428,9 @@ const routes = {
       scoreHistory,
       degraded,
       servedFromWarehouse,
-      warehouseAsOf: servedFromWarehouse.length ? (stored?.priceAsOf ?? stored?.asOf ?? null) : null,
+      // Dated by when the stored data was stored, never by the last trade
+      // date; see lib/freshness.js for why that distinction cost a bug.
+      warehouseAsOf: storedAsOf(servedFromWarehouse, stored ?? {}),
     };
   },
 
