@@ -194,7 +194,16 @@ function draw(width, height, data, mode, handlers) {
 
 export function renderMap({ node, data, state, handlers }) {
   const head = (extra) =>
-    el('div', { class: 'card-head' }, el('h3', { class: 'card-title', text: 'Market map' }), extra ?? null);
+    el(
+      'div',
+      { class: 'card-head' },
+      el('h3', { class: 'card-title', text: 'Market map' }),
+      // The warehouse tracks several thousand companies and this draws 500 of
+      // them. Saying so is the difference between a view and a wrong one: a
+      // treemap that silently omits most of its universe still looks complete.
+      el('span', { class: 'card-sub', style: { marginBottom: 0 }, text: 'S&P 500, sized by market cap' }),
+      extra ?? null,
+    );
 
   if (!data) {
     render(node, head(), el('p', { class: 'empty', text: 'Loading the warehouse…' }));

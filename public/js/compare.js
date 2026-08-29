@@ -206,7 +206,7 @@ function renderGradeStudy({ node, data, state, handlers }) {
       'div',
       { class: 'card-head' },
       el('h3', { class: 'card-title', text: 'Equal-weight portfolios by grade' }),
-      el('span', { class: 'card-sub', style: { marginBottom: 0 }, text: `${data.graded} companies graded` }),
+      el('span', { class: 'card-sub', style: { marginBottom: 0 }, text: `${data.graded} S&P 500 companies graded` }),
     ),
     el('div', { class: 'grade-controls' }, basisPicker, windowPicker),
     state.basis === 'now'
