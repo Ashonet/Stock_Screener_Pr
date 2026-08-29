@@ -71,6 +71,31 @@ select
     -- What actually marks a missed split is the raw close stepping by the split
     -- ratio itself. The second condition then confirms the adjusted series
     -- failed to correct for it rather than having done so.
-    abs(close_step - (1.0 / ratio)) < 0.05 / ratio
+    --
+    -- The third condition is the one that keeps this honest, and it exists
+    -- because widening the universe to the small-cap tail broke the other two.
+    --
+    -- A "split" of 1.05 is a 5% stock dividend, and it implies a price step of
+    -- 4.8%. The tolerance around that step is 4.76%. The two overlap almost
+    -- entirely, so any ordinary day matched: Security National was flagged on a
+    -- 0.5% drift, and Cresud on a day its shares went *up*. Twenty-one of the
+    -- twenty-seven flagged events were stock dividends of a few percent that no
+    -- detector can separate from a quiet day, because the signal and the noise
+    -- are genuinely the same size.
+    --
+    -- So a split must move the price by more than a quarter to be judged here
+    -- at all. Real splits clear that easily: two for one steps 50%, and the
+    -- reverse splits in this data step 900% to 7,900%. What falls below it is
+    -- declined rather than guessed, and the asymmetry is deliberate. A missed
+    -- correction leaves the series as the upstream published it, which is one
+    -- symbol reading wrong. A wrongly applied one silently rewrites years of
+    -- history at the wrong scale, which is how this model's first version
+    -- doubled three years of Monster's prices. Cotiviti's 0.9 sits in the grey
+    -- zone at an 11% step and is deliberately left alone.
+    --
+    -- assert_no_unadjusted_split stays at warning severity as the net beneath
+    -- this: anything genuinely missed still surfaces, without failing a build.
+    abs(1 - (1.0 / ratio)) > 0.25
+        and abs(close_step - (1.0 / ratio)) < 0.05 / ratio
         and abs(close_step - adj_step) < 0.001 as upstream_missed_it
 from inspected
