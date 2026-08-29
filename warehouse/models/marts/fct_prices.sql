@@ -20,8 +20,24 @@ with prices as (
     from {{ ref('stg_prices') }} p
 
     {% if is_incremental() %}
-    -- Only reconsider the window that could have changed.
-    where p.trade_date >= (select coalesce(max(trade_date), '1900-01-01'::date) - interval 10 day from {{ this }})
+    -- Only reconsider the window that could have changed, per symbol.
+    --
+    -- The watermark has to be per symbol rather than one figure for the whole
+    -- table. A global max is right only while the universe is fixed: the moment
+    -- a new symbol arrives carrying six years of backfill, every bar older than
+    -- the *table's* newest date is silently dropped, and the symbol lands with
+    -- a fortnight of history that looks like a complete series. Adding the
+    -- Russell 2000 did exactly that, taking American Assets Trust from 1,505
+    -- bars in the raw layer to 14 in this model, with nothing failing.
+    --
+    -- A symbol with no rows yet has no watermark, so it backfills in full.
+    left join (
+        select symbol, max(trade_date) as loaded_through
+        from {{ this }}
+        group by symbol
+    ) w on w.symbol = p.symbol
+    where w.loaded_through is null
+       or p.trade_date >= w.loaded_through - interval 10 day
     {% endif %}
 
 ),
