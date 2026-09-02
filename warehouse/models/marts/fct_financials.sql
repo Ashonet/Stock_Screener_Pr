@@ -67,4 +67,9 @@ select
 
     row_number() over (partition by p.symbol, p.period_type order by p.period_end desc) as recency_rank
 from pivoted p
-left join {{ ref('dim_security') }} d using (symbol)
+-- Inner, not left. The floor lives in dim_security, so joining to it is what
+-- applies it here; and fct_financials.symbol already has a relationships test
+-- against that dimension, so a row this drops is one the test would have failed
+-- on anyway. Left-joining kept statements for companies the warehouse no longer
+-- carries, with every dimension column null beside them.
+join {{ ref('dim_security') }} d using (symbol)

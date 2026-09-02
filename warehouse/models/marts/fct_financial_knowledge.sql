@@ -138,3 +138,5 @@ select
         partition by symbol, period_type, period_end, metric
     ) as total_versions
 from intervals
+-- The market-cap floor, kept in step with fct_financials.
+where symbol not in ({{ below_market_cap_floor() }})

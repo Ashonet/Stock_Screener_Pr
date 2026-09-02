@@ -13,6 +13,18 @@ vars:
   # Where the immutable raw layer lives, relative to the dbt project root.
   raw_dir: '../warehouse/raw'
 
+  # Smallest company the warehouse carries, in units of market cap.
+  #
+  # Roughly 56% of the listed universe sits below a billion, and it costs more
+  # than half the price rows to keep. Excluding it is what makes the warehouse
+  # fit an instance it has to share with Node.
+  #
+  # Applied to dim_security and to fct_prices. fct_prices is incremental, so
+  # raising this floor removes nothing already stored until the next
+  # --full-refresh (npm run warehouse:refresh); lowering it backfills from the
+  # raw layer, which is never filtered and still holds everything.
+  min_market_cap: 1000000000
+
 models:
   stock_warehouse:
     staging:

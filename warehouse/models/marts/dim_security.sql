@@ -41,3 +41,6 @@ select
 
     ingested_at
 from {{ ref('stg_securities') }}
+-- The floor. Rebuilt as a table on every run, so changing min_market_cap takes
+-- effect here immediately, unlike the incremental price fact.
+where symbol not in ({{ below_market_cap_floor() }})

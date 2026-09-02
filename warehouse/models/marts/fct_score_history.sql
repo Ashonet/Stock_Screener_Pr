@@ -25,3 +25,7 @@ select
 
     row_number() over (partition by symbol order by score_date desc) = 1 as is_latest
 from {{ ref('stg_score_history') }}
+-- The market-cap floor. Applied before the window functions above, which is
+-- what we want: they all partition by symbol, so dropping a symbol entirely
+-- leaves every other symbol's history untouched.
+where symbol not in ({{ below_market_cap_floor() }})

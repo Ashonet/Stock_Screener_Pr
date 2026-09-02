@@ -73,3 +73,6 @@ select
 from payments p
 left join cadence c using (symbol)
 left join cadence_fallback f using (symbol)
+-- The market-cap floor, so the dividend record does not outlive the company's
+-- place in the warehouse.
+where p.symbol not in ({{ below_market_cap_floor() }})

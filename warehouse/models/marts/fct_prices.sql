@@ -1,4 +1,23 @@
-{{ config(materialized='incremental', unique_key=['symbol', 'trade_date']) }}
+{{
+    config(
+        materialized='incremental',
+        unique_key=['symbol', 'trade_date'],
+        post_hook="delete from {{ this }} where symbol in ({{ below_market_cap_floor() }})",
+    )
+}}
+
+-- The post-hook is what keeps the floor honest on an incremental run.
+--
+-- The CTE below governs what gets *added*; on its own that would let a company
+-- that has since fallen under the floor keep the rows it already has, while
+-- dim_security — a table, rebuilt every run — drops it. fct_prices.symbol has a
+-- relationships test against dim_security, so that divergence would not be a
+-- slow drift, it would fail the very next build with an error pointing at the
+-- test rather than at the cause.
+--
+-- Deleting after the merge makes the two models agree every run, incremental or
+-- not. Note that DuckDB frees the pages but does not shrink the file, so
+-- reclaiming the space on disk still wants one --full-refresh.
 
 -- Daily bars, merged rather than appended.
 --
@@ -43,6 +62,25 @@ with prices as (
 ),
 
 /*
+ * The market-cap floor.
+ *
+ * Applied here rather than in the CTE above because that one carries the
+ * incremental watermark join, and its WHERE belongs to the lookback window
+ * rather than to the universe.
+ *
+ * This model is incremental, so the floor governs what is *added*. Symbols
+ * already stored that now fall below it stay until a --full-refresh; the raw
+ * layer is never filtered, so nothing here is a one-way door.
+ */
+in_universe as (
+
+    select *
+    from prices
+    where symbol not in ({{ below_market_cap_floor() }})
+
+),
+
+/*
  * Repair for splits the upstream published and then ignored.
  *
  * Yahoo reported Monster's 2:1 on 11 August 2026 in its own events feed and
@@ -77,7 +115,7 @@ corrections as (
         -- which restates the price onto today's share count. DuckDB has no
         -- product aggregate, so it is done in logs.
         coalesce(exp(sum(ln(m.ratio))), 1) as correction_factor
-    from prices p
+    from in_universe p
     left join missed_splits m
       on m.symbol = p.symbol
      and m.split_date > p.trade_date
@@ -105,7 +143,7 @@ select
     -- price appreciation.
     case when p.close > 0 then (p.adj_close / c.correction_factor) / p.close end as total_return_factor,
     p.ingested_at
-from prices p
+from in_universe p
 join corrections c
   on c.symbol = p.symbol
  and c.trade_date = p.trade_date
