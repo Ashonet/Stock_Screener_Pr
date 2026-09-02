@@ -35,3 +35,17 @@ services:
       - key: HOST
         value: 0.0.0.0
       # PORT is injected by Render; server.js already reads it.
+
+      # DuckDB sizes its buffer pool from the RAM it can see, and in a container
+      # that is the host's, not this instance's 512MB. Unset, it decided it had
+      # 25GB and two dozen threads, and a single detail-view request took the
+      # process to 721MB and got it killed — which the browser sees as a 503
+      # with an HTML body, not as anything the app could report on itself.
+      #
+      # lib/warehouse.js defaults to these same values, so the cap holds even if
+      # this file is not the thing that deployed. They are stated here because
+      # this is where "plan: free" is declared, and the two have to agree.
+      - key: WAREHOUSE_MEMORY_LIMIT
+        value: 256MB
+      - key: WAREHOUSE_THREADS
+        value: "2"
