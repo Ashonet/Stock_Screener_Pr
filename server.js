@@ -490,7 +490,6 @@ const routes = {
     const range = url.searchParams.get('range') ?? '1y';
     if (!yahoo.isValidRange(range)) throw new UpstreamError(`Unsupported range: ${range}`, 400);
 
-    const chartTtl = range === '1d' || range === '5d' ? TTL.intraday : TTL.history;
     const symbols = holdings.map((h) => h.symbol);
 
     // Both halves come out of the same per-symbol caches the rest of the
@@ -498,7 +497,14 @@ const routes = {
     // free.
     const [charts, quotes] = await Promise.all([
       Promise.allSettled(
-        holdings.map((h) => cached(`chart:${h.symbol}:${range}`, chartTtl, () => yahoo.getChart(h.symbol, range))),
+        // Through chartFor, not the upstream directly, which is the whole
+        // wallet's single point of failure. quoteFromChart returns null without
+        // a chart, so a blocked upstream did not merely cost the value line: it
+        // emptied the holdings table too, every row filtered away for want of a
+        // price, under a total that then had nothing to add up. chartFor owns
+        // the same cache key, so a wallet of names already on screen still
+        // costs nothing.
+        holdings.map((h) => chartFor(h.symbol, range)),
       ),
       cached(`quotes:${symbols.join(',')}`, TTL.quotes, () => yahoo.getQuotes(symbols)).catch(() => []),
     ]);
