@@ -1610,14 +1610,23 @@ function renderHero(stock) {
   // Stored data is labelled, never passed off as live. A reader deciding on
   // these numbers should know whether they are today's.
   if (stock.servedFromWarehouse?.length) {
+    const served = stock.servedFromWarehouse;
     const asOf = stock.warehouseAsOf ? ` as of ${isoDate(stock.warehouseAsOf)}` : '';
+    /*
+     * "Prices are current" was the whole point of the old sentence, and it only
+     * held while the chart was the one thing that never fell back. It does now,
+     * so the claim has to go when it stops being true — a banner that reassures
+     * a reader about the number they are deciding on, wrongly, is worse than no
+     * banner at all.
+     */
+    const tail = served.includes('price history')
+      ? ' The chart is stored daily closes, so it carries no intraday detail.'
+      : ' Prices are current.';
     dom.hero.append(
       el('div', {
         class: 'banner',
         style: { gridColumn: '1 / -1' },
-        text:
-          `Showing stored ${stock.servedFromWarehouse.join(' and ')}${asOf}, the live feed is ` +
-          `rate-limited right now. Prices are current.`,
+        text: `Showing stored ${storedKinds(served)}${asOf}, the live feed is rate-limited right now.${tail}`,
       }),
     );
   }
@@ -1631,6 +1640,12 @@ function renderHero(stock) {
       }),
     );
   }
+}
+
+/** "financials", "price history and financials", "a, b and c". */
+function storedKinds(kinds) {
+  if (kinds.length < 3) return kinds.join(' and ');
+  return `${kinds.slice(0, -1).join(', ')} and ${kinds.at(-1)}`;
 }
 
 /** 52-week position: a meter, because the story is one number in a range. */

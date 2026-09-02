@@ -130,6 +130,34 @@ function gradeTimelines() {
 
 /* ------------------------------------------------------------------- routes */
 
+/**
+ * The price chart, falling back to stored bars when the live feed is out.
+ *
+ * The chart is the one upstream call the detail view cannot render without, and
+ * it was the only one with no fallback: every other panel already drops to the
+ * warehouse, so a rate-limited Yahoo took out the whole ticker rather than
+ * degrading a card. Yahoo rate-limits by IP and a full-universe extract spends
+ * that budget, so the two most useful things this dashboard does were knocking
+ * each other over.
+ *
+ * A 404 is passed straight through. That is the ticker being wrong, which
+ * storage cannot fix and should not paper over; only an availability failure is
+ * worth answering from the warehouse. The fallback is deliberately not cached,
+ * so the next request tries live again and the view recovers on its own as soon
+ * as the limit lifts.
+ */
+async function chartFor(symbol, range) {
+  const ttl = range === '1d' || range === '5d' ? TTL.intraday : TTL.history;
+  try {
+    return await cached(`chart:${symbol}:${range}`, ttl, () => yahoo.getChart(symbol, range));
+  } catch (err) {
+    if (err.status === 404 || !warehouse.isReady()) throw err;
+    const stored = await warehouse.chartHistory(symbol, range).catch(() => null);
+    if (!stored) throw err;
+    return stored;
+  }
+}
+
 const routes = {
   /** Liveness for a platform health check, deliberately touches no upstream. */
   async '/api/health'() {
@@ -270,8 +298,7 @@ const routes = {
     const range = url.searchParams.get('range') ?? '1y';
     if (!yahoo.isValidRange(range)) throw new UpstreamError(`Unsupported range: ${range}`, 400);
 
-    const ttl = range === '1d' || range === '5d' ? TTL.intraday : TTL.history;
-    return cached(`chart:${symbol}:${range}`, ttl, () => yahoo.getChart(symbol, range));
+    return chartFor(symbol, range);
   },
 
   /** Everything the detail view needs for one ticker, in a single round trip. */
@@ -283,11 +310,7 @@ const routes = {
     if (!yahoo.isValidRange(range)) throw new UpstreamError(`Unsupported range: ${range}`, 400);
 
     // Price history is the only hard requirement; it also validates the symbol.
-    const chart = await cached(
-      `chart:${symbol}:${range}`,
-      range === '1d' || range === '5d' ? TTL.intraday : TTL.history,
-      () => yahoo.getChart(symbol, range),
-    );
+    const chart = await chartFor(symbol, range);
 
     // The rest is session-gated and enriches the view. Settle them independently
     // so one upstream hiccup degrades a panel instead of the whole page.
@@ -411,6 +434,9 @@ const routes = {
     // Report what is stale rather than what failed: a reader cares that the
     // numbers are from Friday, not which endpoint returned 429.
     const servedFromWarehouse = [];
+    // Named for what actually fell back. The live quote can still be current
+    // while only the chart is stored, so this does not claim "prices".
+    if (chart.stored) servedFromWarehouse.push('price history');
     if (!live.summary && stored?.summary) servedFromWarehouse.push('fundamentals');
     if (!live.financials && stored?.financials?.length) servedFromWarehouse.push('financials');
 
@@ -430,7 +456,7 @@ const routes = {
       servedFromWarehouse,
       // Dated by when the stored data was stored, never by the last trade
       // date; see lib/freshness.js for why that distinction cost a bug.
-      warehouseAsOf: storedAsOf(servedFromWarehouse, stored ?? {}),
+      warehouseAsOf: storedAsOf(servedFromWarehouse, { ...(stored ?? {}), pricesAsOf: chart.storedAsOf }),
     };
   },
 

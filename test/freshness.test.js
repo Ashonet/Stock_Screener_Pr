@@ -16,6 +16,7 @@ import { storedAsOf } from '../lib/freshness.js';
 const stored = {
   asOf: '2026-08-29 14:54:38.324',
   financialsAsOf: '2026-08-29 14:54:38.324',
+  pricesAsOf: '2026-08-29 16:08:59.348',
   // Deliberately present, deliberately never chosen.
   priceAsOf: '2026-08-27',
 };
@@ -60,5 +61,33 @@ describe('storedAsOf', () => {
 
   test('survives being called with nothing', () => {
     assert.equal(storedAsOf(), null);
+  });
+
+  /*
+   * Prices joined the list of kinds that can come from storage when the chart
+   * gained a warehouse fallback. Before that a rate-limited upstream took out
+   * the whole ticker, so there was no banner to date.
+   */
+  test('dates stored prices by their own ingest, not the fundamentals one', () => {
+    const result = storedAsOf(['price history'], {
+      asOf: '2026-08-17 19:00:00',
+      pricesAsOf: '2026-08-29 16:08:59.348',
+    });
+    assert.match(result, /^2026-08-29/, 'the price ingest is the one being labelled');
+  });
+
+  test('still never reaches for the trade date when prices are the stored kind', () => {
+    // priceAsOf is the last close. It is the wrong column for this label whether
+    // or not prices are the thing being labelled.
+    const result = storedAsOf(['price history'], { pricesAsOf: '2026-08-29 16:08:59.348', priceAsOf: '2026-08-27' });
+    assert.ok(!result.startsWith('2026-08-27'), 'a trade date is still not an ingest time');
+  });
+
+  test('ignores the price ingest when the chart was live', () => {
+    const result = storedAsOf(['financials'], {
+      financialsAsOf: '2026-08-17 19:00:00',
+      pricesAsOf: '2026-08-29 16:08:59.348',
+    });
+    assert.match(result, /^2026-08-17/, 'the chart was live, so its ingest says nothing about the banner');
   });
 });
