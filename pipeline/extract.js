@@ -30,6 +30,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import * as yahoo from '../lib/yahoo.js';
+import { MARKET_INDEX_SYMBOLS } from '../lib/markets.js';
 import { num } from '../lib/yahoo.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -360,7 +361,35 @@ async function extractSymbol(symbol, state, writer, { full, deep = true }) {
    * reads. A wide-tier symbol is charted, searched and measured; it is not
    * scored, and the universe file says which is which.
    */
-  if (!deep) return result;
+  if (!deep) {
+    /*
+     * A wide symbol still needs its row in the security dimension.
+     *
+     * fct_prices.symbol carries a relationships test against dim_security, so
+     * prices arriving for something with no profile do not degrade gracefully:
+     * they fail the build. Nothing had ever hit it because every symbol in the
+     * universe was deep, which left the wide tier looking supported while being
+     * quietly unbuildable.
+     *
+     * The chart's own metadata carries the name, currency, exchange and
+     * instrument type, and securityRows already falls back to it, so this needs
+     * no session and no second endpoint. Everything a company would supply from
+     * its profile stays null, which for an index is simply the truth: it has no
+     * sector, no employees and no market cap.
+     */
+    if (full || isStale(state.security?.[symbol], STALENESS_HOURS.security)) {
+      try {
+        const chart = await yahoo.getChart(symbol, '1mo');
+        await writer.write('security', securityRows(symbol, null, chart));
+        result.security = 1;
+        state.security = state.security ?? {};
+        state.security[symbol] = nowISO();
+      } catch (err) {
+        result.errors.push(`security: ${err.message}`);
+      }
+    }
+    return result;
+  }
 
   // Company profile and valuation snapshot.
   if (full || isStale(state.security?.[symbol], STALENESS_HOURS.security)) {
@@ -425,9 +454,16 @@ async function main() {
   // behaving exactly as it did.
   const deepSet = new Set((universe.deep ?? universe.symbols ?? []).map((s) => s.toUpperCase()));
 
+  /*
+   * The market strip's indices, always, and always wide.
+   *
+   * Deliberately not read from universe.json: that file is regenerated from
+   * published constituent lists, and an index is not a constituent of anything,
+   * so anything added to it by hand is lost on the next rebuild.
+   */
   let symbols = only
     ? only.split(',').map((s) => s.trim().toUpperCase()).filter(Boolean)
-    : [...new Set(universe.symbols.map((s) => s.toUpperCase()))];
+    : [...new Set([...universe.symbols.map((s) => s.toUpperCase()), ...MARKET_INDEX_SYMBOLS])];
 
   if (tierFlag === 'deep') symbols = symbols.filter((s) => deepSet.has(s));
   else if (tierFlag === 'wide') symbols = symbols.filter((s) => !deepSet.has(s));

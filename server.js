@@ -28,6 +28,7 @@ import { buildPortfolioScoreHistory } from './lib/portfolioScore.js';
 import { findDips } from './lib/dips.js';
 import { cached, stats as cacheStats } from './lib/cache.js';
 import * as warehouse from './lib/warehouse.js';
+import { MARKET_INDICES } from './lib/markets.js';
 
 const ROOT = fileURLToPath(new URL('.', import.meta.url));
 const PUBLIC_DIR = join(ROOT, 'public');
@@ -54,15 +55,6 @@ const MIME = {
   '.png': 'image/png',
   '.woff2': 'font/woff2',
 };
-
-const MARKET_INDICES = [
-  { symbol: '^GSPC', label: 'S&P 500' },
-  { symbol: '^IXIC', label: 'Nasdaq' },
-  { symbol: '^DJI', label: 'Dow Jones' },
-  { symbol: '^RUT', label: 'Russell 2000' },
-  { symbol: '^VIX', label: 'VIX' },
-  { symbol: '^TNX', label: '10-Year yield' },
-];
 
 /* ------------------------------------------------------------------ helpers */
 
