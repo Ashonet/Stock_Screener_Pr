@@ -158,6 +158,28 @@ async function chartFor(symbol, range) {
   }
 }
 
+/**
+ * Top up a partial quote list from storage, in the order asked for.
+ *
+ * Both quote routes already had a fallback, and it was the wrong shape: the
+ * session-gated endpoint failing over to chart metadata, which needs no crumb
+ * but is the same host behind the same IP. A limit applied to the address takes
+ * out both legs, every promise is filtered away, and the route returns 200 with
+ * an empty list — so the page renders a column of dashes under a header that
+ * says "Updated". Storage is the only leg that does not share that failure.
+ */
+async function fillFromStorage(symbols, live) {
+  const have = new Set(live.map((q) => q.symbol));
+  const missing = symbols.filter((symbol) => !have.has(symbol));
+  if (!missing.length || !warehouse.isReady()) return live;
+
+  const stored = await warehouse.quoteSnapshot(missing).catch(() => []);
+  const bySymbol = new Map([...live, ...stored].map((q) => [q.symbol, q]));
+  // Requested order, and symbols nothing could price are simply absent rather
+  // than present-but-blank.
+  return symbols.map((symbol) => bySymbol.get(symbol)).filter(Boolean);
+}
+
 const routes = {
   /** Liveness for a platform health check, deliberately touches no upstream. */
   async '/api/health'() {
@@ -268,7 +290,7 @@ const routes = {
         // watchlist rows. If it is unavailable, fall back to chart metadata,
         // which carries the same price fields and needs no session.
         const settled = await Promise.allSettled(symbols.map((s) => yahoo.getChart(s, '1d')));
-        return settled
+        const live = settled
           .filter((r) => r.status === 'fulfilled')
           .map((r) => r.value)
           .map((c) => ({
@@ -287,6 +309,7 @@ const routes = {
             volume: c.volume,
             marketTime: c.marketTime,
           }));
+        return fillFromStorage(symbols, live);
       }
     });
     return { quotes };
@@ -832,7 +855,7 @@ const routes = {
         return await yahoo.getQuotes(symbols);
       } catch {
         const settled = await Promise.allSettled(symbols.map((s) => yahoo.getChart(s, '1d')));
-        return settled
+        const live = settled
           .filter((r) => r.status === 'fulfilled')
           .map((r) => r.value)
           .map((c) => ({
@@ -844,6 +867,11 @@ const routes = {
             changePercent:
               c.price != null && c.previousClose ? ((c.price - c.previousClose) / c.previousClose) * 100 : null,
           }));
+        // The pipeline tracks companies, not indices, so this finds nothing
+        // today and the strip stays blank under a full block. It is wired the
+        // same way as the watchlist so that adding the six index symbols to the
+        // extract is all it takes to make the strip survive one too.
+        return fillFromStorage(symbols, live);
       }
     });
 

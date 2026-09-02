@@ -567,7 +567,22 @@ async function loadWatchlistQuotes() {
     for (const quote of quotes) state.quotes.set(quote.symbol, quote);
     renderWatchlist();
     renderWalletList();
-    dom.refreshStatus.textContent = `Updated ${clockTime(Date.now())}`;
+
+    /*
+     * "Updated" has to mean updated.
+     *
+     * This said it unconditionally, and the route it trusts answers 200 with an
+     * empty list when the upstream is blocking — so the header read "Updated
+     * 18:18" across a column of dashes, which is not a degraded page but a
+     * lying one. An empty answer is now named as such, and rows that came from
+     * storage are dated rather than passed off as this minute's price.
+     */
+    const asOf = quotes.filter((q) => q.stored).map((q) => q.storedAsOf).filter(Boolean).sort().at(-1);
+    dom.refreshStatus.textContent = !quotes.length
+      ? 'Quotes unavailable'
+      : quotes.some((q) => q.stored)
+        ? `Stored prices${asOf ? ` from ${isoDate(asOf)}` : ''}, the live feed is rate-limited`
+        : `Updated ${clockTime(Date.now())}`;
   } catch {
     dom.refreshStatus.textContent = 'Quotes unavailable';
   }
