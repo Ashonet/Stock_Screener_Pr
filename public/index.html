@@ -76,6 +76,14 @@
         <span>Compare</span>
       </button>
 
+      <button id="nav-movers" class="nav-screener" type="button" title="Which quality scores moved, and over what period">
+        <svg class="nav-icon" viewBox="0 0 20 20" aria-hidden="true">
+          <path d="M3 14.5 7.5 10l3 3L17 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M13 5.5h4.5V10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <span>Movers</span>
+      </button>
+
       <div class="topbar-actions">
         <span id="refresh-status" class="refresh-status" aria-live="polite"></span>
       </div>
@@ -250,6 +258,10 @@
 
       <section id="compare-view" class="detail" aria-live="polite" hidden>
         <div id="compare-card"></div>
+      </section>
+
+      <section id="movers-view" class="detail" aria-live="polite" hidden>
+        <div id="movers-card" class="card"></div>
       </section>
     </main>
 

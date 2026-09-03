@@ -22,10 +22,18 @@ import { storedAsOf } from './lib/freshness.js';
 import { parseHoldings, buildValueSeries, priceHoldings } from './lib/portfolio.js';
 import { buildIncome, buildIncomeProjection } from './lib/income.js';
 import { buildComparison } from './lib/compare.js';
-import { buildScoreHistory } from './lib/scoreHistory.js';
+import { buildScoreHistory, scoreOnDate } from './lib/scoreHistory.js';
 import { gradePortfolios, gradesAsOf, GRADE_ORDER } from './lib/gradeStudy.js';
 import { buildPortfolioScoreHistory } from './lib/portfolioScore.js';
 import { findDips } from './lib/dips.js';
+import {
+  comparisonSnapshot,
+  splitMovers,
+  isValidMoverRange,
+  pickBasis,
+  moversFromPairs,
+  MOVER_RANGES,
+} from './lib/movers.js';
 import { cached, stats as cacheStats } from './lib/cache.js';
 import * as warehouse from './lib/warehouse.js';
 import { MARKET_INDICES } from './lib/markets.js';
@@ -117,6 +125,72 @@ function gradeTimelines() {
       if (history.periods.length) out.set(security.symbol, [...history.periods].reverse());
     }
     return out;
+  });
+}
+
+/**
+ * The raw material for scoring the whole universe at any past date.
+ *
+ * Cached rather than the scores themselves. Scoring is the cheap half — about
+ * 150ms for two thousand companies — and it has to happen per request, because
+ * the dates are what the reader chose. The queries behind it are the expensive
+ * half and are the same every time.
+ *
+ * Closes are fetched once and shared: they do not depend on which statements
+ * are being read, and they are the largest of the three by far.
+ */
+function universeInputs(periodType) {
+  return cached(`movers:inputs:${periodType}`, 6 * 60 * 60_000, async () => {
+    const { securities, financials, dividends } = await warehouse.scoringInputs({
+      index: null,
+      periodType,
+    });
+    const closes = await warehouse.monthlyHistory(
+      securities.map((s) => s.symbol),
+      { years: 6 },
+    );
+    return { securities, financials, dividends, closes };
+  });
+}
+
+/** Every company's score on one date, point-in-time. */
+function scoreUniverseOn(inputs, date, periodType) {
+  const out = new Map();
+  for (const security of inputs.securities) {
+    const rows = inputs.financials.get(security.symbol);
+    if (!rows?.length) continue;
+    const scored = scoreOnDate({
+      summary: { summaryProfile: { industry: security.industry } },
+      financials: rows,
+      dividendPayments: inputs.dividends.get(security.symbol) ?? [],
+      closes: inputs.closes.get(security.symbol) ?? [],
+      periodType,
+      date,
+    });
+    if (scored) out.set(security.symbol, scored);
+  }
+  return out;
+}
+
+/**
+ * Attach each company's price move over the same window to its score change.
+ *
+ * The two belong together: a score that fell while the shares rose says
+ * something quite different from one that fell alongside them, and the table
+ * cannot show that with only half of it.
+ */
+async function withPriceChange(rows, from, to) {
+  const prices = await cached(`movers:prices:${from}:${to}`, TTL.financials, () =>
+    warehouse.priceChangeBetween(from, to),
+  );
+  return rows.map((row) => {
+    const price = prices.get(row.symbol);
+    return {
+      ...row,
+      priceChangePct: price?.changePct ?? null,
+      priceSplitAdjusted: Boolean(price?.splitAdjusted),
+      priceUnmeasurable: Boolean(price?.unmeasurable),
+    };
   });
 }
 
@@ -844,6 +918,145 @@ const routes = {
     );
 
     return findDips(holdings, ranges, facts, { windowDays: days });
+  },
+
+  /**
+   * What the quality scores did over a range.
+   *
+   * Warehouse only. Scores are the pipeline's own output, so this is one of the
+   * few views that cannot be affected by the upstream at all, and it answers at
+   * the same speed whether or not Yahoo is talking to us.
+   *
+   * A range with no snapshot old enough behind it is not an error and not an
+   * empty list: it returns the oldest date on record so the view can say how
+   * far back the history goes and stop offering to compare against nothing.
+   */
+  async '/api/score-movers'(url) {
+    if (!warehouse.isReady()) {
+      throw new UpstreamError('The warehouse has not been built yet, run the pipeline first.', 503);
+    }
+
+    const range = url.searchParams.get('range') ?? '1d';
+    if (!isValidMoverRange(range)) throw new UpstreamError(`Unsupported range: ${range}`, 400);
+
+    const [dates, coverage] = await Promise.all([
+      cached('movers:dates', TTL.financials, () => warehouse.scoreSnapshotDates()),
+      cached('movers:coverage', TTL.financials, () => warehouse.statementCoverage()),
+    ]);
+
+    const choice = pickBasis({
+      rangeKey: range,
+      snapshots: dates,
+      quarterlyFrom: coverage.quarterly?.oldest ?? null,
+      annualFrom: coverage.annual?.oldest ?? null,
+    });
+    if (!choice) return { range, ranges: MOVER_RANGES, available: false, reason: 'No scores have been stored yet.' };
+
+    const window = choice.window;
+
+    if (choice.basis === 'none') {
+      return {
+        range,
+        ranges: MOVER_RANGES,
+        available: false,
+        to: window.to,
+        oldest: window.oldest,
+        covered: window.covered,
+        earliest: choice.earliest,
+        reason: choice.earliest
+          ? `Nothing reaches back that far. Recorded scores begin ${window.oldest} and the statements behind a reconstructed score begin ${choice.earliest}.`
+          : `Scores only go back to ${window.oldest}, which is not far enough for this range.`,
+      };
+    }
+
+    /*
+     * Reconstructed: no snapshot reaches this far, so the score is recomputed
+     * at both ends from statements restricted to what had been reported by
+     * each date. Both ends come from the same timelines, because subtracting a
+     * reconstruction from a recorded snapshot would report the difference
+     * between two methods as a change in a company.
+     */
+    if (choice.basis === 'reconstructed') {
+      const inputs = await universeInputs(choice.periodType);
+      const [now, was] = [
+        scoreUniverseOn(inputs, choice.to, choice.periodType),
+        scoreUniverseOn(inputs, choice.from, choice.periodType),
+      ];
+      const meta = new Map(inputs.securities.map((x) => [x.symbol, { name: x.name, sector: x.sector }]));
+      const rows = await withPriceChange(
+        moversFromPairs(
+          [...now.keys()].map((symbol) => ({ symbol, now: now.get(symbol), was: was.get(symbol) })),
+          meta,
+        ),
+        choice.from,
+        choice.to,
+      );
+      const split = splitMovers(rows);
+
+      return {
+        range,
+        ranges: MOVER_RANGES,
+        available: true,
+        basis: 'reconstructed',
+        periodType: choice.periodType,
+        from: choice.from,
+        to: choice.to,
+        requested: choice.from,
+        gapDays: Math.round((Date.parse(choice.to) - Date.parse(choice.from)) / 86_400_000),
+        exact: true,
+        oldest: window.oldest,
+        covered: window.covered,
+        statementsFrom: coverage[choice.periodType]?.oldest ?? null,
+        scored: rows.length,
+        counts: {
+          moved: split.movers.length,
+          up: split.up,
+          down: split.down,
+          regraded: split.regraded,
+          unchanged: split.unchanged,
+          newlyCovered: split.newlyCovered.length,
+        },
+        movers: split.movers,
+        newlyCovered: split.newlyCovered.slice(0, 50),
+      };
+    }
+
+    const rows = await withPriceChange(
+      await cached(`movers:${window.from}:${window.to}`, TTL.financials, () =>
+        warehouse.scoresBetween(window.from, window.to),
+      ),
+      window.from,
+      window.to,
+    );
+    const split = splitMovers(rows);
+
+    return {
+      range,
+      ranges: MOVER_RANGES,
+      available: true,
+      basis: 'recorded',
+      from: window.from,
+      to: window.to,
+      requested: window.requested,
+      // The gap actually measured, which is rarely the one the button names.
+      gapDays: window.gapDays,
+      exact: window.exact,
+      oldest: window.oldest,
+      covered: window.covered,
+      scored: rows.length,
+      counts: {
+        moved: split.movers.length,
+        up: split.up,
+        down: split.down,
+        regraded: split.regraded,
+        unchanged: split.unchanged,
+        newlyCovered: split.newlyCovered.length,
+      },
+      movers: split.movers,
+      // Capped: this is context for the numbers above, not a list anybody reads
+      // to the end, and it ran to 1,467 rows the day the universe grew.
+      newlyCovered: split.newlyCovered.slice(0, 50),
+    };
   },
 
   async '/api/market'() {

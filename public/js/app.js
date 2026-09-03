@@ -26,6 +26,7 @@ import {
 } from './store.js';
 import { renderWallet } from './wallet.js';
 import { renderCompare } from './compare.js';
+import { renderMovers } from './movers.js';
 import { fundamentalCharts } from './fundamentals.js';
 import { renderScreener } from './screener.js';
 import { renderMap } from './map.js';
@@ -77,6 +78,7 @@ const STORE = {
   goalRate: 'sd:goalRate',
   goalYears: 'sd:goalYears',
   goalReturn: 'sd:goalReturn',
+  moversRange: 'sd:moversRange',
   period: 'sd:period',
 };
 const REFRESH_MS = 30_000;
@@ -172,6 +174,13 @@ const state = {
   walletScore: null,
   walletFacets: null,
   walletDips: null,
+  moversData: null,
+  movers: {
+    // Validated by the server, which owns the list; a stale key here comes
+    // back as a 400 and shows as an error rather than a silent wrong answer.
+    range: readStore(STORE.moversRange, '1d'),
+    direction: 'all',
+  },
   mix: { facet: 'sector' },
   screenerData: null,
   screener: { sortKey: 'overall_score', sortDir: 'desc', basis: 'all', sector: 'all', index: 'all' },
@@ -185,6 +194,7 @@ const state = {
   loading: false,
   requestToken: 0,
   walletToken: 0,
+  moversToken: 0,
   compareToken: 0,
 };
 
@@ -216,6 +226,9 @@ const dom = {
   navScreener: document.getElementById('nav-screener'),
   navMap: document.getElementById('nav-map'),
   navCompare: document.getElementById('nav-compare'),
+  navMovers: document.getElementById('nav-movers'),
+  moversView: document.getElementById('movers-view'),
+  moversCard: document.getElementById('movers-card'),
   walletIncome: document.getElementById('wallet-income'),
   walletPanels: {
     overview: document.getElementById('wpanel-overview'),
@@ -1246,9 +1259,11 @@ function setVisibleView(view) {
   if (dom.screenerView) dom.screenerView.hidden = view !== 'screener';
   if (dom.mapView) dom.mapView.hidden = view !== 'map';
   if (dom.compareView) dom.compareView.hidden = view !== 'compare';
+  if (dom.moversView) dom.moversView.hidden = view !== 'movers';
   dom.navScreener?.setAttribute('aria-current', String(view === 'screener'));
   dom.navMap?.setAttribute('aria-current', String(view === 'map'));
   dom.navCompare?.setAttribute('aria-current', String(view === 'compare'));
+  dom.navMovers?.setAttribute('aria-current', String(view === 'movers'));
 }
 
 /* ------------------------------------------------------------------ compare */
@@ -1445,6 +1460,66 @@ async function loadScreener() {
     state.screenerData = { error: err.message };
   }
   renderScreenerView();
+}
+
+/* ------------------------------------------------------------------- movers */
+
+function renderMoversView() {
+  renderMovers({
+    node: dom.moversCard,
+    data: state.moversData,
+    state: state.movers,
+    handlers: {
+      onRange: (range) => {
+        if (state.movers.range === range) return;
+        state.movers = { ...state.movers, range };
+        writeStore(STORE.moversRange, range);
+        // Each range is a different pair of snapshots, so this is a fetch
+        // rather than a filter of what is already here.
+        loadMovers();
+      },
+      // Direction only hides rows already loaded, so it repaints.
+      onDirection: (direction) => {
+        state.movers = { ...state.movers, direction };
+        renderMoversView();
+      },
+      onSelectSymbol: (symbol) => {
+        addToList(symbol);
+        renderWatchlist();
+        selectSymbol(symbol);
+      },
+    },
+  });
+}
+
+/**
+ * Scores are the pipeline's own output, so this touches no upstream and
+ * answers just as well when Yahoo is rate-limiting the address.
+ */
+async function loadMovers() {
+  const token = ++state.moversToken;
+  state.moversData = null;
+  renderMoversView();
+  try {
+    const data = await api.fetchScoreMovers(state.movers.range);
+    if (token !== state.moversToken) return;
+    state.moversData = data;
+  } catch (err) {
+    if (token !== state.moversToken) return;
+    state.moversData = { error: err.message };
+  }
+  renderMoversView();
+}
+
+function showMoversView() {
+  store.view = 'movers';
+  saveView();
+  clearSymbolFromUrl();
+  setVisibleView('movers');
+  renderWatchlist();
+  renderWalletList();
+  renderMoversView();
+  if (!state.moversData) loadMovers();
 }
 
 function showScreenerView() {
@@ -2842,6 +2917,10 @@ function init() {
     if (!dom.navCompare) throw new Error('#nav-compare is missing from the page');
     dom.navCompare.addEventListener('click', showCompareView);
   });
+  step('movers nav', () => {
+    if (!dom.navMovers) throw new Error('#nav-movers is missing from the page');
+    dom.navMovers.addEventListener('click', showMoversView);
+  });
   step('screener nav', () => {
     // Thrown rather than optional-chained: swallowing a missing element keeps
     // the app alive but hides the fact that the markup and the script disagree,
@@ -2873,6 +2952,8 @@ function init() {
     loadStock();
   } else if (store.view === 'map' && dom.mapView) {
     showMapView();
+  } else if (store.view === 'movers' && dom.moversView) {
+    showMoversView();
   } else if (store.view === 'wallet' && activeWallet()) {
     setVisibleView('wallet');
     renderWalletView();

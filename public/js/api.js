@@ -33,3 +33,4 @@ export const fetchFacets = (symbols, opts) => get('/api/portfolio/facets', { sym
 export const fetchDips = (holdings, opts) => get('/api/portfolio/dips', { holdings }, opts);
 export const fetchCompare = (symbols, years, opts) => get('/api/compare', { symbols, years }, opts);
 export const fetchGradeStudy = (basis, opts) => get('/api/compare/grades', { basis }, opts);
+export const fetchScoreMovers = (range, opts) => get('/api/score-movers', { range }, opts);

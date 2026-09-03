@@ -10,7 +10,7 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { buildScoreHistory, trailingTwelveMonths, periodLabel } from '../lib/scoreHistory.js';
+import { buildScoreHistory, trailingTwelveMonths, periodLabel, scoreOnDate } from '../lib/scoreHistory.js';
 
 const MONTH = 30 * 86_400_000;
 
@@ -202,5 +202,77 @@ describe('buildScoreHistory', () => {
     const h = buildScoreHistory({});
     assert.deepEqual(h.periods, []);
     assert.deepEqual(h.unscored, []);
+  });
+});
+
+describe('scoreOnDate', () => {
+  /*
+   * The reason this exists. buildScoreHistory scores each reporting period at
+   * that period's own end, so a score read off it cannot move between
+   * earnings — and a month of score movers came back with every company
+   * unchanged, which was an artefact of where the score was sampled rather
+   * than a fact about the market.
+   */
+  // `quarter` is the shared row builder; used here for annual periods, as the
+  // suite above does.
+  const annual = ['2023-12-31', '2024-12-31', '2025-12-31'].map((d, i) =>
+    quarter(d, { revenue: 1000 + i * 100, netIncome: 100 + i * 10 }),
+  );
+
+  /** The same company at a flat price, so only the date varies. */
+  const flatAt = (price, date) =>
+    scoreOnDate({
+      financials: annual,
+      closes: Array.from({ length: 40 }, (_, i) => ({
+        t: Date.UTC(2024, 0, 1) + i * MONTH,
+        close: price,
+        adjClose: price,
+      })),
+      periodType: 'annual',
+      date,
+    });
+
+  test('moves between earnings, because the price does', () => {
+    // Identical statements at both ends. Only the price differs, and that has
+    // to be enough to move the score, or a month of movers is empty.
+    // EPS here is 0.12, so these straddle the band the valuation pillar
+    // actually responds over: about ten to fifty times earnings.
+    const cheap = flatAt(2, '2026-06-01');
+    const dear = flatAt(5, '2026-06-01');
+    assert.equal(cheap.period, dear.period, 'both rest on the same statements');
+    assert.notEqual(cheap.score, dear.score);
+    assert.ok(dear.score < cheap.score, 'paying two and a half times as much for the same earnings scores worse');
+  });
+
+  test('the price sensitivity runs out, and that is a real limit', () => {
+    /*
+     * Worth pinning down rather than discovering later. Without the valuation
+     * context the live score gets — the multiple against the company's own
+     * history and against its peers — the only price-sensitive part left is the
+     * absolute band, and that bottoms out. Past roughly forty times earnings
+     * this company scores the same whatever it costs, so a reconstructed score
+     * understates how much an expensive company's score really moved.
+     */
+    const dear = flatAt(20, '2026-06-01');
+    const dearer = flatAt(200, '2026-06-01');
+    assert.equal(dearer.score, dear.score, 'ten times the price, same score: the pillar has saturated');
+  });
+
+  test('never reads statements published after the date', () => {
+    // The look-ahead that would make any of this meaningless.
+    const rising = closes(Date.UTC(2024, 0, 1), 36);
+    const before = scoreOnDate({ financials: annual, closes: rising, periodType: 'annual', date: '2025-06-30' });
+    assert.equal(before.period, '2024-12-31', 'the 2025 statements had not closed yet');
+  });
+
+  test('has nothing to say before the first statements closed', () => {
+    const rising = closes(Date.UTC(2024, 0, 1), 36);
+    assert.equal(scoreOnDate({ financials: annual, closes: rising, periodType: 'annual', date: '2023-01-01' }), null);
+  });
+
+  test('refuses a date with no price behind it rather than guessing one', () => {
+    assert.equal(scoreOnDate({ financials: annual, closes: [], periodType: 'annual', date: '2026-01-01' }), null);
+    assert.equal(scoreOnDate({ financials: annual, closes: closes(Date.UTC(2024, 0, 1), 36) }), null, "no date at all");
+    assert.equal(scoreOnDate(), null);
   });
 });
